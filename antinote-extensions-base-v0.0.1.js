@@ -89,6 +89,7 @@ function TutorialCommand(command, description) {
   this.description = description;
 }
 
+
 function ReturnObject(status, message, payload) {
   this.status = status || "error";
   this.message = message || "Undefined error.";

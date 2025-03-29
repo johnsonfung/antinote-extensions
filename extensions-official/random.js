@@ -73,3 +73,64 @@ random_letters.execute = function(payload) {
   var success = new ReturnObject("success", "Random letters generated.", result);
   return success;
 };
+
+// Another example command that replaces the whole text with a random quote
+var random_quote = new Command(
+  "random_quote",
+  [],
+  [],
+  "replaceAll",
+  "Replace the whole text with a random quote.",
+  [
+    new TutorialCommand("random_quote", "Replace the whole text with a random quote.")
+  ],
+  extensionRoot
+);
+
+random_quote.execute = function(payload) {
+  var quotes = [
+    "Letting go gives us freedom, and freedom is the only condition for happiness.",
+    "You can only lose what you cling to.",
+    "The foot feels the foot when it feels the ground.",
+    "In the end, these things matter most: How well did you love? How fully did you live? How deeply did you let go?",
+    "Learning to let go should be learned before learning to get.",
+    "Do not dwell in the past, do not dream of the future, concentrate the mind on the present moment.",
+    "When you let go of what you are, you become what you might be.",
+    "To let go is to be free."
+  ];
+  
+  var result = quotes[Math.floor(Math.random() * quotes.length)];
+  
+  var success = new ReturnObject("success", "Random quote generated.", result);
+  return success;
+};
+
+// Another example that opens a URL.
+// If the user's note contains the word "cat", it will open the wikipedia page for cats. 
+// Otherwise it will open a random wikipedia page.
+var random_wiki = new Command(
+  "random_wiki",
+  [],
+  [],
+  "openURL",
+  "Open a random Wikipedia page.",
+  [
+    new TutorialCommand("random_wiki", "Open a random Wikipedia page.")
+  ],
+  extensionRoot
+);
+
+random_wiki.execute = function(payload) {
+  var note = payload.fullText;
+  var url = "https://en.wikipedia.org/wiki/Special:Random";
+  if (note.includes("cat")) {
+    url = "https://en.wikipedia.org/wiki/Cat";
+  }
+
+  var success = new ReturnObject("success", "Opening random Wikipedia page.", url);
+  return success;
+};
+
+
+
+

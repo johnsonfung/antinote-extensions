@@ -1,15 +1,45 @@
 # ✨ Antinote Extensions
 
-Antinote supports powerful custom JavaScript extensions that let you process and manipulate notes via user-defined commands. This guide walks you through creating an extension from scratch.
+Antinote supports simple custom JavaScript extensions that let you add text to your note, modify your note, or open a URL/URI based on the content of your note. This guide walks you through creating an extension from scratch.
 
 ---
 
-## �� Extension Basics
+## 📦 Extension Basics
 
-An extension is a container for one or more commands. Each extension has:
+An extension is a container for one or more commands, implemented as a single JavaScript file. Each extension has:
 
 - A **name** (e.g., "random", "date", "math")
 - A **version** (e.g., "1.0.0")
+- One or more commands which 
+
+All user extensions are stored in:
+```
+~/Library/Containers/com.chabomakers.Antinote/Data/Library/Application Support/Antinote/Extensions
+```
+
+---
+
+## 🚀 Using Extensions
+
+To use an extension:
+
+1. Download the extension's JavaScript file
+2. Place it in the Extensions folder
+3. Restart Antinote
+
+Then you can use any command from the extension in your notes using the syntax:
+```
+** command_name(arg1, arg2, ...)
+```
+
+For example, to generate a random number between 10 and 20:
+```
+** random_number(10, 20)
+```
+
+---
+
+## 🧠 Creating an Extension
 
 Start every extension by creating a new `Extension`:
 
@@ -22,15 +52,12 @@ Each command within an extension can have:
 - A **name** and optional **aliases**
 - **Parameters** with:
   - Type (float, int, bool, or string)
-  - Variable name (to use in your script)
+  - Name
   - Help text explaining the parameter
   - Default value
 - A **function** that defines what the command does
 - Optional **tutorial examples** showing how to use it
 
----
-
-## 🧠 Creating a Command
 
 Use the `Command` constructor to define a new command:
 
@@ -168,6 +195,10 @@ Standard object returned from a command.
 ## 🐞 Debugging
 
 If you launch Antinote from Terminal, any `console.log()` or `console.error()` output from your extensions will be printed in the terminal prefixed with `JS console.log`.
+
+There is also logging on the Swift side of things, prefixed with `Extensions -`. These logs will show you which functions were loaded.
+
+At the moment there is no checking or validating of extensions. The base JS file is loaded and then every extension is loaded afterwards to create a single JS context. Validation will be implemented later.
 
 ---
 
