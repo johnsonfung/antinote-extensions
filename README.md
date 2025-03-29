@@ -197,6 +197,20 @@ Standard object returned from a command.
 
 ---
 
+## 🤝 Contributing
+
+We welcome community contributions! Here's how to submit your extension:
+
+1. Create a pull request with your extension's JavaScript file
+2. Your extension will be reviewed and added to the unofficial extensions directory
+3. To make your extension official (included with Antinote by default), it will need to undergo additional review to ensure it:
+   - Aligns with Antinote's core value proposition
+   - Maintains a simple, intuitive user experience
+   - Provides clear user value
+   - Follows best practices for extension development
+
+---
+
 ## 🐞 Debugging
 
 If you launch Antinote from Terminal, any `console.log()` or `console.error()` output from your extensions will be printed in the terminal prefixed with `JS console.log`.
