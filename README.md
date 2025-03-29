@@ -10,13 +10,18 @@ An extension is a container for one or more commands, implemented as a single Ja
 
 - A **name** (e.g., "random", "date", "math")
 - A **version** (e.g., "1.0.0")
-- One or more commands which 
+- One or more commands
 
 All user extensions are stored in:
 ```
 ~/Library/Containers/com.chabomakers.Antinote/Data/Library/Application Support/Antinote/Extensions
 ```
 
+To open it from Terminal:
+
+```sh
+open ~/Library/Containers/com.chabomakers.Antinote/Data/Library/Application\ Support/Antinote/Extensions
+```
 ---
 
 ## 🚀 Using Extensions
