@@ -4,22 +4,29 @@ Antinote supports powerful custom JavaScript extensions that let you process and
 
 ---
 
-## 📦 Extension Basics
+## �� Extension Basics
 
-Each extension consists of:
+An extension is a container for one or more commands. Each extension has:
 
-- A **name**
-- A **version** 
-- One or more **commands**
-- Optional **parameter definitions**
-- A **function** that defines what your command does
-- An optional list of **tutorial examples**
+- A **name** (e.g., "random", "date", "math")
+- A **version** (e.g., "1.0.0")
 
 Start every extension by creating a new `Extension`:
 
 ```js
 var extensionRoot = new Extension("my_extension_name", "1.0.0");
 ```
+
+Each command within an extension can have:
+
+- A **name** and optional **aliases**
+- **Parameters** with:
+  - Type (float, int, bool, or string)
+  - Variable name (to use in your script)
+  - Help text explaining the parameter
+  - Default value
+- A **function** that defines what the command does
+- Optional **tutorial examples** showing how to use it
 
 ---
 
