@@ -66,8 +66,9 @@ Command.prototype.execute = function() {
 };
 
 // Extension constructor function
-function Extension(name) {
+function Extension(name, version) {
   this.name = name;
+  this.version = version || "1.0.0";
   this.commands = [];
 }
 

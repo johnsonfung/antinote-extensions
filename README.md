@@ -9,6 +9,7 @@ Antinote supports powerful custom JavaScript extensions that let you process and
 Each extension consists of:
 
 - A **name**
+- A **version** 
 - One or more **commands**
 - Optional **parameter definitions**
 - A **function** that defines what your command does
@@ -17,7 +18,7 @@ Each extension consists of:
 Start every extension by creating a new `Extension`:
 
 ```js
-var extensionRoot = new Extension("my_extension_name");
+var extensionRoot = new Extension("my_extension_name", "1.0.0");
 ```
 
 ---
@@ -104,8 +105,11 @@ random_letters.execute = function(payload) {
 
 ## 🛠 API Reference
 
-### `new Extension(name)`
+### `new Extension(name, version)`
 Creates a new extension container.
+
+- `name`: The name of your extension
+- `version`: The version of your extension (optional, defaults to "1.0.0")
 
 ---
 

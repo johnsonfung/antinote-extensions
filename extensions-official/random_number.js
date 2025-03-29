@@ -1,8 +1,7 @@
-
 // 1. Name your extension
 var extension_name = "random"
 
-var extensionRoot = new Extension(extension_name);
+var extensionRoot = new Extension(extension_name, "1.0.0");
 
 // 2. Create a command for you extension
 var random_number = new Command(
