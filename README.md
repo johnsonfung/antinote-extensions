@@ -1,6 +1,6 @@
 # ✨ Antinote Extensions
 
-Antinote supports simple custom JavaScript extensions that let you add text to your note, modify your note, or open a URL/URI based on the content of your note. This guide walks you through creating an extension from scratch.
+Antinote supports simple custom JavaScript (ES5) extensions that let you add text to your note, modify your note, or open a URL/URI based on the content of your note. This guide walks you through creating an extension from scratch.
 
 ---
 
@@ -47,6 +47,8 @@ Note that this "**" syntax is temporary until Antinote has a proper command pale
 ---
 
 ## 🧠 Creating an Extension
+
+_Note_: Antinote Extensions uses [JavaScriptCore](https://developer.apple.com/documentation/javascriptcore) to parse JS, which means that you are generally limited to ES5.
 
 Start every extension by creating a new `Extension`:
 
