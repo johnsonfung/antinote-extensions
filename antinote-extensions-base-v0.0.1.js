@@ -29,12 +29,12 @@ Command.prototype.getParsedParams = function(payload) {
       var rawValue = payload.parameters?.[i];
       // If missing, use the default from the parameter definition.
       if (rawValue === undefined || rawValue === null) {
-        rawValue = this.parameters[i].default_value;
+        rawValue = this.parameters[i].defaultValue;
       }
       
       // Parse the value based on the parameter type.
       var parsedValue;
-      switch (this.parameters[i].parameter_type) {
+      switch (this.parameters[i].parameterType) {
         case "float":
           parsedValue = parseFloat(rawValue);
           break;
@@ -77,11 +77,11 @@ Extension.prototype.register_command = function(cmd) {
 };
 
 // Parameter constructor function
-function Parameter(parameter_type, name, helpText, default_value) {
-  this.parameter_type = parameter_type;
+function Parameter(parameterType, name, helpText, defaultValue) {
+  this.parameterType = parameterType;
   this.name = name;
   this.helpText = helpText || "This parameter needs help text."
-  this.default_value = (default_value !== undefined) ? default_value : null;
+  this.defaultValue = (defaultValue !== undefined) ? defaultValue : null;
 }
 
 function TutorialCommand(command, description) {

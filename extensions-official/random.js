@@ -1,17 +1,17 @@
 // 1. Name your extension
-var extension_name = "random"
+var extensionName = "random"
 
-var extensionRoot = new Extension(extension_name, "1.0.0");
+var extensionRoot = new Extension(extensionName, "1.0.0");
 
 // 2. Create a command for you extension
 var random_number = new Command(
-  "random_number", // 3. Name your command
+  "random_number", // 3. This is the name of the command and what the user will type in the note to trigger it. Please use snake_case.
 
   // 4. Create the parameters for the command. Every parameter must have a type, name, and helpText.
   // type: The type of the parameter. Possible values are "float", "int", "bool", "string"
   // name: The name of the parameter
   // helpText: The help text for the parameter that the user sees
-  // default_value: The default value for the parameter
+  // defaultValue: The default value for the parameter
   [
     new Parameter("float", "from", "bottom range", 0),
     new Parameter("float", "to", "top range", 100),
@@ -34,6 +34,15 @@ var random_number = new Command(
 random_number.execute = function(payload) {
   // This will automatically replace empty parameters with the default values and parse them based on the parameter type
   var [from, to, int] = this.getParsedParams(payload);
+
+  // Error handling
+  if (from > to) {
+    return new ReturnObject("error", "The 'from' value cannot be greater than the 'to' value.");
+  }
+  
+  if (from < 0 || to < 0) {
+    return new ReturnObject("error", "Values cannot be negative.");
+  }
 
   console.log(from, to, int); // Console logs will appear in Terminal if you launch Antinote from the command line. Starts with 'JS console.log'
   
@@ -64,6 +73,15 @@ var random_letters = new Command(
 
 random_letters.execute = function(payload) {
   var [numberOfLetters] = this.getParsedParams(payload);
+  
+  // Error handling
+  if (numberOfLetters < 1) {
+    return new ReturnObject("error", "Number of letters must be at least 1.");
+  }
+  
+  if (numberOfLetters > 1000) {
+    return new ReturnObject("error", "Cannot generate more than 1000 letters at once.");
+  }
   
   var result = "";
   for (var i = 0; i < numberOfLetters; i++) {

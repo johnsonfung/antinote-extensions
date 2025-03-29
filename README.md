@@ -42,6 +42,8 @@ For example, to generate a random number between 10 and 20:
 ** random_number(10, 20)
 ```
 
+Note that this "**" syntax is temporary until Antinote has a proper command palette where users will be able to quickly search and apply extensions.
+
 ---
 
 ## 🧠 Creating an Extension
@@ -56,10 +58,10 @@ Each command within an extension can have:
 
 - A **name** and optional **aliases**
 - **Parameters** with:
-  - type: float, int, bool, or string
-  - varName: string (for use in your logic)
-  - helpText: string (explaining the parameter to users)
-  - defaultValue: float, int, bool, or string (matching your type)
+  - `parameterType`  : float, int, bool, or string
+  - `name`: string (for use in your logic)
+  - `helpText`: string (explaining the parameter to users)
+  - `defaultValue`: float, int, bool, or string (matching your type)
 - A **function** that defines what the command does
 - Optional **tutorial examples** showing how to use it
 
@@ -111,6 +113,40 @@ my_command.execute = function(payload) {
   return new ReturnObject("success", "Random number generated.", result);
 };
 ```
+
+---
+
+## ⚠️ Error Handling
+
+Always validate your inputs and return appropriate error messages when something goes wrong. Here's an example:
+
+```js
+my_command.execute = function(payload) {
+  var [from, to, int] = this.getParsedParams(payload);
+
+  // Validate inputs
+  if (from > to) {
+    return new ReturnObject("error", "The 'from' value cannot be greater than the 'to' value.");
+  }
+  
+  if (from < 0 || to < 0) {
+    return new ReturnObject("error", "Values cannot be negative.");
+  }
+
+  // Process valid inputs
+  var result = Math.random() * (to - from) + from;
+  if (int) {
+    result = Math.floor(result);
+  }
+
+  return new ReturnObject("success", "Random number generated.", result);
+};
+```
+
+The `ReturnObject` takes three parameters:
+- `status`: Either "success" or "error"
+- `message`: A user-friendly message explaining what happened
+- `payload`: The result (for success) or empty string (for error)
 
 ---
 
