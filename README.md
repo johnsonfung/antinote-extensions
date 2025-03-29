@@ -1,27 +1,161 @@
-# Antinote Extensions
+# ✨ Antinote Extensions
 
-## Intro
+Antinote supports powerful custom JavaScript extensions that let you process and manipulate notes via user-defined commands. This guide walks you through creating an extension from scratch.
 
-Antinote enables extensions written in ES5 Javascript which enable new utility keywords that can do the following:
-- Add new text to a note
-- Edit existing text in a note
-- Open URLs and URI Schemes (for deeplinking / exporting)
+---
 
-__Limitations__
-- Extensions are sandboxed and cannot access any networking features or APIs
-- They run entriely local on the user's machine
-- They can only access one note at a time
+## 📦 Extension Basics
 
-## Downloading Extensions
+Each extension consists of:
 
-1. To open the Extensions folder for Antinote, paste this command into your Terminal:
+- A **name**
+- One or more **commands**
+- Optional **parameter definitions**
+- A **function** that defines what your command does
+- An optional list of **tutorial examples**
 
-```bash
+Start every extension by creating a new `Extension`:
+
+```js
+var extensionRoot = new Extension("my_extension_name");
+```
+
+---
+
+## 🧠 Creating a Command
+
+Use the `Command` constructor to define a new command:
+
+```js
+var my_command = new Command(
+  "my_command", // command name
+
+  // parameter definitions
+  [
+    new Parameter("float", "from", "bottom range", 0),
+    new Parameter("float", "to", "top range", 100),
+    new Parameter("bool", "int", "round to nearest whole number", true)
+  ],
+
+  ["alias1", "alias2"], // up to 3 aliases
+
+  "replaceLine", // action type: "replaceLine", "replaceAll", or "openURL"
+
+  "Generate a random number between two values.", // help text
+
+  [ // tutorial examples
+    new TutorialCommand("my_command", "Generate a random number from 0 to 100."),
+    new TutorialCommand("my_command(10, 20)", "Generate a random number from 10 to 20."),
+    new TutorialCommand("my_command(10, 20, false)", "Generate a decimal number from 10 to 20.")
+  ],
+
+  extensionRoot // parent extension
+);
+```
+
+---
+
+## ⚙️ Writing the Function
+
+Define the command behavior by assigning an `execute` function:
+
+```js
+my_command.execute = function(payload) {
+  var [from, to, int] = this.getParsedParams(payload);
+
+  var result = Math.random() * (to - from) + from;
+  if (int) {
+    result = Math.floor(result);
+  }
+
+  return new ReturnObject("success", "Random number generated.", result);
+};
+```
+
+---
+
+## 🧪 Sample: Random Letters
+
+```js
+var random_letters = new Command(
+  "random_letters",
+  [ new Parameter("int", "numberOfLetters", "how many letters you want", 1) ],
+  [],
+  "replaceLine",
+  "Generate random letters.",
+  [
+    new TutorialCommand("random_letters", "Generate 1 random letter."),
+    new TutorialCommand("random_letters(5)", "Generate 5 random letters.")
+  ],
+  extensionRoot
+);
+
+random_letters.execute = function(payload) {
+  var [count] = this.getParsedParams(payload);
+  var result = "";
+  for (var i = 0; i < count; i++) {
+    result += String.fromCharCode(65 + Math.floor(Math.random() * 26));
+  }
+  return new ReturnObject("success", "Random letters generated.", result);
+};
+```
+
+---
+
+## 🛠 API Reference
+
+### `new Extension(name)`
+Creates a new extension container.
+
+---
+
+### `new Command(name, parameters, aliases, type, helpText, tutorials, extension)`
+Registers a new command.
+
+- `type`: `"replaceLine"`, `"replaceAll"`, or `"openURL"`
+- `tutorials`: Array of `TutorialCommand` instances
+
+---
+
+### `new Parameter(type, name, helpText, defaultValue)`
+Defines a command parameter.
+
+- `type`: `"float"`, `"int"`, `"bool"`, or `"string"`
+
+---
+
+### `new TutorialCommand(command, description)`
+Example usage to help users understand the command.
+
+---
+
+### `ReturnObject(status, message, payload)`
+Standard object returned from a command.
+
+- `status`: `"success"` or `"error"`
+- `message`: Message shown to user
+- `payload`: The result (string to insert or URL to open)
+
+---
+
+## 🐞 Debugging
+
+If you launch Antinote from Terminal, any `console.log()` or `console.error()` output from your extensions will be printed in the terminal prefixed with `JS console.log`.
+
+---
+
+## 📂 Extension Folder
+
+Extensions are stored in:
+
+```
+~/Library/Containers/com.chabomakers.Antinote/Data/Library/Application Support/Antinote/Extensions
+```
+
+To open it from Terminal:
+
+```sh
 open ~/Library/Containers/com.chabomakers.Antinote/Data/Library/Application\ Support/Antinote/Extensions
 ```
-2. Copy/paste any of the extensions from this repo's `extensions-official` folder into there.
-3. Restart Antinote.
-4. Use the extension by typing `** extension_command(arg1, arg2, etc)` and then pressing enter.
 
-## Creating an Extension
-
+---
