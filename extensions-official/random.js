@@ -50,7 +50,7 @@ random_number.execute = function(payload) {
 var random_letters = new Command(
   "random_letters",
   [
-    new Parameter("int", "numberOfLetters", "how many letters you want to return", 1),
+    new Parameter("int", "numberOfLetters", "Number of letters to generate", 1),
   ], 
   [],
   "replaceLine",

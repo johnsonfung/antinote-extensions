@@ -32,7 +32,7 @@ To use an extension:
 2. Place it in the Extensions folder
 3. Restart Antinote
 
-Then you can use any command from the extension in your notes using the syntax:
+Then you can use any command from the extension **inside Antinote** using the syntax:
 ```
 ** command_name(arg1, arg2, ...)
 ```
@@ -56,10 +56,10 @@ Each command within an extension can have:
 
 - A **name** and optional **aliases**
 - **Parameters** with:
-  - Type (float, int, bool, or string)
-  - Name
-  - Help text explaining the parameter
-  - Default value
+  - type: float, int, bool, or string
+  - varName: string (for use in your logic)
+  - helpText: string (explaining the parameter to users)
+  - defaultValue: float, int, bool, or string (matching your type)
 - A **function** that defines what the command does
 - Optional **tutorial examples** showing how to use it
 
@@ -72,9 +72,9 @@ var my_command = new Command(
 
   // parameter definitions
   [
-    new Parameter("float", "from", "bottom range", 0),
-    new Parameter("float", "to", "top range", 100),
-    new Parameter("bool", "int", "round to nearest whole number", true)
+    new Parameter("float", "from", "Bottom range", 0),
+    new Parameter("float", "to", "Top range", 100),
+    new Parameter("bool", "int", "Round to nearest whole number", true)
   ],
 
   ["alias1", "alias2"], // up to 3 aliases
@@ -119,7 +119,7 @@ my_command.execute = function(payload) {
 ```js
 var random_letters = new Command(
   "random_letters",
-  [ new Parameter("int", "numberOfLetters", "how many letters you want", 1) ],
+  [ new Parameter("int", "numberOfLetters", "Number of letters to generate", 1) ],
   [],
   "replaceLine",
   "Generate random letters.",
