@@ -129,6 +129,22 @@ Example usage to help users understand the command.
 
 ---
 
+### Payload Format
+Commands receive a payload from Antinote like this:
+
+```json
+{
+  "parameters": ["10", "20", "true"],
+  "fullText": "Full text of the note from the user",
+  "userSettings": {
+    "decimalSeparator": ".",
+    "thousandsSeparator": ","
+  }
+}
+```
+
+---
+
 ### `ReturnObject(status, message, payload)`
 Standard object returned from a command.
 
