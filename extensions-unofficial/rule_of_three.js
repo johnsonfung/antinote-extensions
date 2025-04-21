@@ -1,6 +1,6 @@
 var extensionRoot = new Extension("rule_of_three", "1.0.0");
 
-var thirds = new Command(
+var three = new Command(
   "three",
 
   [
@@ -28,7 +28,7 @@ var thirds = new Command(
   extensionRoot
 );
 
-thirds.execute = function(payload) {
+three.execute = function(payload) {
   var [ref1, ref2, req1, req2, logic] = this.getParsedParams(payload);
   logic = logic == "true"
 
@@ -42,12 +42,12 @@ thirds.execute = function(payload) {
     return new ReturnObject("error", "The first 2 parameters must not be 'x'");
   }
 
-  const unitSep = /^(\d+)(.*)$/
+  const unitSep = /^(\d*\.\d+|\d+)(\s*.*)?$/
 
   const values = []
 
-  const leftUnit = ref1.match(unitSep)[2]
-  const rightUnit = ref2.match(unitSep)[2]
+  const leftUnit = ref1.match(unitSep)[2] || ""
+  const rightUnit = ref2.match(unitSep)[2] || ""
 
   values[0] = parseFloat(ref1.match(unitSep)[1])
   values[1] = parseFloat(ref2.match(unitSep)[1])
