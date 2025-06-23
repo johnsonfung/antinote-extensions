@@ -7,7 +7,7 @@ Welcome to **North Star**! This theme was heavily inspired by Samurize's ⁠Auro
 <table>
   <tr>
     <td>
-      <img width="554" alt="Neo Theme - Lists" src="https://github.com/user-attachments/assets/dee78645-8cd8-4018-abd4-d6802e4069ed" />
+      <img width="554" alt="Neo Theme - Lists" src="https://github.com/user-attachments/assets/5a3231ce-0504-4542-8f77-6fe5af6daf84" />
       <p align="center"><strong>Lists</strong><br>&nbsp;</p>
     </td>
     <td>
@@ -17,7 +17,7 @@ Welcome to **North Star**! This theme was heavily inspired by Samurize's ⁠Auro
   </tr>
   <tr>
     <td>
-      <img width="554" alt="Neo Theme - Code" src="https://github.com/user-attachments/assets/5a3231ce-0504-4542-8f77-6fe5af6daf84" />
+      <img width="554" alt="Neo Theme - Code" src="https://github.com/user-attachments/assets/dee78645-8cd8-4018-abd4-d6802e4069ed" />
       <p align="center"><strong>Code</strong><br>&nbsp;</p>
     </td>
     <td>
