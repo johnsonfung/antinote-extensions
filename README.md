@@ -83,7 +83,7 @@ var my_command = new Command(
 
   ["alias1", "alias2"], // up to 3 aliases
 
-  "replaceLine", // action type: "replaceLine", "replaceAll", or "openURL"
+  "replaceLine", // action type: "insert", "replaceLine", "replaceAll", or "openURL"
 
   "Generate a random number between two values.", // help text
 
@@ -193,7 +193,7 @@ Creates a new extension container.
 ### `new Command(name, parameters, aliases, type, helpText, tutorials, extension)`
 Registers a new command.
 
-- `type`: `"replaceLine"`, `"replaceAll"`, or `"openURL"`
+- `type`: `"insert"`, `"replaceLine"`, `"replaceAll"`, or `"openURL"`
 - `tutorials`: Array of `TutorialCommand` instances
 
 ---
