@@ -527,6 +527,19 @@ Makes authenticated API call (for network extensions).
 
 ---
 
+## 📚 Extension Catalog
+
+For a complete list of all official extensions and their commands, see:
+**[Official Extensions Index](extensions-official/EXTENSIONS_INDEX.md)**
+
+This catalog includes:
+- All extensions organized by category
+- Complete command reference with parameters
+- Usage examples for every command
+- Data scope and network access information
+
+---
+
 ## 📞 Support
 
 - **Issues**: [GitHub Issues](https://github.com/johnsonfung/antinote-extensions/issues)
