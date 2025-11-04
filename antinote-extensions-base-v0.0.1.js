@@ -3,12 +3,11 @@
 if (typeof global === 'undefined') { var global = this; }
 global.commandRegistry = new Array();
 
-function Command(name, parameters, aliases, type, helpText, tutorials, extension) {
+function Command(name, parameters, type, helpText, tutorials, extension) {
   this.name = name;
   this.parameters = parameters || [];
-  this.aliases = aliases || [];
   this.extension = extension;
-  this.type = type || "replaceLine";     // Types: replaceAll, replaceLine, openURL
+  this.type = type || "replaceLine";     // Types: insert, replaceAll, replaceLine, openURL
   this.helpText = helpText ||  "This command replaces text in a line.";
   this.tutorials = tutorials || [];
 
@@ -66,14 +65,35 @@ Command.prototype.execute = function() {
 };
 
 // Extension constructor function
-function Extension(name, version) {
+function Extension(name, version, endpoints, requiredAPIKeys, author, category, dataScope) {
   this.name = name;
   this.version = version || "1.0.0";
   this.commands = [];
+  this.endpoints = endpoints || [];  // Array of endpoint URLs this extension calls
+  this.requiredAPIKeys = requiredAPIKeys || [];  // Array of API key IDs this extension requires
+  this.preferences = [];  // Array of preference definitions
+  this.author = author || "";  // GitHub username or author name
+  this.category = category || "Utilities";  // Category for organizing extensions
+  // Data access scope: "none" (no note content), "line" (current line only), "full" (entire note)
+  this.dataScope = dataScope || "full";  // Default to "full" for backwards compatibility
 }
 
 Extension.prototype.register_command = function(cmd) {
   this.commands.push(cmd);
+};
+
+// Preference constructor function
+function Preference(key, label, type, defaultValue, options, helpText) {
+  this.key = key;
+  this.label = label;
+  this.type = type; // "bool", "string", "selectOne", "selectMultiple"
+  this.defaultValue = defaultValue;
+  this.options = options || null; // Array of strings for select types
+  this.helpText = helpText || null;
+}
+
+Extension.prototype.register_preference = function(pref) {
+  this.preferences.push(pref);
 };
 
 // Parameter constructor function
