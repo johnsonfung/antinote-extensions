@@ -1,4 +1,4 @@
-(function() {
+(function () {
   // 1. Name your extension (wrapped in IIFE to avoid variable conflicts)
   var extensionName = "random";
 
@@ -27,20 +27,20 @@
       new Parameter("float", "to", "top range", 100),
       new Parameter("bool", "int", "round to nearest whole number", true)
     ],
-    "replaceLine", // This is the action the command will do to the user's note: "insert", "replaceLine", "replaceAll", or "openURL"
-    "Generate a random number between two values.", // This is the description text for the command
+    "insert", // This is the action the command will do to the user's note: "insert", "replaceLine", "replaceAll", or "openURL"
+    "Insert a random number between two values.", // This is the description text for the command
 
     // Give examples of how to use the command. This will show up in the UI.
     [
-      new TutorialCommand("random_number", "Generate a random integer between 0 and 100."),
-      new TutorialCommand("random_number(10, 20)", "Generate a random integer between 10 and 20."),
-      new TutorialCommand("random_number(10, 20, false)", "Generate a random decimal number between 10 and 20.")
+      new TutorialCommand("random_number", "Insert a random integer between 0 and 100."),
+      new TutorialCommand("random_number(10, 20)", "Insert a random integer between 10 and 20."),
+      new TutorialCommand("random_number(10, 20, false)", "Insert a random decimal number between 10 and 20.")
     ],
     extensionRoot
   );
 
   // 5. Write your function
-  random_number.execute = function(payload) {
+  random_number.execute = function (payload) {
     // This will automatically replace empty parameters with the default values and parse them based on the parameter type
     var [from, to, int] = this.getParsedParams(payload);
 
@@ -70,16 +70,16 @@
     [
       new Parameter("int", "numberOfLetters", "Number of letters to generate", 1),
     ],
-    "replaceLine",
-    "Generate a random letter or series of letters.",
+    "insert",
+    "Insert a random letter or series of letters.",
     [
-      new TutorialCommand("random_letters", "Generate a random letter."),
-      new TutorialCommand("random_letters(5)", "Generate 5 random letters.")
+      new TutorialCommand("random_letters", "Insert a random letter."),
+      new TutorialCommand("random_letters(5)", "Insert 5 random letters.")
     ],
     extensionRoot
   );
 
-  random_letters.execute = function(payload) {
+  random_letters.execute = function (payload) {
     var [numberOfLetters] = this.getParsedParams(payload);
 
     // Error handling
@@ -104,15 +104,15 @@
   var random_quote = new Command(
     "random_quote",
     [],
-    "replaceAll",
-    "Replace the whole text with a random quote.",
+    "insert",
+    "Insert a random quote.",
     [
-      new TutorialCommand("random_quote", "Replace the whole text with a random quote.")
+      new TutorialCommand("random_quote", "Insert a random quote.")
     ],
     extensionRoot
   );
 
-  random_quote.execute = function(payload) {
+  random_quote.execute = function (payload) {
     var quotes = [
       "Letting go gives us freedom, and freedom is the only condition for happiness.",
       "You can only lose what you cling to.",
@@ -126,7 +126,7 @@
 
     var result = quotes[Math.floor(Math.random() * quotes.length)];
 
-    var success = new ReturnObject("success", "Random quote generated.", result);
+    var success = new ReturnObject("success", "Random quote inserted.", result);
     return success;
   };
 
@@ -144,7 +144,7 @@
     extensionRoot
   );
 
-  random_wiki.execute = function(payload) {
+  random_wiki.execute = function (payload) {
     var url = "https://en.wikipedia.org/wiki/Special:Random";
 
     var success = new ReturnObject("success", "Opening random Wikipedia page.", url);
