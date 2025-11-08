@@ -1,0 +1,21 @@
+{
+  "name": "llm",
+  "version": "3.0.0",
+  "author": "johnsonfung",
+  "description": "General-purpose AI command for getting AI-generated responses using the ai_providers service",
+  "license": "MIT",
+  "category": "AI & ML",
+  "dataScope": "none",
+  "endpoints": [],
+  "requiredAPIKeys": [],
+  "dependencies": ["ai_providers"],
+  "commands": [
+    {
+      "name": "ai",
+      "description": "Insert an AI-generated response to your prompt.",
+      "type": "insert"
+    }
+  ],
+  "official": true,
+  "includedByDefault": true
+}

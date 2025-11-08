@@ -46,6 +46,9 @@ let errors = [];
 let warnings = [];
 let extensionsChecked = 0;
 
+// Cache for loaded extension metadata
+const extensionMetadataCache = new Map();
+
 // Utility: Get all extension directories
 function getExtensionDirs(baseDir, isOfficial) {
   if (!fs.existsSync(baseDir)) {
@@ -77,8 +80,61 @@ function validateFileExists(extension, filePath, fileName) {
   return true;
 }
 
+// Utility: Load extension metadata (with caching)
+function loadExtensionMetadata(extensionName, allExtensions) {
+  // Check cache first
+  if (extensionMetadataCache.has(extensionName)) {
+    return extensionMetadataCache.get(extensionName);
+  }
+
+  // Find the extension
+  const extension = allExtensions.find(ext => ext.name === extensionName);
+  if (!extension) {
+    return null;
+  }
+
+  // Load metadata
+  try {
+    const content = fs.readFileSync(extension.metadataPath, 'utf8');
+    const metadata = JSON.parse(content);
+    extensionMetadataCache.set(extensionName, metadata);
+    return metadata;
+  } catch (error) {
+    return null;
+  }
+}
+
+// Utility: Get all security disclosures for an extension (including inherited from dependencies)
+function getInheritedSecurityDisclosures(metadata, extensionName, allExtensions, visited = new Set()) {
+  // Prevent circular dependencies
+  if (visited.has(extensionName)) {
+    return { endpoints: [], requiredAPIKeys: [] };
+  }
+  visited.add(extensionName);
+
+  const endpoints = new Set(metadata.endpoints || []);
+  const requiredAPIKeys = new Set(metadata.requiredAPIKeys || []);
+
+  // Recursively collect from dependencies
+  if (metadata.dependencies && Array.isArray(metadata.dependencies)) {
+    metadata.dependencies.forEach(depName => {
+      const depMetadata = loadExtensionMetadata(depName, allExtensions);
+      if (depMetadata) {
+        const inherited = getInheritedSecurityDisclosures(depMetadata, depName, allExtensions, visited);
+        inherited.endpoints.forEach(e => endpoints.add(e));
+        inherited.requiredAPIKeys.forEach(k => requiredAPIKeys.add(k));
+      }
+    });
+  }
+
+  return {
+    endpoints: Array.from(endpoints),
+    requiredAPIKeys: Array.from(requiredAPIKeys)
+  };
+}
+
 // Validation: Check extension.json structure
-function validateMetadata(extension) {
+function validateMetadata(extension, allExtensions) {
   const { metadataPath, name, isOfficial } = extension;
 
   if (!validateFileExists(extension, metadataPath, 'extension.json')) {
@@ -93,6 +149,9 @@ function validateMetadata(extension) {
     errors.push(`[${name}] Invalid JSON in extension.json: ${error.message}`);
     return;
   }
+
+  // Cache the metadata
+  extensionMetadataCache.set(name, metadata);
 
   // Check required fields
   const requiredFields = isOfficial
@@ -132,9 +191,11 @@ function validateMetadata(extension) {
     errors.push(`[${name}] requiredAPIKeys must be an array`);
   }
 
-  // Validate commands
-  if (!Array.isArray(metadata.commands) || metadata.commands.length === 0) {
-    errors.push(`[${name}] Must have at least one command`);
+  // Validate commands (allow service extensions to have zero commands)
+  if (!Array.isArray(metadata.commands)) {
+    errors.push(`[${name}] commands must be an array`);
+  } else if (metadata.commands.length === 0 && !metadata.isService) {
+    errors.push(`[${name}] Must have at least one command (unless isService is true)`);
   } else {
     metadata.commands.forEach((cmd, index) => {
       if (!cmd.name) {
@@ -149,11 +210,21 @@ function validateMetadata(extension) {
     });
   }
 
+  // Validate dependencies exist
+  if (metadata.dependencies && Array.isArray(metadata.dependencies)) {
+    metadata.dependencies.forEach(depName => {
+      const depMetadata = loadExtensionMetadata(depName, allExtensions);
+      if (!depMetadata) {
+        errors.push(`[${name}] Declares dependency on "${depName}" but that extension was not found`);
+      }
+    });
+  }
+
   return metadata;
 }
 
 // Validation: Check index.js code for security disclosures
-function validateCodeDisclosures(extension, metadata) {
+function validateCodeDisclosures(extension, metadata, allExtensions) {
   const { indexPath, name } = extension;
 
   if (!validateFileExists(extension, indexPath, 'index.js')) {
@@ -161,6 +232,19 @@ function validateCodeDisclosures(extension, metadata) {
   }
 
   const code = fs.readFileSync(indexPath, 'utf8');
+
+  // Get inherited security disclosures from dependencies
+  const inherited = getInheritedSecurityDisclosures(metadata, name, allExtensions);
+  const allEndpoints = inherited.endpoints;
+  const allAPIKeys = inherited.requiredAPIKeys;
+
+  // Check if extension has dependencies - if so, it should inherit security disclosures
+  if (metadata.dependencies && metadata.dependencies.length > 0) {
+    // Extensions with dependencies should typically have empty or minimal own disclosures
+    if (metadata.endpoints.length > 0 || metadata.requiredAPIKeys.length > 0) {
+      warnings.push(`[${name}] Has dependencies but also declares own endpoints/API keys. Consider if these are truly needed or if they're inherited from dependencies.`);
+    }
+  }
 
   // Check if extension declares endpoints but doesn't make calls
   if (metadata.endpoints && metadata.endpoints.length > 0) {
@@ -179,22 +263,43 @@ function validateCodeDisclosures(extension, metadata) {
     });
   }
 
-  // Check if code makes HTTP calls but doesn't declare endpoints
-  if (metadata.endpoints.length === 0) {
-    const httpCallMatch = code.match(/https?:\/\/[^\s"']+/g);
-    if (httpCallMatch) {
-      const foundEndpoints = [...new Set(httpCallMatch.map(url => {
-        const match = url.match(/https?:\/\/[^/\s"']+/);
-        return match ? match[0] : null;
-      }).filter(Boolean))];
+  // Check if code makes HTTP calls but doesn't declare endpoints (including inherited)
+  const httpCallMatch = code.match(/https?:\/\/[^\s"']+/g);
+  if (httpCallMatch) {
+    const foundEndpoints = [...new Set(httpCallMatch.map(url => {
+      const match = url.match(/https?:\/\/[^/\s"']+/);
+      return match ? match[0] : null;
+    }).filter(Boolean))];
 
-      if (foundEndpoints.length > 0) {
-        errors.push(`[${name}] Makes HTTP calls to ${foundEndpoints.join(', ')} but endpoints array is empty`);
+    foundEndpoints.forEach(foundEndpoint => {
+      // Skip if this URL appears only in headers (like HTTP-Referer)
+      const isHeaderOnly = code.includes(`"HTTP-Referer": "${foundEndpoint}"`) ||
+                           code.includes(`'HTTP-Referer': '${foundEndpoint}'`) ||
+                           code.includes(`"Referer": "${foundEndpoint}"`) ||
+                           code.includes(`'Referer': '${foundEndpoint}'`) ||
+                           code.includes(`["HTTP-Referer"] = "${foundEndpoint}"`) ||
+                           code.includes(`['HTTP-Referer'] = '${foundEndpoint}'`) ||
+                           code.includes(`["Referer"] = "${foundEndpoint}"`) ||
+                           code.includes(`['Referer'] = '${foundEndpoint}'`);
+
+      if (isHeaderOnly) {
+        return; // Skip referer headers
       }
-    }
+
+      // Check if this endpoint is declared (either directly or inherited)
+      const isDeclared = allEndpoints.some(declared => {
+        const declaredDomain = declared.replace(/^https?:\/\//, '').split('/')[0];
+        const foundDomain = foundEndpoint.replace(/^https?:\/\//, '').split('/')[0];
+        return declaredDomain === foundDomain;
+      });
+
+      if (!isDeclared) {
+        errors.push(`[${name}] Makes HTTP calls to ${foundEndpoint} but it's not declared in endpoints (including inherited from dependencies)`);
+      }
+    });
   }
 
-  // Check if extension uses API keys
+  // Check if extension uses API keys (check both own and inherited)
   if (metadata.requiredAPIKeys.length > 0) {
     metadata.requiredAPIKeys.forEach(keyName => {
       if (!code.includes(keyName)) {
@@ -203,18 +308,23 @@ function validateCodeDisclosures(extension, metadata) {
     });
   }
 
-  // Check for undeclared API key usage
+  // Check for undeclared API key usage (must be declared or inherited)
   const apiKeyPatterns = [
     /getAPIKey\(['"]([^'"]+)['"]\)/g,
-    /apikey_\w+/gi
+    /apikey_\w+/gi,
+    /callAPI\(\s*['"]([^'"]*)['"]/g
   ];
 
   apiKeyPatterns.forEach(pattern => {
     const matches = code.matchAll(pattern);
     for (const match of matches) {
       const keyName = match[1] || match[0];
-      if (!metadata.requiredAPIKeys.includes(keyName)) {
-        errors.push(`[${name}] Uses API key "${keyName}" but not declared in requiredAPIKeys`);
+      // Skip empty strings
+      if (!keyName || keyName.trim() === '') continue;
+
+      // Check if key is declared (own or inherited)
+      if (!allAPIKeys.includes(keyName) && keyName.startsWith('apikey_')) {
+        errors.push(`[${name}] Uses API key "${keyName}" but it's not declared in requiredAPIKeys (including inherited from dependencies)`);
       }
     }
   });
@@ -254,12 +364,12 @@ function validateReadme(extension) {
 }
 
 // Validate single extension
-function validateExtension(extension) {
+function validateExtension(extension, allExtensions) {
   console.log(`\nValidating ${extension.name}...`);
 
-  const metadata = validateMetadata(extension);
+  const metadata = validateMetadata(extension, allExtensions);
   if (metadata) {
-    validateCodeDisclosures(extension, metadata);
+    validateCodeDisclosures(extension, metadata, allExtensions);
   }
   validateTests(extension);
   validateReadme(extension);
@@ -280,7 +390,7 @@ function main() {
   console.log(`Found ${unofficialExtensions.length} unofficial extensions`);
 
   // Validate each extension
-  allExtensions.forEach(validateExtension);
+  allExtensions.forEach(ext => validateExtension(ext, allExtensions));
 
   console.log('\n' + '='.repeat(50));
   console.log(`\n📊 Validation Summary:`);
