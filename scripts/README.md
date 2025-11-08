@@ -21,12 +21,33 @@ The main build script that generates a distributable manifest and extension pack
 ### Usage:
 
 ```bash
-# Using npm script (recommended)
+# Build with automatic patch version increment (default)
 npm run build
+# or
+npm run build:patch
 
-# Or directly
-node scripts/build.js
+# Build with minor version increment
+npm run build:minor
+
+# Build with major version increment
+npm run build:major
+
+# Or directly with version argument
+node scripts/build.js [patch|minor|major]
 ```
+
+### Versioning:
+
+The manifest version is automatically incremented with each build and tracked in `manifest-version.json`:
+
+- **patch** (default): `1.0.0` → `1.0.1` - For bug fixes and minor changes
+- **minor**: `1.0.0` → `1.1.0` - For new extensions or features
+- **major**: `1.0.0` → `2.0.0` - For breaking changes
+
+The version file tracks:
+- **version**: Semantic version string (e.g., "1.2.3")
+- **buildNumber**: Auto-incrementing build counter
+- **lastUpdated**: ISO timestamp of last build
 
 ### Output Structure:
 
@@ -49,6 +70,7 @@ dist/
 ```json
 {
   "version": "1.0.0",
+  "buildNumber": 1,
   "generatedAt": "ISO8601 timestamp",
   "signature": "SHA-256 hash of manifest (placeholder for real signature)",
   "extensions": [

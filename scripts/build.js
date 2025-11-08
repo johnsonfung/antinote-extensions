@@ -22,9 +22,14 @@ const EXTENSIONS_OFFICIAL_DIR = path.join(ROOT_DIR, 'extensions-official');
 const EXTENSIONS_UNOFFICIAL_DIR = path.join(ROOT_DIR, 'extensions-unofficial');
 const DIST_DIR = path.join(ROOT_DIR, 'dist');
 const DIST_EXTENSIONS_DIR = path.join(DIST_DIR, 'extensions');
+const VERSION_FILE = path.join(ROOT_DIR, 'manifest-version.json');
 
 // Extensions that should be included by default
 const INCLUDED_BY_DEFAULT = ['random', 'date', 'text_format', 'line_format'];
+
+// Parse command line arguments
+const args = process.argv.slice(2);
+const versionBump = args.find(arg => ['major', 'minor', 'patch'].includes(arg)) || 'patch';
 
 // Utility: Calculate SHA-256 hash of a file
 function calculateSHA256(filePath) {
@@ -57,6 +62,50 @@ function getExtensionDirs(baseDir) {
       path: path.join(baseDir, name),
       metadataPath: path.join(baseDir, name, 'extension.json')
     }));
+}
+
+// Utility: Read and increment version
+function readAndIncrementVersion() {
+  let versionData;
+
+  if (fs.existsSync(VERSION_FILE)) {
+    versionData = JSON.parse(fs.readFileSync(VERSION_FILE, 'utf8'));
+  } else {
+    // Initialize version file if it doesn't exist
+    versionData = {
+      version: '1.0.0',
+      lastUpdated: new Date().toISOString(),
+      buildNumber: 0
+    };
+  }
+
+  // Parse semantic version
+  const [major, minor, patch] = versionData.version.split('.').map(Number);
+
+  // Increment based on argument
+  let newVersion;
+  switch (versionBump) {
+    case 'major':
+      newVersion = `${major + 1}.0.0`;
+      break;
+    case 'minor':
+      newVersion = `${major}.${minor + 1}.0`;
+      break;
+    case 'patch':
+    default:
+      newVersion = `${major}.${minor}.${patch + 1}`;
+      break;
+  }
+
+  // Update version data
+  versionData.version = newVersion;
+  versionData.lastUpdated = new Date().toISOString();
+  versionData.buildNumber += 1;
+
+  // Save updated version
+  fs.writeFileSync(VERSION_FILE, JSON.stringify(versionData, null, 2) + '\n');
+
+  return versionData;
 }
 
 // Step 1: Update extension.json files
@@ -203,11 +252,12 @@ async function createZipFiles() {
 }
 
 // Step 5: Generate manifest.json
-function generateManifest(zipInfo) {
+function generateManifest(zipInfo, versionData) {
   console.log('\n📄 Generating manifest.json...');
 
   const manifest = {
-    version: '1.0.0',
+    version: versionData.version,
+    buildNumber: versionData.buildNumber,
     generatedAt: new Date().toISOString(),
     extensions: zipInfo.map(({ name, sha256, metadataSha256, metadata }) => ({
       id: name,
@@ -272,17 +322,23 @@ async function main() {
   console.log('='.repeat(50));
 
   try {
+    // Increment version
+    console.log(`\n📌 Incrementing version (${versionBump})...`);
+    const versionData = readAndIncrementVersion();
+    console.log(`  ✓ New version: ${versionData.version} (build ${versionData.buildNumber})`);
+
     updateExtensionMetadata();
     validateFolderStructure();
     setupDistDirectory();
     const zipInfo = await createZipFiles();
-    const manifest = generateManifest(zipInfo);
+    const manifest = generateManifest(zipInfo, versionData);
     signManifest(manifest);
     generateChecksums(zipInfo);
 
     console.log('\n' + '='.repeat(50));
     console.log('✅ Build completed successfully!');
-    console.log(`\nOutput directory: ${DIST_DIR}`);
+    console.log(`\nManifest Version: ${versionData.version} (build ${versionData.buildNumber})`);
+    console.log(`Output directory: ${DIST_DIR}`);
     console.log(`  - manifest.json (with ${manifest.extensions.length} extensions)`);
     console.log(`  - checksums.txt`);
     console.log(`  - extensions/ (${zipInfo.length} zip files)`);
@@ -293,6 +349,8 @@ async function main() {
     const includedByDefault = zipInfo.filter(z => z.metadata.includedByDefault).length;
 
     console.log(`\n📊 Summary:`);
+    console.log(`  - Manifest version: ${versionData.version}`);
+    console.log(`  - Build number: ${versionData.buildNumber}`);
     console.log(`  - Official extensions: ${official}`);
     console.log(`  - Unofficial extensions: ${unofficial}`);
     console.log(`  - Included by default: ${includedByDefault}`);

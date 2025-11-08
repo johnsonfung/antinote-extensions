@@ -5,6 +5,9 @@
   "main": "antinote-extensions-base-v0.0.1.js",
   "scripts": {
     "build": "node scripts/build.js",
+    "build:patch": "node scripts/build.js patch",
+    "build:minor": "node scripts/build.js minor",
+    "build:major": "node scripts/build.js major",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
