@@ -2,7 +2,6 @@
 extensions-official/EXTENSIONS_INDEX.md
 node_modules/
 dist/
-package-lock.json
 .env
 generate-keys.js
 INTEGRATION.md
