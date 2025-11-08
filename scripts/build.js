@@ -15,6 +15,8 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const archiver = require('archiver');
+const nacl = require('tweetnacl');
+const naclUtil = require('tweetnacl-util');
 
 // Configuration
 const ROOT_DIR = path.join(__dirname, '..');
@@ -287,22 +289,78 @@ function generateManifest(zipInfo, versionData) {
   return manifest;
 }
 
-// Step 6: Sign manifest (placeholder)
+// Step 6: Sign manifest with Ed25519
 function signManifest(manifest) {
   console.log('\n🔐 Signing manifest...');
 
-  // TODO: Implement actual signing with private key
-  // For now, just calculate a hash of the manifest content
-  const manifestContent = JSON.stringify(manifest);
-  const signature = calculateSHA256String(manifestContent);
+  // Get private key from environment variable
+  const privateKeyHex = process.env.MANIFEST_PRIVATE_KEY;
 
-  manifest.signature = signature;
+  if (!privateKeyHex) {
+    console.warn('  ⚠️  Warning: MANIFEST_PRIVATE_KEY not set in environment');
+    console.warn('  ⚠️  Using fallback SHA-256 hash instead of cryptographic signature');
+
+    // Fallback to hash-based signature
+    const manifestContent = JSON.stringify(manifest);
+    const signature = calculateSHA256String(manifestContent);
+    manifest.signature = signature;
+    manifest.signatureType = 'sha256-fallback';
+  } else {
+    try {
+      // Convert hex private key to Uint8Array
+      const privateKeyBytes = naclUtil.decodeBase64(Buffer.from(privateKeyHex, 'hex').toString('base64'));
+
+      // Validate key length (Ed25519 secret keys are 64 bytes, or 32 bytes for seed)
+      if (privateKeyBytes.length !== 64 && privateKeyBytes.length !== 32) {
+        throw new Error(`Invalid private key length: ${privateKeyBytes.length} bytes (expected 32 or 64)`);
+      }
+
+      // If 32 bytes (seed), generate full keypair
+      let secretKey = privateKeyBytes;
+      if (privateKeyBytes.length === 32) {
+        const keyPair = nacl.sign.keyPair.fromSeed(privateKeyBytes);
+        secretKey = keyPair.secretKey;
+
+        // Extract and save public key for verification
+        const publicKeyHex = Buffer.from(keyPair.publicKey).toString('hex');
+        manifest.publicKey = publicKeyHex;
+      }
+
+      // Create canonical JSON string (sorted keys, no whitespace) for signing
+      const manifestForSigning = { ...manifest };
+      delete manifestForSigning.signature;
+      delete manifestForSigning.signatureType;
+      const manifestContent = JSON.stringify(manifestForSigning, Object.keys(manifestForSigning).sort());
+
+      // Sign using Ed25519
+      const messageBytes = naclUtil.decodeUTF8(manifestContent);
+      const signatureBytes = nacl.sign.detached(messageBytes, secretKey);
+      const signatureBase64 = naclUtil.encodeBase64(signatureBytes);
+
+      manifest.signature = signatureBase64;
+      manifest.signatureType = 'ed25519';
+
+      console.log(`  ✓ Signed manifest with Ed25519`);
+      console.log(`    Signature: ${signatureBase64.substring(0, 32)}...`);
+      if (manifest.publicKey) {
+        console.log(`    Public key: ${manifest.publicKey.substring(0, 32)}...`);
+      }
+    } catch (error) {
+      console.error(`  ✗ Failed to sign manifest: ${error.message}`);
+      console.warn('  ⚠️  Using fallback SHA-256 hash instead');
+
+      // Fallback to hash-based signature
+      const manifestContent = JSON.stringify(manifest);
+      const signature = calculateSHA256String(manifestContent);
+      manifest.signature = signature;
+      manifest.signatureType = 'sha256-fallback';
+    }
+  }
 
   const manifestPath = path.join(DIST_DIR, 'manifest.json');
   fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2) + '\n');
 
-  console.log(`  ✓ Signed manifest (placeholder signature)`);
-  console.log(`    Signature: ${signature.substring(0, 32)}...`);
+  console.log(`  ✓ Manifest signed and saved`);
 }
 
 // Step 7: Generate checksums file

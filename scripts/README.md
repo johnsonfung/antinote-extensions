@@ -107,13 +107,19 @@ dist/
 
 ### Security:
 
-The build script currently generates a placeholder signature by hashing the manifest content.
+The build script signs the manifest using **Ed25519 cryptographic signatures**.
 
-**TODO**: Implement proper cryptographic signing with a private key:
-1. Generate a private/public key pair
-2. Sign the manifest with the private key
-3. Distribute the public key with the Swift app
-4. Verify the signature in the Swift app before trusting the manifest
+**Setup Required:**
+1. Set `MANIFEST_PRIVATE_KEY` environment variable with your Ed25519 private key (hex format)
+2. The build script will automatically sign the manifest and include the public key
+3. Embed the public key in your Swift app to verify signatures
+
+**See [SECURITY.md](../SECURITY.md) for complete setup instructions.**
+
+If `MANIFEST_PRIVATE_KEY` is not set:
+- Build will warn and use SHA-256 hash fallback
+- Manifest will have `signatureType: "sha256-fallback"`
+- **Not suitable for production** - your Swift app should reject these
 
 ### Requirements:
 
