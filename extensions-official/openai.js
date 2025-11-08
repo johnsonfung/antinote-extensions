@@ -127,10 +127,10 @@
             });
 
             // Call the API using the Swift bridge
-            // Parameters: apiKeyName, extensionName, url, method, headers, body
+            // Parameters: apiKeyName, url, method, headers, body
+            // Note: Extension identity is automatically determined by the system for security
             var result = callAPI(
                 "apikey_openai",     // The keychain key for the API key
-                extensionName,       // The name of this extension (for permission checking)
                 url,
                 method,
                 headers,

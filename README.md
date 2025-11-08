@@ -279,9 +279,9 @@ my_command.execute = function(payload) {
   });
 
   // Call API
+  // Note: Extension identity is automatically determined by the system for security
   var result = callAPI(
     "apikey_openai",    // API key ID
-    "openai",           // Extension name
     url,
     "POST",
     headers,
@@ -499,8 +499,10 @@ Parses parameters based on types and applies defaults.
 #### `getExtensionPreference(extensionName, key)`
 Gets preference value for an extension.
 
-#### `callAPI(apiKeyId, extensionName, url, method, headers, body)`
+#### `callAPI(apiKeyId, url, method, headers, body)`
 Makes authenticated API call (for network extensions).
+- Extension identity is automatically determined by the system for security
+- Cannot be spoofed by malicious extensions
 
 ---
 
