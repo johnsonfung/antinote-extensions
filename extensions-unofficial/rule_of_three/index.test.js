@@ -179,7 +179,7 @@ describe("Rule of Three Extension - Command Execution Tests", function() {
 
     it("should return error when ref1 or ref2 is x", function() {
       var payload = {
-        parameters: ["x", "10", "1", "2"],
+        parameters: ["x", "10", "x", "2"],
         fullText: "",
         userSettings: {},
         preferences: {}

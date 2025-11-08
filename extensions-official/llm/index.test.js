@@ -66,7 +66,7 @@ describe("LLM Extension - Metadata Validation", function() {
 
   it("should have required version field", function() {
     expect(metadata.version).toBeDefined();
-    expect(metadata.version).toBe("2.0.0");
+    expect(metadata.version).toBe("3.0.0");
   });
 
   it("should have required author field", function() {
@@ -83,25 +83,23 @@ describe("LLM Extension - Metadata Validation", function() {
     expect(metadata.dataScope).toBe("none");
   });
 
-  it("should have endpoints array with all provider APIs", function() {
+  it("should have empty endpoints array (inherited from ai_providers)", function() {
     expect(metadata.endpoints).toBeDefined();
     expect(metadata.endpoints).toBeArray();
-    expect(metadata.endpoints.length).toBeGreaterThanOrEqual(5);
-    expect(metadata.endpoints[0]).toContain("api.openai.com");
-    expect(metadata.endpoints[1]).toContain("api.anthropic.com");
-    expect(metadata.endpoints[2]).toContain("generativelanguage.googleapis.com");
-    expect(metadata.endpoints[3]).toContain("openrouter.ai");
-    expect(metadata.endpoints[4]).toContain("localhost:11434");
+    expect(metadata.endpoints.length).toBe(0);
   });
 
-  it("should require API keys for all providers", function() {
+  it("should have empty requiredAPIKeys array (inherited from ai_providers)", function() {
     expect(metadata.requiredAPIKeys).toBeDefined();
     expect(metadata.requiredAPIKeys).toBeArray();
-    expect(metadata.requiredAPIKeys.length).toBeGreaterThanOrEqual(4);
-    expect(metadata.requiredAPIKeys[0]).toBe("apikey_openai");
-    expect(metadata.requiredAPIKeys[1]).toBe("apikey_anthropic");
-    expect(metadata.requiredAPIKeys[2]).toBe("apikey_google");
-    expect(metadata.requiredAPIKeys[3]).toBe("apikey_openrouter");
+    expect(metadata.requiredAPIKeys.length).toBe(0);
+  });
+
+  it("should declare dependency on ai_providers", function() {
+    expect(metadata.dependencies).toBeDefined();
+    expect(metadata.dependencies).toBeArray();
+    expect(metadata.dependencies.length).toBe(1);
+    expect(metadata.dependencies[0]).toBe("ai_providers");
   });
 
   it("should have ai command", function() {

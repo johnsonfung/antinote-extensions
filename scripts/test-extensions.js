@@ -54,11 +54,48 @@ async function runExtensionTests(extension) {
   console.log(`  Running tests for ${name}...`);
 
   try {
+    // Load extension metadata to get command names
+    const metadataPath = path.join(extension.path, 'extension.json');
+    let commandNames = [];
+    if (fs.existsSync(metadataPath)) {
+      try {
+        const metadata = JSON.parse(fs.readFileSync(metadataPath, 'utf8'));
+        commandNames = (metadata.commands || []).map(cmd => cmd.name);
+      } catch (e) {
+        // Ignore JSON parse errors
+      }
+    }
+
+    // Generate variable declarations for each command
+    const commandDeclarations = commandNames.map(cmdName =>
+      `var ${cmdName} = global.commandRegistry.find(function(c) { return c.name === "${cmdName}"; });`
+    ).join('\n      ');
+
     // Run the test file with Node.js
     // Load base file first, then extension code, then tests
+    // Set __dirname to point to the extension directory so tests can find extension.json
     const testCode = `
+      // Override __dirname to point to the extension directory
+      var __dirname = ${JSON.stringify(extension.path)};
+
       ${fs.readFileSync(BASE_FILE, 'utf8')}
+
+      // Mock runtime functions provided by Antinote app
+      function getExtensionPreference(extensionName, key) {
+        // Return null to use defaults in extension code
+        return null;
+      }
+
+      function callAPI(endpoint, method, headers, body, timeout) {
+        // Mock API call - return success with empty response
+        return new ReturnObject("success", "Mock API response", "{}");
+      }
+
       ${fs.readFileSync(indexPath, 'utf8')}
+
+      // Expose commands from global registry to local scope for tests
+      ${commandDeclarations}
+
       ${fs.readFileSync(testPath, 'utf8')}
     `;
 
