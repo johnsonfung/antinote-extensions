@@ -1,0 +1,33 @@
+{
+  "name": "antinote-extensions",
+  "version": "1.0.0",
+  "description": "Antinote supports custom JavaScript (ES5) extensions that let you add text to your note, modify your note, or open a URL/URI. Extensions can work locally or make network requests to external APIs. This guide walks you through creating an extension from scratch.",
+  "main": "antinote-extensions-base-v0.0.1.js",
+  "scripts": {
+    "build": "node scripts/build.js",
+    "build:patch": "node scripts/build.js patch",
+    "build:minor": "node scripts/build.js minor",
+    "build:major": "node scripts/build.js major",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/johnsonfung/antinote-extensions.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/johnsonfung/antinote-extensions/issues"
+  },
+  "homepage": "https://github.com/johnsonfung/antinote-extensions#readme",
+  "devDependencies": {
+    "archiver": "^7.0.1",
+    "tweetnacl": "^1.0.3",
+    "tweetnacl-util": "^0.15.1"
+  },
+  "dependencies": {
+    "dotenv": "^17.2.3"
+  }
+}

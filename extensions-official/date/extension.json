@@ -1,0 +1,35 @@
+{
+  "name": "date",
+  "version": "1.0.0",
+  "author": "johnsonfung",
+  "description": "Insert dates with various formats and offsets, including business days",
+  "license": "MIT",
+  "category": "Date & Time",
+  "dataScope": "none",
+  "endpoints": [],
+  "requiredAPIKeys": [],
+  "commands": [
+    {
+      "name": "today",
+      "description": "Insert today's date, optionally offset by days.",
+      "type": "insert"
+    },
+    {
+      "name": "tomorrow",
+      "description": "Insert tomorrow's date, optionally offset by additional days.",
+      "type": "insert"
+    },
+    {
+      "name": "yesterday",
+      "description": "Insert yesterday's date, optionally offset by additional days.",
+      "type": "insert"
+    },
+    {
+      "name": "businessDay",
+      "description": "Insert a date offset by business days (excludes weekends).",
+      "type": "insert"
+    }
+  ],
+  "official": true,
+  "includedByDefault": true
+}

@@ -1,0 +1,19 @@
+{
+  "name": "rule_of_three",
+  "version": "1.0.0",
+  "author": "johnsonfung",
+  "description": "Calculate proportions using the rule of three mathematical formula, with support for units",
+  "license": "MIT",
+  "category": "Math",
+  "dataScope": "none",
+  "endpoints": [],
+  "requiredAPIKeys": [],
+  "commands": [
+    {
+      "name": "three",
+      "description": "Compute rule of three, either req1 or req2 must be set to 'x'. Optionally show the logic diagram.",
+      "type": "replaceLine"
+    }
+  ],
+  "official": false
+}

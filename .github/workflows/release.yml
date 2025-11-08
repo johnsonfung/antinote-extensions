@@ -1,0 +1,118 @@
+name: Build and Release Extensions
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      version_bump:
+        description: 'Version bump type'
+        required: true
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+        default: 'patch'
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build extensions
+        env:
+          MANIFEST_PRIVATE_KEY: ${{ secrets.MANIFEST_PRIVATE_KEY }}
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            npm run build:${{ inputs.version_bump }}
+          else
+            npm run build:patch
+          fi
+
+      - name: Read version
+        id: version
+        run: |
+          VERSION=$(node -p "require('./manifest-version.json').version")
+          BUILD_NUMBER=$(node -p "require('./manifest-version.json').buildNumber")
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "build_number=${BUILD_NUMBER}" >> $GITHUB_OUTPUT
+          echo "Building version ${VERSION} (build ${BUILD_NUMBER})"
+
+      - name: Verify build artifacts
+        run: |
+          echo "Checking dist directory..."
+          ls -la dist/
+          echo ""
+          echo "Checking extensions directory..."
+          ls -la dist/extensions/
+          echo ""
+          echo "Manifest info:"
+          cat dist/manifest.json | jq '.version, .buildNumber, .extensions | length'
+
+      - name: Create Release
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ steps.version.outputs.version }}
+          name: Release v${{ steps.version.outputs.version }}
+          body: |
+            ## Antinote Extensions v${{ steps.version.outputs.version }}
+
+            Build Number: ${{ steps.version.outputs.build_number }}
+
+            ### Installation
+
+            Download the extensions you need from the assets below, or use the manifest.json to programmatically install extensions.
+
+            ### What's Included
+
+            This release includes:
+            - `manifest.json` - Signed manifest with all extension metadata and checksums
+            - `checksums.txt` - SHA-256 checksums for all extension packages
+            - Individual `.zip` files for each extension
+
+            ### Verification
+
+            All extensions are cryptographically signed. Verify the manifest signature before installation.
+
+            To verify a specific extension:
+            ```bash
+            sha256sum -c checksums.txt
+            ```
+          draft: false
+          prerelease: false
+          files: |
+            dist/manifest.json
+            dist/checksums.txt
+            dist/extensions/*.zip
+          fail_on_unmatched_files: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Commit version bump
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add manifest-version.json
+          git commit -m "chore: bump version to ${{ steps.version.outputs.version }}"
+          git push

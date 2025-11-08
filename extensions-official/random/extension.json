@@ -1,0 +1,35 @@
+{
+  "name": "random",
+  "version": "1.0.0",
+  "author": "johnsonfung",
+  "description": "Generate random numbers, letters, quotes, and open random Wikipedia pages",
+  "license": "MIT",
+  "category": "Random Generators",
+  "dataScope": "none",
+  "endpoints": [],
+  "requiredAPIKeys": [],
+  "commands": [
+    {
+      "name": "random_number",
+      "description": "Insert a random number between two values.",
+      "type": "insert"
+    },
+    {
+      "name": "random_letters",
+      "description": "Insert a random letter or series of letters.",
+      "type": "insert"
+    },
+    {
+      "name": "random_quote",
+      "description": "Insert a random quote.",
+      "type": "insert"
+    },
+    {
+      "name": "random_wiki",
+      "description": "Open a random Wikipedia page.",
+      "type": "openURL"
+    }
+  ],
+  "official": true,
+  "includedByDefault": true
+}

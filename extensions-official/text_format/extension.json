@@ -1,0 +1,60 @@
+{
+  "name": "text_format",
+  "version": "1.0.0",
+  "author": "johnsonfung",
+  "description": "Format entire text with various transformations including find/replace, append, prepend, and case conversions",
+  "license": "MIT",
+  "category": "Text Formatting",
+  "dataScope": "full",
+  "endpoints": [],
+  "requiredAPIKeys": [],
+  "commands": [
+    {
+      "name": "replace",
+      "description": "Find and replace text throughout the document.",
+      "type": "replaceAll"
+    },
+    {
+      "name": "append",
+      "description": "Add text to the end of the document.",
+      "type": "replaceAll"
+    },
+    {
+      "name": "prepend",
+      "description": "Add text to the beginning of the document.",
+      "type": "replaceAll"
+    },
+    {
+      "name": "uppercase",
+      "description": "Convert entire document to UPPERCASE.",
+      "type": "replaceAll"
+    },
+    {
+      "name": "lowercase",
+      "description": "Convert entire document to lowercase.",
+      "type": "replaceAll"
+    },
+    {
+      "name": "sentence_case",
+      "description": "Convert entire document to Sentence case.",
+      "type": "replaceAll"
+    },
+    {
+      "name": "title_case",
+      "description": "Convert entire document to Title Case.",
+      "type": "replaceAll"
+    },
+    {
+      "name": "capitalize_first",
+      "description": "Capitalize the first letter of the document.",
+      "type": "replaceAll"
+    },
+    {
+      "name": "remove_quotes",
+      "description": "Remove surrounding quotes from the entire document.",
+      "type": "replaceAll"
+    }
+  ],
+  "official": true,
+  "includedByDefault": true
+}
