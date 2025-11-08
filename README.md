@@ -444,12 +444,29 @@ Here's a complete extension with preferences, error handling, and best practices
 We welcome community contributions! To submit your extension:
 
 1. **Fork this repository**
-2. **Add your extension** to `extensions-unofficial/`
-3. **Test thoroughly** - Ensure it works and handles errors gracefully
-4. **Submit a pull request** with:
-   - Extension file
+2. **Create your extension folder** in `extensions-unofficial/your-extension-name/` with:
+   - `index.js` - Your extension code
+   - `extension.json` - Metadata (name, version, author, category, dataScope, endpoints, requiredAPIKeys, commands)
+   - `README.md` - Documentation and usage examples
+   - `index.test.js` - Test file to verify your extension works
+3. **Run validation and tests locally** before submitting:
+   ```sh
+   npm install
+   npm run validate    # Validates metadata and security disclosures
+   npm run test        # Runs all validation and extension tests
+   ```
+4. **Fix any validation errors** - All extensions must:
+   - Include all required metadata fields
+   - Declare all API endpoints they call
+   - Declare all API keys they require
+   - Have accurate data scope declarations
+   - Pass their own test suite
+5. **Submit a pull request** with:
+   - All four required files (index.js, extension.json, README.md, index.test.js)
    - Clear description of what it does
    - Usage examples
+
+**⚠️ PR Requirements**: All pull requests must pass the automated validation and test suite before being reviewed. The CI workflow will automatically run when you submit your PR. If the checks fail, please fix the issues and push updates.
 
 ### Official Extensions
 
@@ -463,6 +480,7 @@ To become an official extension (included with Antinote by default):
    - Well-documented and tested
    - Follows security best practices
    - Declares minimal necessary data scope
+   - Passes all validation and security disclosure checks
 
 ---
 
