@@ -1,0 +1,53 @@
+{
+  "name": "line_format",
+  "version": "1.0.0",
+  "author": "johnsonfung",
+  "description": "Format the current line with various text transformations (uppercase, lowercase, camelCase, snake_case, etc.)",
+  "license": "MIT",
+  "category": "Text Formatting",
+  "dataScope": "line",
+  "endpoints": [],
+  "requiredAPIKeys": [],
+  "commands": [
+    {
+      "name": "uppercase_line",
+      "description": "Convert the current line to UPPERCASE.",
+      "type": "replaceLine"
+    },
+    {
+      "name": "lowercase_line",
+      "description": "Convert the current line to lowercase.",
+      "type": "replaceLine"
+    },
+    {
+      "name": "sentence_case_line",
+      "description": "Convert the current line to Sentence case.",
+      "type": "replaceLine"
+    },
+    {
+      "name": "title_case_line",
+      "description": "Convert the current line to Title Case.",
+      "type": "replaceLine"
+    },
+    {
+      "name": "camel_case",
+      "description": "Convert the current line to camelCase.",
+      "type": "replaceLine"
+    },
+    {
+      "name": "snake_case",
+      "description": "Convert the current line to snake_case.",
+      "type": "replaceLine"
+    },
+    {
+      "name": "kebab_case",
+      "description": "Convert the current line to kebab-case.",
+      "type": "replaceLine"
+    },
+    {
+      "name": "remove_quotes_line",
+      "description": "Remove surrounding quotes from the current line.",
+      "type": "replaceLine"
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "name": "dice",
+  "version": "1.0.0",
+  "author": "Antinote Community",
+  "description": "Roll dice of various types (D2, D3, D4, D6, D8, D10, D12, D20, etc.)",
+  "license": "MIT",
+  "category": "Random Generators",
+  "dataScope": "none",
+  "endpoints": [],
+  "requiredAPIKeys": [],
+  "commands": [
+    {
+      "name": "roll",
+      "description": "Roll dice. Default is one D6. Specify die type (e.g., D20) and optionally the number of dice to roll.",
+      "type": "insert"
+    }
+  ]
+}

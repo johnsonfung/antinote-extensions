@@ -1,0 +1,18 @@
+{
+  "name": "openai",
+  "version": "1.0.0",
+  "author": "johnsonfung",
+  "description": "Use OpenAI's GPT to generate text based on prompts",
+  "license": "MIT",
+  "category": "AI & ML",
+  "dataScope": "line",
+  "endpoints": ["https://api.openai.com"],
+  "requiredAPIKeys": ["OpenAI"],
+  "commands": [
+    {
+      "name": "gpt",
+      "description": "Generate text using OpenAI's GPT model.",
+      "type": "replaceLine"
+    }
+  ]
+}
