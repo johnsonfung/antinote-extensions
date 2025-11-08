@@ -6,7 +6,9 @@
   "license": "MIT",
   "category": "Random Generators",
   "dataScope": "none",
-  "endpoints": [],
+  "endpoints": [
+    "https://en.wikipedia.org"
+  ],
   "requiredAPIKeys": [],
   "commands": [
     {

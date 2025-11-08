@@ -10,7 +10,7 @@
     "https://api.openai.com"
   ],
   "requiredAPIKeys": [
-    "OpenAI"
+    "apikey_openai"
   ],
   "commands": [
     {

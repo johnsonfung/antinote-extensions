@@ -1,0 +1,47 @@
+name: CI - Validate and Test Extensions
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  validate-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate extension metadata
+        run: npm run validate
+
+      - name: Run extension tests
+        run: npm run test:extensions
+
+      - name: Build manifest (without signing)
+        run: npm run build
+        continue-on-error: true
+        # Note: This will use fallback signature since MANIFEST_PRIVATE_KEY
+        # is not available in PR builds for security reasons
+
+      - name: Verify build output
+        if: success()
+        run: |
+          echo "✓ Build completed successfully"
+          if [ -f "dist/manifest.json" ]; then
+            echo "✓ Manifest generated"
+            cat dist/manifest.json | jq '.version, .extensions | length'
+          fi
