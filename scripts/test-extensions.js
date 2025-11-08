@@ -54,15 +54,32 @@ async function runExtensionTests(extension) {
   console.log(`  Running tests for ${name}...`);
 
   try {
-    // Load extension metadata to get command names
+    // Load extension metadata to get command names and dependencies
     const metadataPath = path.join(extension.path, 'extension.json');
     let commandNames = [];
+    let dependencies = [];
     if (fs.existsSync(metadataPath)) {
       try {
         const metadata = JSON.parse(fs.readFileSync(metadataPath, 'utf8'));
         commandNames = (metadata.commands || []).map(cmd => cmd.name);
+        dependencies = metadata.dependencies || [];
       } catch (e) {
         // Ignore JSON parse errors
+      }
+    }
+
+    // Load dependency extensions
+    let dependencyCode = '';
+    for (const depName of dependencies) {
+      // Try to find dependency in official extensions first, then unofficial
+      let depPath = path.join(EXTENSIONS_OFFICIAL_DIR, depName, 'index.js');
+      if (!fs.existsSync(depPath)) {
+        depPath = path.join(EXTENSIONS_UNOFFICIAL_DIR, depName, 'index.js');
+      }
+
+      if (fs.existsSync(depPath)) {
+        dependencyCode += `\n      // Load dependency: ${depName}\n`;
+        dependencyCode += `      ${fs.readFileSync(depPath, 'utf8')}\n`;
       }
     }
 
@@ -86,9 +103,24 @@ async function runExtensionTests(extension) {
         return null;
       }
 
-      function callAPI(endpoint, method, headers, body, timeout) {
-        // Mock API call - return success with empty response
-        return new ReturnObject("success", "Mock API response", "{}");
+      function callAPI(apiKeyId, url, method, headers, body, timeout) {
+        // Mock API call - return object with success and data properties
+        // (not a ReturnObject - different format expected by ai_providers)
+        return {
+          success: true,
+          data: JSON.stringify({
+            choices: [{
+              message: {
+                content: "Mock AI response for testing"
+              }
+            }]
+          })
+        };
+      }
+${dependencyCode}
+      // Expose global functions to local scope (for dependencies like ai_providers)
+      if (typeof global.callAIProvider !== 'undefined') {
+        var callAIProvider = global.callAIProvider;
       }
 
       ${fs.readFileSync(indexPath, 'utf8')}

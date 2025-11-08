@@ -1,0 +1,31 @@
+{
+  "name": "ai_process",
+  "version": "1.0.0",
+  "author": "johnsonfung",
+  "description": "AI-powered text processing: polish text, translate languages, and create structured lists",
+  "license": "MIT",
+  "category": "AI & ML",
+  "dataScope": "full",
+  "dependencies": ["ai_providers"],
+  "endpoints": [],
+  "requiredAPIKeys": [],
+  "commands": [
+    {
+      "name": "polish",
+      "description": "Polish text with AI to improve professionalism (1=casual, 2=professional, 3=formal)",
+      "type": "replaceAll"
+    },
+    {
+      "name": "translate",
+      "description": "Translate text to another language using AI",
+      "type": "replaceAll"
+    },
+    {
+      "name": "create_list",
+      "description": "Generate a structured list from text using AI",
+      "type": "replaceAll"
+    }
+  ],
+  "official": true,
+  "includedByDefault": true
+}
