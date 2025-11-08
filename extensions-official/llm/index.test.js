@@ -1,4 +1,4 @@
-// Test file for openai extension
+// Test file for LLM extension
 // This file tests both the extension metadata and command execution
 
 // Load the extension metadata
@@ -57,16 +57,16 @@ var metadataContent = fs.readFileSync(metadataPath, 'utf8');
 var metadata = JSON.parse(metadataContent);
 
 // Tests for extension metadata
-describe("OpenAI Extension - Metadata Validation", function() {
+describe("LLM Extension - Metadata Validation", function() {
 
   it("should have required name field", function() {
     expect(metadata.name).toBeDefined();
-    expect(metadata.name).toBe("openai");
+    expect(metadata.name).toBe("llm");
   });
 
   it("should have required version field", function() {
     expect(metadata.version).toBeDefined();
-    expect(metadata.version).toBe("1.0.0");
+    expect(metadata.version).toBe("2.0.0");
   });
 
   it("should have required author field", function() {
@@ -80,28 +80,35 @@ describe("OpenAI Extension - Metadata Validation", function() {
 
   it("should have required dataScope field", function() {
     expect(metadata.dataScope).toBeDefined();
-    expect(metadata.dataScope).toBe("line");
+    expect(metadata.dataScope).toBe("none");
   });
 
-  it("should have endpoints array with OpenAI API", function() {
+  it("should have endpoints array with all provider APIs", function() {
     expect(metadata.endpoints).toBeDefined();
     expect(metadata.endpoints).toBeArray();
-    expect(metadata.endpoints.length).toBeGreaterThanOrEqual(1);
+    expect(metadata.endpoints.length).toBeGreaterThanOrEqual(5);
     expect(metadata.endpoints[0]).toContain("api.openai.com");
+    expect(metadata.endpoints[1]).toContain("api.anthropic.com");
+    expect(metadata.endpoints[2]).toContain("generativelanguage.googleapis.com");
+    expect(metadata.endpoints[3]).toContain("openrouter.ai");
+    expect(metadata.endpoints[4]).toContain("localhost:11434");
   });
 
-  it("should require OpenAI API key", function() {
+  it("should require API keys for all providers", function() {
     expect(metadata.requiredAPIKeys).toBeDefined();
     expect(metadata.requiredAPIKeys).toBeArray();
-    expect(metadata.requiredAPIKeys.length).toBeGreaterThanOrEqual(1);
-    expect(metadata.requiredAPIKeys[0]).toBe("OpenAI");
+    expect(metadata.requiredAPIKeys.length).toBeGreaterThanOrEqual(4);
+    expect(metadata.requiredAPIKeys[0]).toBe("apikey_openai");
+    expect(metadata.requiredAPIKeys[1]).toBe("apikey_anthropic");
+    expect(metadata.requiredAPIKeys[2]).toBe("apikey_google");
+    expect(metadata.requiredAPIKeys[3]).toBe("apikey_openrouter");
   });
 
-  it("should have gpt command", function() {
+  it("should have ai command", function() {
     expect(metadata.commands).toBeDefined();
     expect(metadata.commands).toBeArray();
     expect(metadata.commands.length).toBeGreaterThanOrEqual(1);
-    expect(metadata.commands[0].name).toBe("gpt");
+    expect(metadata.commands[0].name).toBe("ai");
   });
 });
 
@@ -109,36 +116,38 @@ describe("OpenAI Extension - Metadata Validation", function() {
 // Note: In a real test environment, these would be loaded via require or eval
 // For now, we'll assume they're available in the global scope
 
-describe("OpenAI Extension - Command Execution Tests", function() {
+describe("LLM Extension - Command Execution Tests", function() {
 
-  describe("gpt command", function() {
+  describe("ai command", function() {
     // Note: These tests require a valid API key and internet connection
     // In a real test environment, you would mock the API call
 
     it("should have correct command structure", function() {
       // Verify the command object exists and has required properties
-      if (typeof gpt !== 'undefined') {
-        expect(gpt.name).toBeDefined();
-        expect(gpt.name).toBe("gpt");
-        expect(gpt.execute).toBeDefined();
+      if (typeof ai !== 'undefined') {
+        expect(ai.name).toBeDefined();
+        expect(ai.name).toBe("ai");
+        expect(ai.execute).toBeDefined();
       }
     });
 
     it("should validate parameters", function() {
       var payload = {
-        parameters: ["test prompt", "150", "0.7"],
+        parameters: ["test prompt", "0", "0.7"],
         fullText: "",
         userSettings: {},
         preferences: {
+          provider: "openai",
           model: "gpt-4o",
-          systemPrompt: "You are a helpful assistant."
+          systemPrompt: "You are a helpful assistant.",
+          defaultMaxTokens: "150"
         }
       };
 
       // This test verifies parameter parsing works
       // Actual API call would require valid API key
-      if (typeof gpt !== 'undefined' && gpt.getParsedParams) {
-        var params = gpt.getParsedParams(payload);
+      if (typeof ai !== 'undefined' && ai.getParsedParams) {
+        var params = ai.getParsedParams(payload);
         expect(params).toBeDefined();
         expect(params.length).toBe(3);
       }
@@ -152,6 +161,6 @@ describe("OpenAI Extension - Command Execution Tests", function() {
 });
 
 // Run the tests
-console.log("Running OpenAI Extension Tests...");
-console.log("==================================");
-console.log("Note: Full API tests require valid OpenAI API key");
+console.log("Running LLM Extension Tests...");
+console.log("==============================");
+console.log("Note: Full API tests require valid API keys for chosen provider");
