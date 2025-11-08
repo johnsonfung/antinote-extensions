@@ -84,9 +84,12 @@ async function runExtensionTests(extension) {
     }
 
     // Generate variable declarations for each command
-    const commandDeclarations = commandNames.map(cmdName =>
-      `var ${cmdName} = global.commandRegistry.find(function(c) { return c.name === "${cmdName}"; });`
-    ).join('\n      ');
+    // Sanitize command names to be valid JavaScript identifiers
+    const commandDeclarations = commandNames.map(cmdName => {
+      // Create a safe variable name by replacing special characters
+      const safeName = cmdName.replace(/[^a-zA-Z0-9_]/g, '_');
+      return `var ${safeName} = global.commandRegistry.find(function(c) { return c.name === "${cmdName}"; });`;
+    }).join('\n      ');
 
     // Run the test file with Node.js
     // Load base file first, then extension code, then tests

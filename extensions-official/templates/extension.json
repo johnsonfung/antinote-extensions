@@ -1,0 +1,45 @@
+{
+  "name": "templates",
+  "version": "1.0.0",
+  "author": "johnsonfung",
+  "description": "Insert useful text templates for daily tasks, meetings, and note-taking",
+  "license": "MIT",
+  "category": "Productivity",
+  "dataScope": "none",
+  "endpoints": [],
+  "requiredAPIKeys": [],
+  "commands": [
+    {
+      "name": "::todo",
+      "description": "Insert daily to-do list template with GSD framework",
+      "type": "insert"
+    },
+    {
+      "name": "::bullet",
+      "description": "Insert bullet journal template",
+      "type": "insert"
+    },
+    {
+      "name": "::sorry",
+      "description": "Insert apology template",
+      "type": "insert"
+    },
+    {
+      "name": "::reflect",
+      "description": "Insert daily reflection template",
+      "type": "insert"
+    },
+    {
+      "name": "::standup",
+      "description": "Insert standup meeting template",
+      "type": "insert"
+    },
+    {
+      "name": "::one_on_one",
+      "description": "Insert 1:1 meeting template",
+      "type": "insert"
+    }
+  ],
+  "official": true,
+  "includedByDefault": true
+}
