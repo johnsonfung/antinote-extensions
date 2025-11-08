@@ -49,5 +49,7 @@
       "description": "Remove surrounding quotes from the current line.",
       "type": "replaceLine"
     }
-  ]
+  ],
+  "official": true,
+  "includedByDefault": true
 }

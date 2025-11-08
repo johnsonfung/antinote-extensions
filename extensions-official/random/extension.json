@@ -29,5 +29,7 @@
       "description": "Open a random Wikipedia page.",
       "type": "openURL"
     }
-  ]
+  ],
+  "official": true,
+  "includedByDefault": true
 }

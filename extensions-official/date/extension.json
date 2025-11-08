@@ -29,5 +29,7 @@
       "description": "Insert a date offset by business days (excludes weekends).",
       "type": "insert"
     }
-  ]
+  ],
+  "official": true,
+  "includedByDefault": true
 }

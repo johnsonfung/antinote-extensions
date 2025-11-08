@@ -6,13 +6,19 @@
   "license": "MIT",
   "category": "AI & ML",
   "dataScope": "line",
-  "endpoints": ["https://api.openai.com"],
-  "requiredAPIKeys": ["OpenAI"],
+  "endpoints": [
+    "https://api.openai.com"
+  ],
+  "requiredAPIKeys": [
+    "OpenAI"
+  ],
   "commands": [
     {
       "name": "gpt",
       "description": "Generate text using OpenAI's GPT model.",
       "type": "replaceLine"
     }
-  ]
+  ],
+  "official": true,
+  "includedByDefault": false
 }

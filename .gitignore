@@ -1,9 +1,5 @@
-themes-community/.DS_Store
-themes-community/.DS_Store
-themes-community/dot-matrix/.DS_Store
-themes-community/.DS_Store
 .DS_Store
-.DS_Store
-themes-community/.DS_Store
-themes-community/.DS_Store
 extensions-official/EXTENSIONS_INDEX.md
+node_modules/
+dist/
+package-lock.json

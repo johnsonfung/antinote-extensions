@@ -8,6 +8,8 @@
   "dataScope": "none",
   "endpoints": [],
   "requiredAPIKeys": [],
+  "official": true,
+  "includedByDefault": false,
   "commands": [
     {
       "name": "roll",
