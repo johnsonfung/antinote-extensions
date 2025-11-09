@@ -151,7 +151,7 @@
   // ===========================
 
   var todo = new Command(
-    "::todo",
+    "todo",
     [],
     "insert",
     "Insert daily to-do list template with GSD (Get Stuff Done) framework",
@@ -179,7 +179,7 @@
   // ===========================
 
   var bullet = new Command(
-    "::bullet",
+    "bullet",
     [],
     "insert",
     "Insert bullet journal template",
@@ -210,7 +210,7 @@
   // ===========================
 
   var sorry = new Command(
-    "::sorry",
+    "sorry",
     [],
     "insert",
     "Insert apology template",
@@ -237,7 +237,7 @@
   // ===========================
 
   var reflect = new Command(
-    "::reflect",
+    "reflect",
     [],
     "insert",
     "Insert daily reflection template",
@@ -268,7 +268,7 @@
   // ===========================
 
   var standup = new Command(
-    "::standup",
+    "standup",
     [],
     "insert",
     "Insert standup meeting template",
@@ -298,7 +298,7 @@
   // ===========================
 
   var one_on_one = new Command(
-    "::one_on_one",
+    "one_on_one",
     [],
     "insert",
     "Insert 1:1 meeting template with manager",

@@ -82,7 +82,7 @@ Insert today's date (yesterday + 1).
 
 ---
 
-### `businessDay`
+### `business_day`
 
 Insert a date offset by business days (excludes weekends).
 
@@ -92,22 +92,22 @@ Insert a date offset by business days (excludes weekends).
 **Examples:**
 
 ```
-** businessDay
+** business_day
 ```
 Insert today if weekday, or next Monday if weekend.
 
 ```
-** businessDay(1)
+** business_day(1)
 ```
 Insert next business day (tomorrow if weekday).
 
 ```
-** businessDay(5)
+** business_day(5)
 ```
 Insert date 5 business days from now.
 
 ```
-** businessDay(-3)
+** business_day(-3)
 ```
 Insert date 3 business days ago.
 

@@ -25,7 +25,7 @@
       "type": "insert"
     },
     {
-      "name": "businessDay",
+      "name": "business_day",
       "description": "Insert a date offset by business days (excludes weekends).",
       "type": "insert"
     }

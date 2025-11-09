@@ -2,24 +2,28 @@
 
 Quick access to commonly used text templates for productivity, meetings, and personal development.
 
+> **Note on Command Names:** The actual command names are `todo`, `bullet`, `sorry`, etc. The `::` prefix shown in examples (like `::todo`) is added via Antinote's command alias feature. You can create your own aliases to add `::` or any other prefix you prefer.
+
 ## Features
 
 This extension provides 6 ready-to-use templates plus 10 customizable templates that can be instantly inserted into your notes:
 
 ### Built-in Templates
-- **::todo** - Daily to-do list with GSD (Get Stuff Done) framework
-- **::bullet** - Bullet journal template
-- **::sorry** - Professional apology template
-- **::reflect** - Daily reflection prompts
-- **::standup** - Standup meeting notes
-- **::one_on_one** - 1:1 meeting with manager template
+- **todo** (or `::todo` via alias) - Daily to-do list with GSD (Get Stuff Done) framework
+- **bullet** (or `::bullet` via alias) - Bullet journal template
+- **sorry** (or `::sorry` via alias) - Professional apology template
+- **reflect** (or `::reflect` via alias) - Daily reflection prompts
+- **standup** (or `::standup` via alias) - Standup meeting notes
+- **one_on_one** (or `::one_on_one` via alias) - 1:1 meeting with manager template
 
 ### Custom Templates
 - **custom_template_1** through **custom_template_10** - User-configurable templates for any purpose
 
 ## Commands
 
-### ::todo()
+### todo()
+
+Command name: `todo` (can be aliased to `::todo`)
 
 Insert a daily to-do list using the GSD (Get Stuff Done) framework.
 
@@ -40,10 +44,12 @@ Review quarterly goals
 
 **Example:**
 ```
-::todo()
+todo()
 ```
 
-### ::bullet()
+### bullet()
+
+Command name: `bullet` (can be aliased to `::bullet`)
 
 Insert a bullet journal template with standard rapid logging notation.
 
@@ -69,10 +75,12 @@ Insert a bullet journal template with standard rapid logging notation.
 
 **Example:**
 ```
-::bullet()
+bullet()
 ```
 
-### ::sorry()
+### sorry()
+
+Command name: `sorry` (can be aliased to `::sorry`)
 
 Insert a thoughtful apology template with placeholders to customize.
 
@@ -95,10 +103,12 @@ Best,
 
 **Example:**
 ```
-::sorry()
+sorry()
 ```
 
-### ::reflect()
+### reflect()
+
+Command name: `reflect` (can be aliased to `::reflect`)
 
 Insert daily reflection prompts for personal growth and mindfulness.
 
@@ -124,10 +134,12 @@ Insert daily reflection prompts for personal growth and mindfulness.
 
 **Example:**
 ```
-::reflect()
+reflect()
 ```
 
-### ::standup()
+### standup()
+
+Command name: `standup` (can be aliased to `::standup`)
 
 Insert a standup meeting template for agile/scrum teams.
 
@@ -150,10 +162,12 @@ Challenges or help needed:
 
 **Example:**
 ```
-::standup()
+standup()
 ```
 
-### ::one_on_one()
+### one_on_one()
+
+Command name: `one_on_one` (can be aliased to `::one_on_one`)
 
 Insert a comprehensive 1:1 meeting template for manager check-ins.
 
@@ -187,7 +201,7 @@ Growth opportunities or skills to develop:
 
 **Example:**
 ```
-::one_on_one()
+one_on_one()
 ```
 
 ### custom_template_1()
@@ -246,16 +260,16 @@ custom_template_10()
 ## Use Cases
 
 ### Daily Planning
-- Use `::todo()` to start each day with a clear plan using the GSD framework
-- Use `::bullet()` for rapid logging throughout the day
+- Use `todo()` to start each day with a clear plan using the GSD framework
+- Use `bullet()` for rapid logging throughout the day
 
 ### Team Communication
-- Use `::standup()` to prepare for daily standups or async updates
-- Use `::one_on_one()` to structure productive conversations with your manager
+- Use `standup()` to prepare for daily standups or async updates
+- Use `one_on_one()` to structure productive conversations with your manager
 
 ### Personal Growth
-- Use `::reflect()` for evening journaling and self-improvement
-- Use `::sorry()` to craft thoughtful, genuine apologies
+- Use `reflect()` for evening journaling and self-improvement
+- Use `sorry()` to craft thoughtful, genuine apologies
 
 ### Custom Workflows
 - Configure `custom_template_1` through `custom_template_10` with your own templates
@@ -293,7 +307,7 @@ Meeting Notes Template:\n\n# [Meeting Name]\nDate: [Date]\n\n## Attendees\n\n\n#
 
 - All date-based templates automatically insert the current date
 - Templates use markdown formatting (# for headers)
-- The `::todo` template uses the "list:" prefix for compatibility with list-based workflows
+- The `todo` template uses the "list:" prefix for compatibility with list-based workflows
 - All templates are designed to be customized after insertion
 
 ## License

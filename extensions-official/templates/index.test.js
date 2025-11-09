@@ -118,12 +118,12 @@ describe("Templates Extension - Metadata Validation", function() {
 
   it("should have all template commands", function() {
     var commandNames = metadata.commands.map(function(cmd) { return cmd.name; });
-    expect(commandNames.indexOf("::todo")).toBeGreaterThanOrEqual(0);
-    expect(commandNames.indexOf("::bullet")).toBeGreaterThanOrEqual(0);
-    expect(commandNames.indexOf("::sorry")).toBeGreaterThanOrEqual(0);
-    expect(commandNames.indexOf("::reflect")).toBeGreaterThanOrEqual(0);
-    expect(commandNames.indexOf("::standup")).toBeGreaterThanOrEqual(0);
-    expect(commandNames.indexOf("::one_on_one")).toBeGreaterThanOrEqual(0);
+    expect(commandNames.indexOf("todo")).toBeGreaterThanOrEqual(0);
+    expect(commandNames.indexOf("bullet")).toBeGreaterThanOrEqual(0);
+    expect(commandNames.indexOf("sorry")).toBeGreaterThanOrEqual(0);
+    expect(commandNames.indexOf("reflect")).toBeGreaterThanOrEqual(0);
+    expect(commandNames.indexOf("standup")).toBeGreaterThanOrEqual(0);
+    expect(commandNames.indexOf("one_on_one")).toBeGreaterThanOrEqual(0);
     expect(commandNames.indexOf("custom_template_1")).toBeGreaterThanOrEqual(0);
     expect(commandNames.indexOf("custom_template_2")).toBeGreaterThanOrEqual(0);
     expect(commandNames.indexOf("custom_template_3")).toBeGreaterThanOrEqual(0);
@@ -155,7 +155,7 @@ describe("Templates Extension - Command Execution Tests", function() {
         preferences: {}
       };
 
-      var result = __todo.execute(payload);
+      var result = todo.execute(payload);
       expect(result.status).toBe("success");
     });
 
@@ -167,7 +167,7 @@ describe("Templates Extension - Command Execution Tests", function() {
         preferences: {}
       };
 
-      var result = __todo.execute(payload);
+      var result = todo.execute(payload);
       expect(result.payload).toContain("list:To-Do");
       expect(result.payload).toContain("# Goals");
       expect(result.payload).toContain("# Schedule");
@@ -182,7 +182,7 @@ describe("Templates Extension - Command Execution Tests", function() {
         preferences: {}
       };
 
-      var result = __todo.execute(payload);
+      var result = todo.execute(payload);
       // Should contain a date (at minimum a comma for date formatting)
       expect(result.payload).toContain(",");
     });
@@ -197,7 +197,7 @@ describe("Templates Extension - Command Execution Tests", function() {
         preferences: {}
       };
 
-      var result = __bullet.execute(payload);
+      var result = bullet.execute(payload);
       expect(result.status).toBe("success");
     });
 
@@ -209,7 +209,7 @@ describe("Templates Extension - Command Execution Tests", function() {
         preferences: {}
       };
 
-      var result = __bullet.execute(payload);
+      var result = bullet.execute(payload);
       expect(result.payload).toContain("## Tasks");
       expect(result.payload).toContain("## Events");
       expect(result.payload).toContain("## Notes");
@@ -226,7 +226,7 @@ describe("Templates Extension - Command Execution Tests", function() {
         preferences: {}
       };
 
-      var result = __sorry.execute(payload);
+      var result = sorry.execute(payload);
       expect(result.status).toBe("success");
     });
 
@@ -238,7 +238,7 @@ describe("Templates Extension - Command Execution Tests", function() {
         preferences: {}
       };
 
-      var result = __sorry.execute(payload);
+      var result = sorry.execute(payload);
       expect(result.payload).toContain("[Name]");
       expect(result.payload).toContain("apologize");
       expect(result.payload).toContain("Moving forward");
@@ -254,7 +254,7 @@ describe("Templates Extension - Command Execution Tests", function() {
         preferences: {}
       };
 
-      var result = __reflect.execute(payload);
+      var result = reflect.execute(payload);
       expect(result.status).toBe("success");
     });
 
@@ -266,7 +266,7 @@ describe("Templates Extension - Command Execution Tests", function() {
         preferences: {}
       };
 
-      var result = __reflect.execute(payload);
+      var result = reflect.execute(payload);
       expect(result.payload).toContain("What went well");
       expect(result.payload).toContain("What could have gone better");
       expect(result.payload).toContain("What did I learn");
@@ -283,7 +283,7 @@ describe("Templates Extension - Command Execution Tests", function() {
         preferences: {}
       };
 
-      var result = __standup.execute(payload);
+      var result = standup.execute(payload);
       expect(result.status).toBe("success");
     });
 
@@ -295,7 +295,7 @@ describe("Templates Extension - Command Execution Tests", function() {
         preferences: {}
       };
 
-      var result = __standup.execute(payload);
+      var result = standup.execute(payload);
       expect(result.payload).toContain("## Yesterday");
       expect(result.payload).toContain("## Today");
       expect(result.payload).toContain("## Blockers");
@@ -311,7 +311,7 @@ describe("Templates Extension - Command Execution Tests", function() {
         preferences: {}
       };
 
-      var result = __one_on_one.execute(payload);
+      var result = one_on_one.execute(payload);
       expect(result.status).toBe("success");
     });
 
@@ -323,7 +323,7 @@ describe("Templates Extension - Command Execution Tests", function() {
         preferences: {}
       };
 
-      var result = __one_on_one.execute(payload);
+      var result = one_on_one.execute(payload);
       expect(result.payload).toContain("## My Updates");
       expect(result.payload).toContain("## Discussion Topics");
       expect(result.payload).toContain("## Feedback Requested");

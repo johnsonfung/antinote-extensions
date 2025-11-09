@@ -10,32 +10,32 @@
   "requiredAPIKeys": [],
   "commands": [
     {
-      "name": "::todo",
+      "name": "todo",
       "description": "Insert daily to-do list template with GSD framework",
       "type": "insert"
     },
     {
-      "name": "::bullet",
+      "name": "bullet",
       "description": "Insert bullet journal template",
       "type": "insert"
     },
     {
-      "name": "::sorry",
+      "name": "sorry",
       "description": "Insert apology template",
       "type": "insert"
     },
     {
-      "name": "::reflect",
+      "name": "reflect",
       "description": "Insert daily reflection template",
       "type": "insert"
     },
     {
-      "name": "::standup",
+      "name": "standup",
       "description": "Insert standup meeting template",
       "type": "insert"
     },
     {
-      "name": "::one_on_one",
+      "name": "one_on_one",
       "description": "Insert 1:1 meeting template",
       "type": "insert"
     },

@@ -173,9 +173,9 @@
     return new ReturnObject("success", "Inserted date.", out);
   };
 
-  // --- command: businessDay ---
-  var businessDay = new Command(
-    "businessDay",
+  // --- command: business_day ---
+  var business_day = new Command(
+    "business_day",
     [
       // Business days offset (positive = future, negative = past, 0 = today if weekday or next Monday)
       new Parameter("int", "businessDaysOffset", "Business days to add/subtract", 0)
@@ -183,15 +183,15 @@
     "insert",
     "Insert a date offset by business days (excludes weekends).",
     [
-      new TutorialCommand("businessDay", "Insert today if weekday, or next Monday if weekend"),
-      new TutorialCommand("businessDay(1)", "Insert next business day (tomorrow if weekday)"),
-      new TutorialCommand("businessDay(5)", "Insert date 5 business days from now"),
-      new TutorialCommand("businessDay(-3)", "Insert date 3 business days ago")
+      new TutorialCommand("business_day", "Insert today if weekday, or next Monday if weekend"),
+      new TutorialCommand("business_day(1)", "Insert next business day (tomorrow if weekday)"),
+      new TutorialCommand("business_day(5)", "Insert date 5 business days from now"),
+      new TutorialCommand("business_day(-3)", "Insert date 3 business days ago")
     ],
     extensionRoot
   );
 
-  businessDay.execute = function (payload) {
+  business_day.execute = function (payload) {
     var [businessDaysOffset] = this.getParsedParams(payload);
     var format = getExtensionPreference(extensionName, "format") || "local_long_date";
     var locale = getExtensionPreference(extensionName, "locale") || "";

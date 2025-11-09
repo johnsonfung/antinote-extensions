@@ -112,12 +112,12 @@ describe("Date Extension - Metadata Validation", function() {
     expect(metadata.commands.length).toBeGreaterThanOrEqual(1);
   });
 
-  it("should have 4 commands (today, tomorrow, yesterday, businessDay)", function() {
+  it("should have 4 commands (today, tomorrow, yesterday, business_day)", function() {
     expect(metadata.commands.length).toBe(4);
     expect(metadata.commands[0].name).toBe("today");
     expect(metadata.commands[1].name).toBe("tomorrow");
     expect(metadata.commands[2].name).toBe("yesterday");
-    expect(metadata.commands[3].name).toBe("businessDay");
+    expect(metadata.commands[3].name).toBe("business_day");
   });
 });
 
@@ -200,7 +200,7 @@ describe("Date Extension - Command Execution Tests", function() {
     });
   });
 
-  describe("businessDay command", function() {
+  describe("business_day command", function() {
     it("should return a business day", function() {
       var payload = {
         parameters: [],
@@ -209,7 +209,7 @@ describe("Date Extension - Command Execution Tests", function() {
         preferences: {}
       };
 
-      var result = businessDay.execute(payload);
+      var result = business_day.execute(payload);
       expect(result.status).toBe("success");
       expect(result.payload).toBeDefined();
     });
@@ -222,7 +222,7 @@ describe("Date Extension - Command Execution Tests", function() {
         preferences: {}
       };
 
-      var result = businessDay.execute(payload);
+      var result = business_day.execute(payload);
       expect(result.status).toBe("success");
       expect(result.payload).toBeDefined();
     });
@@ -235,7 +235,7 @@ describe("Date Extension - Command Execution Tests", function() {
         preferences: {}
       };
 
-      var result = businessDay.execute(payload);
+      var result = business_day.execute(payload);
       expect(result.status).toBe("success");
       expect(result.payload).toBeDefined();
     });

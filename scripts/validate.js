@@ -200,6 +200,12 @@ function validateMetadata(extension, allExtensions) {
     metadata.commands.forEach((cmd, index) => {
       if (!cmd.name) {
         errors.push(`[${name}] Command ${index} missing name`);
+      } else {
+        // Validate command naming: must be snake_case (lowercase letters, numbers, and underscores only)
+        const validNamePattern = /^[a-z0-9_]+$/;
+        if (!validNamePattern.test(cmd.name)) {
+          errors.push(`[${name}] Command "${cmd.name}" must use snake_case (lowercase letters, numbers, and underscores only). Do not include symbols like :: in the command name - those should be added as aliases.`);
+        }
       }
       if (!cmd.description) {
         warnings.push(`[${name}] Command ${cmd.name || index} missing description`);
