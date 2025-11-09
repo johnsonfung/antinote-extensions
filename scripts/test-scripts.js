@@ -110,8 +110,30 @@ function createTestExtension() {
  * Test helper to clean up test extension
  */
 function cleanupTestExtension() {
+  // Remove from git if it exists in the index
+  try {
+    execSync('git rm -rf extensions-official/test_bump_script', { cwd: ROOT_DIR, stdio: 'pipe' });
+  } catch (error) {
+    // Ignore errors if not in git
+  }
+
+  // Remove from disk if it exists
   if (fs.existsSync(TEST_EXTENSION_DIR)) {
     fs.rmSync(TEST_EXTENSION_DIR, { recursive: true });
+  }
+
+  // Reset any uncommitted git changes related to the test extension
+  try {
+    execSync('git reset HEAD extensions-official/test_bump_script 2>/dev/null', { cwd: ROOT_DIR, stdio: 'pipe' });
+  } catch (error) {
+    // Ignore errors
+  }
+
+  // Clean up any untracked files
+  try {
+    execSync('git clean -fd extensions-official/test_bump_script 2>/dev/null', { cwd: ROOT_DIR, stdio: 'pipe' });
+  } catch (error) {
+    // Ignore errors
   }
 }
 
@@ -188,6 +210,7 @@ function testBumpScript() {
 
   // Test 1: Auto-bump when file changed and version not changed
   test('Auto-bumps version when file changed without manual version bump', () => {
+    cleanupTestExtension(); // Clean up first
     createTestExtension();
     commitTestExtension();
 
@@ -206,6 +229,7 @@ function testBumpScript() {
 
   // Test 2: Skip when version manually changed
   test('Skips auto-bump when version was manually changed', () => {
+    cleanupTestExtension(); // Clean up first
     createTestExtension();
     commitTestExtension();
 
@@ -227,6 +251,7 @@ function testBumpScript() {
 
   // Test 3: No changes means no bump
   test('Does not bump version when no changes detected', () => {
+    cleanupTestExtension(); // Clean up first
     createTestExtension();
     commitTestExtension();
 
@@ -243,6 +268,7 @@ function testBumpScript() {
 
   // Test 4: Bump multiple versions correctly
   test('Correctly increments patch version', () => {
+    cleanupTestExtension(); // Clean up first
     createTestExtension();
     setExtensionVersion('2.5.9');
     commitTestExtension();
@@ -269,6 +295,7 @@ function testValidateScript() {
 
   // Test 1: Valid extension passes validation
   test('Validates a correct extension structure', () => {
+    cleanupTestExtension(); // Clean up first
     createTestExtension();
 
     try {
@@ -285,6 +312,7 @@ function testValidateScript() {
 
   // Test 2: Missing required field fails validation
   test('Fails validation when required field is missing', () => {
+    cleanupTestExtension(); // Clean up first
     createTestExtension();
 
     // Remove required field
@@ -306,6 +334,7 @@ function testValidateScript() {
 
   // Test 3: Invalid dataScope fails validation
   test('Fails validation for invalid dataScope value', () => {
+    cleanupTestExtension(); // Clean up first
     createTestExtension();
 
     // Set invalid dataScope
@@ -327,6 +356,7 @@ function testValidateScript() {
 
   // Test 4: Missing index.js fails validation
   test('Fails validation when index.js is missing', () => {
+    cleanupTestExtension(); // Clean up first
     createTestExtension();
 
     // Remove index.js
@@ -356,6 +386,9 @@ async function main() {
     testBumpScript();
     testValidateScript();
 
+    // Final cleanup to ensure no test artifacts remain
+    cleanupTestExtension();
+
     // Print summary
     console.log('\n' + '='.repeat(50));
     console.log(`\n${colors.cyan}📊 Test Summary:${colors.reset}`);
@@ -372,6 +405,8 @@ async function main() {
     process.exit(0);
   } catch (error) {
     console.error(`\n${colors.red}❌ Test runner failed:${colors.reset}`, error);
+    // Cleanup on error too
+    cleanupTestExtension();
     process.exit(1);
   }
 }
