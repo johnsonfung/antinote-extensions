@@ -110,10 +110,10 @@ describe("Templates Extension - Metadata Validation", function() {
     expect(metadata.requiredAPIKeys.length).toBe(0);
   });
 
-  it("should have commands array with 9 commands", function() {
+  it("should have commands array with 16 commands", function() {
     expect(metadata.commands).toBeDefined();
     expect(metadata.commands).toBeArray();
-    expect(metadata.commands.length).toBe(9);
+    expect(metadata.commands.length).toBe(16);
   });
 
   it("should have all template commands", function() {
@@ -127,6 +127,13 @@ describe("Templates Extension - Metadata Validation", function() {
     expect(commandNames.indexOf("custom_template_1")).toBeGreaterThanOrEqual(0);
     expect(commandNames.indexOf("custom_template_2")).toBeGreaterThanOrEqual(0);
     expect(commandNames.indexOf("custom_template_3")).toBeGreaterThanOrEqual(0);
+    expect(commandNames.indexOf("custom_template_4")).toBeGreaterThanOrEqual(0);
+    expect(commandNames.indexOf("custom_template_5")).toBeGreaterThanOrEqual(0);
+    expect(commandNames.indexOf("custom_template_6")).toBeGreaterThanOrEqual(0);
+    expect(commandNames.indexOf("custom_template_7")).toBeGreaterThanOrEqual(0);
+    expect(commandNames.indexOf("custom_template_8")).toBeGreaterThanOrEqual(0);
+    expect(commandNames.indexOf("custom_template_9")).toBeGreaterThanOrEqual(0);
+    expect(commandNames.indexOf("custom_template_10")).toBeGreaterThanOrEqual(0);
   });
 
   it("should have all commands with insert type", function() {
@@ -365,6 +372,111 @@ describe("Templates Extension - Command Execution Tests", function() {
       };
 
       var result = custom_template_3.execute(payload);
+      expect(result.status).toBe("error");
+      expect(result.message).toContain("not configured");
+    });
+  });
+
+  describe("custom_template_4 command", function() {
+    it("should return error when template is not configured", function() {
+      var payload = {
+        parameters: [],
+        fullText: "",
+        userSettings: {},
+        preferences: {}
+      };
+
+      var result = custom_template_4.execute(payload);
+      expect(result.status).toBe("error");
+      expect(result.message).toContain("not configured");
+    });
+  });
+
+  describe("custom_template_5 command", function() {
+    it("should return error when template is not configured", function() {
+      var payload = {
+        parameters: [],
+        fullText: "",
+        userSettings: {},
+        preferences: {}
+      };
+
+      var result = custom_template_5.execute(payload);
+      expect(result.status).toBe("error");
+      expect(result.message).toContain("not configured");
+    });
+  });
+
+  describe("custom_template_6 command", function() {
+    it("should return error when template is not configured", function() {
+      var payload = {
+        parameters: [],
+        fullText: "",
+        userSettings: {},
+        preferences: {}
+      };
+
+      var result = custom_template_6.execute(payload);
+      expect(result.status).toBe("error");
+      expect(result.message).toContain("not configured");
+    });
+  });
+
+  describe("custom_template_7 command", function() {
+    it("should return error when template is not configured", function() {
+      var payload = {
+        parameters: [],
+        fullText: "",
+        userSettings: {},
+        preferences: {}
+      };
+
+      var result = custom_template_7.execute(payload);
+      expect(result.status).toBe("error");
+      expect(result.message).toContain("not configured");
+    });
+  });
+
+  describe("custom_template_8 command", function() {
+    it("should return error when template is not configured", function() {
+      var payload = {
+        parameters: [],
+        fullText: "",
+        userSettings: {},
+        preferences: {}
+      };
+
+      var result = custom_template_8.execute(payload);
+      expect(result.status).toBe("error");
+      expect(result.message).toContain("not configured");
+    });
+  });
+
+  describe("custom_template_9 command", function() {
+    it("should return error when template is not configured", function() {
+      var payload = {
+        parameters: [],
+        fullText: "",
+        userSettings: {},
+        preferences: {}
+      };
+
+      var result = custom_template_9.execute(payload);
+      expect(result.status).toBe("error");
+      expect(result.message).toContain("not configured");
+    });
+  });
+
+  describe("custom_template_10 command", function() {
+    it("should return error when template is not configured", function() {
+      var payload = {
+        parameters: [],
+        fullText: "",
+        userSettings: {},
+        preferences: {}
+      };
+
+      var result = custom_template_10.execute(payload);
       expect(result.status).toBe("error");
       expect(result.message).toContain("not configured");
     });

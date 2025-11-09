@@ -53,6 +53,41 @@
       "name": "custom_template_3",
       "description": "Insert custom template 3 (user-configurable)",
       "type": "insert"
+    },
+    {
+      "name": "custom_template_4",
+      "description": "Insert custom template 4 (user-configurable)",
+      "type": "insert"
+    },
+    {
+      "name": "custom_template_5",
+      "description": "Insert custom template 5 (user-configurable)",
+      "type": "insert"
+    },
+    {
+      "name": "custom_template_6",
+      "description": "Insert custom template 6 (user-configurable)",
+      "type": "insert"
+    },
+    {
+      "name": "custom_template_7",
+      "description": "Insert custom template 7 (user-configurable)",
+      "type": "insert"
+    },
+    {
+      "name": "custom_template_8",
+      "description": "Insert custom template 8 (user-configurable)",
+      "type": "insert"
+    },
+    {
+      "name": "custom_template_9",
+      "description": "Insert custom template 9 (user-configurable)",
+      "type": "insert"
+    },
+    {
+      "name": "custom_template_10",
+      "description": "Insert custom template 10 (user-configurable)",
+      "type": "insert"
     }
   ],
   "official": true,

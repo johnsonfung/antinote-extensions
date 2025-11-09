@@ -48,6 +48,76 @@
   );
   extensionRoot.register_preference(customTemplate3Pref);
 
+  var customTemplate4Pref = new Preference(
+    "custom_template_4",
+    "Custom Template 4",
+    "string",
+    "",
+    null,
+    "User-defined template text. Use \\n for line breaks."
+  );
+  extensionRoot.register_preference(customTemplate4Pref);
+
+  var customTemplate5Pref = new Preference(
+    "custom_template_5",
+    "Custom Template 5",
+    "string",
+    "",
+    null,
+    "User-defined template text. Use \\n for line breaks."
+  );
+  extensionRoot.register_preference(customTemplate5Pref);
+
+  var customTemplate6Pref = new Preference(
+    "custom_template_6",
+    "Custom Template 6",
+    "string",
+    "",
+    null,
+    "User-defined template text. Use \\n for line breaks."
+  );
+  extensionRoot.register_preference(customTemplate6Pref);
+
+  var customTemplate7Pref = new Preference(
+    "custom_template_7",
+    "Custom Template 7",
+    "string",
+    "",
+    null,
+    "User-defined template text. Use \\n for line breaks."
+  );
+  extensionRoot.register_preference(customTemplate7Pref);
+
+  var customTemplate8Pref = new Preference(
+    "custom_template_8",
+    "Custom Template 8",
+    "string",
+    "",
+    null,
+    "User-defined template text. Use \\n for line breaks."
+  );
+  extensionRoot.register_preference(customTemplate8Pref);
+
+  var customTemplate9Pref = new Preference(
+    "custom_template_9",
+    "Custom Template 9",
+    "string",
+    "",
+    null,
+    "User-defined template text. Use \\n for line breaks."
+  );
+  extensionRoot.register_preference(customTemplate9Pref);
+
+  var customTemplate10Pref = new Preference(
+    "custom_template_10",
+    "Custom Template 10",
+    "string",
+    "",
+    null,
+    "User-defined template text. Use \\n for line breaks."
+  );
+  extensionRoot.register_preference(customTemplate10Pref);
+
   // Helper function to get current date in readable format
   function getCurrentDate() {
     var today = new Date();
@@ -343,6 +413,188 @@
     template = template.replace(/\\n/g, "\n");
 
     return new ReturnObject("success", "Custom template 3 inserted", template);
+  };
+
+  // ===========================
+  // CUSTOM_TEMPLATE_4 COMMAND
+  // ===========================
+
+  var custom_template_4 = new Command(
+    "custom_template_4",
+    [],
+    "insert",
+    "Insert custom template 4 (user-configurable in preferences)",
+    [
+      new TutorialCommand("custom_template_4()", "Insert your custom template 4")
+    ],
+    extensionRoot
+  );
+
+  custom_template_4.execute = function(payload) {
+    var template = getExtensionPreference(extensionName, "custom_template_4") || "";
+
+    if (!template || template.trim() === "") {
+      return new ReturnObject("error", "Custom template 4 is not configured. Please set it in extension preferences.");
+    }
+
+    template = template.replace(/\\n/g, "\n");
+    return new ReturnObject("success", "Custom template 4 inserted", template);
+  };
+
+  // ===========================
+  // CUSTOM_TEMPLATE_5 COMMAND
+  // ===========================
+
+  var custom_template_5 = new Command(
+    "custom_template_5",
+    [],
+    "insert",
+    "Insert custom template 5 (user-configurable in preferences)",
+    [
+      new TutorialCommand("custom_template_5()", "Insert your custom template 5")
+    ],
+    extensionRoot
+  );
+
+  custom_template_5.execute = function(payload) {
+    var template = getExtensionPreference(extensionName, "custom_template_5") || "";
+
+    if (!template || template.trim() === "") {
+      return new ReturnObject("error", "Custom template 5 is not configured. Please set it in extension preferences.");
+    }
+
+    template = template.replace(/\\n/g, "\n");
+    return new ReturnObject("success", "Custom template 5 inserted", template);
+  };
+
+  // ===========================
+  // CUSTOM_TEMPLATE_6 COMMAND
+  // ===========================
+
+  var custom_template_6 = new Command(
+    "custom_template_6",
+    [],
+    "insert",
+    "Insert custom template 6 (user-configurable in preferences)",
+    [
+      new TutorialCommand("custom_template_6()", "Insert your custom template 6")
+    ],
+    extensionRoot
+  );
+
+  custom_template_6.execute = function(payload) {
+    var template = getExtensionPreference(extensionName, "custom_template_6") || "";
+
+    if (!template || template.trim() === "") {
+      return new ReturnObject("error", "Custom template 6 is not configured. Please set it in extension preferences.");
+    }
+
+    template = template.replace(/\\n/g, "\n");
+    return new ReturnObject("success", "Custom template 6 inserted", template);
+  };
+
+  // ===========================
+  // CUSTOM_TEMPLATE_7 COMMAND
+  // ===========================
+
+  var custom_template_7 = new Command(
+    "custom_template_7",
+    [],
+    "insert",
+    "Insert custom template 7 (user-configurable in preferences)",
+    [
+      new TutorialCommand("custom_template_7()", "Insert your custom template 7")
+    ],
+    extensionRoot
+  );
+
+  custom_template_7.execute = function(payload) {
+    var template = getExtensionPreference(extensionName, "custom_template_7") || "";
+
+    if (!template || template.trim() === "") {
+      return new ReturnObject("error", "Custom template 7 is not configured. Please set it in extension preferences.");
+    }
+
+    template = template.replace(/\\n/g, "\n");
+    return new ReturnObject("success", "Custom template 7 inserted", template);
+  };
+
+  // ===========================
+  // CUSTOM_TEMPLATE_8 COMMAND
+  // ===========================
+
+  var custom_template_8 = new Command(
+    "custom_template_8",
+    [],
+    "insert",
+    "Insert custom template 8 (user-configurable in preferences)",
+    [
+      new TutorialCommand("custom_template_8()", "Insert your custom template 8")
+    ],
+    extensionRoot
+  );
+
+  custom_template_8.execute = function(payload) {
+    var template = getExtensionPreference(extensionName, "custom_template_8") || "";
+
+    if (!template || template.trim() === "") {
+      return new ReturnObject("error", "Custom template 8 is not configured. Please set it in extension preferences.");
+    }
+
+    template = template.replace(/\\n/g, "\n");
+    return new ReturnObject("success", "Custom template 8 inserted", template);
+  };
+
+  // ===========================
+  // CUSTOM_TEMPLATE_9 COMMAND
+  // ===========================
+
+  var custom_template_9 = new Command(
+    "custom_template_9",
+    [],
+    "insert",
+    "Insert custom template 9 (user-configurable in preferences)",
+    [
+      new TutorialCommand("custom_template_9()", "Insert your custom template 9")
+    ],
+    extensionRoot
+  );
+
+  custom_template_9.execute = function(payload) {
+    var template = getExtensionPreference(extensionName, "custom_template_9") || "";
+
+    if (!template || template.trim() === "") {
+      return new ReturnObject("error", "Custom template 9 is not configured. Please set it in extension preferences.");
+    }
+
+    template = template.replace(/\\n/g, "\n");
+    return new ReturnObject("success", "Custom template 9 inserted", template);
+  };
+
+  // ===========================
+  // CUSTOM_TEMPLATE_10 COMMAND
+  // ===========================
+
+  var custom_template_10 = new Command(
+    "custom_template_10",
+    [],
+    "insert",
+    "Insert custom template 10 (user-configurable in preferences)",
+    [
+      new TutorialCommand("custom_template_10()", "Insert your custom template 10")
+    ],
+    extensionRoot
+  );
+
+  custom_template_10.execute = function(payload) {
+    var template = getExtensionPreference(extensionName, "custom_template_10") || "";
+
+    if (!template || template.trim() === "") {
+      return new ReturnObject("error", "Custom template 10 is not configured. Please set it in extension preferences.");
+    }
+
+    template = template.replace(/\\n/g, "\n");
+    return new ReturnObject("success", "Custom template 10 inserted", template);
   };
 
 })();

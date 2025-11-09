@@ -4,7 +4,7 @@ Quick access to commonly used text templates for productivity, meetings, and per
 
 ## Features
 
-This extension provides 6 ready-to-use templates plus 3 customizable templates that can be instantly inserted into your notes:
+This extension provides 6 ready-to-use templates plus 10 customizable templates that can be instantly inserted into your notes:
 
 ### Built-in Templates
 - **::todo** - Daily to-do list with GSD (Get Stuff Done) framework
@@ -15,9 +15,7 @@ This extension provides 6 ready-to-use templates plus 3 customizable templates t
 - **::one_on_one** - 1:1 meeting with manager template
 
 ### Custom Templates
-- **custom_template_1** - User-configurable template 1
-- **custom_template_2** - User-configurable template 2
-- **custom_template_3** - User-configurable template 3
+- **custom_template_1** through **custom_template_10** - User-configurable templates for any purpose
 
 ## Commands
 
@@ -225,18 +223,24 @@ Same as custom_template_1 - configure in extension preferences with `\n` for lin
 custom_template_2()
 ```
 
-### custom_template_3()
+### custom_template_3() - custom_template_10()
 
-Insert your third custom template configured in preferences.
+Insert your custom templates configured in preferences (templates 3-10).
 
 **Configuration:**
 Same as custom_template_1 - configure in extension preferences with `\n` for line breaks.
 
-**Use Case:** Perfect for personal templates unique to your workflow.
+**Use Cases:**
+- custom_template_3-10 provide additional slots for specialized templates
+- Examples: project templates, code review checklists, research frameworks, personal rituals
+- Each can be aliased to memorable commands (e.g., `::retro`, `::review`, `::research`)
 
 **Example:**
 ```
-custom_template_3()
+custom_template_4()
+custom_template_5()
+...
+custom_template_10()
 ```
 
 ## Use Cases
@@ -254,10 +258,11 @@ custom_template_3()
 - Use `::sorry()` to craft thoughtful, genuine apologies
 
 ### Custom Workflows
-- Configure `custom_template_1/2/3` with your own templates
+- Configure `custom_template_1` through `custom_template_10` with your own templates
 - Use Antinote's command alias feature to create memorable shortcuts (e.g., `::retro` → `custom_template_1`)
 - Perfect for templates you use frequently but aren't available as built-ins
-- Examples: sprint retrospectives, client meeting notes, incident reports, research templates
+- 10 slots provides flexibility for different contexts: work, personal, projects, etc.
+- Examples: sprint retrospectives, client meeting notes, incident reports, research templates, weekly reviews, project kickoffs, code review checklists, interview notes, learning journals, gratitude logs
 
 ## Configuration
 
@@ -265,14 +270,13 @@ custom_template_3()
 
 Each custom template has a preference where you can define your template text:
 
-- **Custom Template 1** - Your first user-defined template
-- **Custom Template 2** - Your second user-defined template
-- **Custom Template 3** - Your third user-defined template
+- **Custom Template 1-10** - User-defined templates for any purpose
 
 **Formatting:**
 - Use `\n` to create line breaks in your template
 - Templates can include any text, markdown formatting, or placeholders
-- Leave empty if you don't need all three custom templates
+- Leave templates empty if you don't need all 10 slots
+- Combine with command aliases for memorable, purpose-specific names
 
 **Example:**
 ```
