@@ -14,7 +14,9 @@
     [], // No API keys - uses ai_providers
     "johnsonfung",
     "AI & ML",
-    "full" // Requires full note content
+    "full", // Requires full note content
+    ["ai_providers"], // dependencies
+    false  // isService
   );
 
   // Register extension preferences

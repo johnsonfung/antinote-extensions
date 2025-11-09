@@ -20,7 +20,9 @@
         [],  // No API keys - uses ai_providers
         "johnsonfung",
         "AI & ML",
-        "none"
+        "none",
+        ["ai_providers"],  // dependencies
+        false  // isService
     );
 
     // Create the ai command

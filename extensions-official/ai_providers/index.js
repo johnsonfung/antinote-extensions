@@ -89,7 +89,9 @@
         allApiKeys,
         "johnsonfung",
         "AI & ML",
-        "none"
+        "none",
+        [],      // dependencies
+        true     // isService
     );
 
     // Register shared preferences

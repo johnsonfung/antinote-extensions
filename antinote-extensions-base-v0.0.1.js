@@ -65,7 +65,7 @@ Command.prototype.execute = function() {
 };
 
 // Extension constructor function
-function Extension(name, version, endpoints, requiredAPIKeys, author, category, dataScope) {
+function Extension(name, version, endpoints, requiredAPIKeys, author, category, dataScope, dependencies, isService) {
   this.name = name;
   this.version = version || "1.0.0";
   this.commands = [];
@@ -76,6 +76,8 @@ function Extension(name, version, endpoints, requiredAPIKeys, author, category, 
   this.category = category || "Utilities";  // Category for organizing extensions
   // Data access scope: "none" (no note content), "line" (current line only), "full" (entire note)
   this.dataScope = dataScope || "full";  // Default to "full" for backwards compatibility
+  this.dependencies = dependencies || [];  // Array of extension names this extension depends on
+  this.isService = isService || false;  // Whether this extension is a service (provides functionality for other extensions)
 }
 
 Extension.prototype.register_command = function(cmd) {
