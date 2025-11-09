@@ -1,0 +1,14 @@
+{
+  "name": "test_bump_script",
+  "version": "1.0.0",
+  "author": "test",
+  "description": "Test extension for bump script",
+  "license": "MIT",
+  "category": "Test",
+  "dataScope": "none",
+  "endpoints": [],
+  "requiredAPIKeys": [],
+  "commands": [],
+  "official": true,
+  "includedByDefault": false
+}
