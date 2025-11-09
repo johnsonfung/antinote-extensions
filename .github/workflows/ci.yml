@@ -1,4 +1,4 @@
-name: CI - Validate and Test Extensions
+name: CI - Test, Build and Release
 
 on:
   push:
@@ -8,13 +8,18 @@ on:
     branches:
       - main
 
+permissions:
+  contents: write
+
 jobs:
-  validate-and-test:
+  test:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Needed for bump script to compare with last commit
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -25,23 +30,109 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Run script tests
+        run: npm run test:scripts
+
       - name: Validate extension metadata
         run: npm run validate
 
       - name: Run extension tests
         run: npm run test:extensions
 
-      - name: Build manifest (without signing)
-        run: npm run build
-        continue-on-error: true
-        # Note: This will use fallback signature since MANIFEST_PRIVATE_KEY
-        # is not available in PR builds for security reasons
+  build-and-release:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 
-      - name: Verify build output
-        if: success()
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build extensions with signing
+        env:
+          MANIFEST_PRIVATE_KEY: ${{ secrets.MANIFEST_PRIVATE_KEY }}
+        run: npm run build
+
+      - name: Read version
+        id: version
         run: |
-          echo "✓ Build completed successfully"
-          if [ -f "dist/manifest.json" ]; then
-            echo "✓ Manifest generated"
-            cat dist/manifest.json | jq '.version, .extensions | length'
-          fi
+          VERSION=$(node -p "require('./manifest-version.json').version")
+          BUILD_NUMBER=$(node -p "require('./manifest-version.json').buildNumber")
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "build_number=${BUILD_NUMBER}" >> $GITHUB_OUTPUT
+          echo "Building version ${VERSION} (build ${BUILD_NUMBER})"
+
+      - name: Verify build artifacts
+        run: |
+          echo "Checking dist directory..."
+          ls -la dist/
+          echo ""
+          echo "Checking extensions directory..."
+          ls -la dist/extensions/
+          echo ""
+          echo "Manifest info:"
+          cat dist/manifest.json | jq '.version, .buildNumber, .extensions | length'
+
+      - name: Create Release
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ steps.version.outputs.version }}
+          name: Release v${{ steps.version.outputs.version }}
+          body: |
+            ## Antinote Extensions v${{ steps.version.outputs.version }}
+
+            Build Number: ${{ steps.version.outputs.build_number }}
+            Generated from commit: ${{ github.sha }}
+
+            ### Installation
+
+            Download the extensions you need from the assets below, or use the manifest.json to programmatically install extensions.
+
+            ### What's Included
+
+            This release includes:
+            - `manifest.json` - Signed manifest with all extension metadata and checksums
+            - `checksums.txt` - SHA-256 checksums for all extension packages
+            - Individual `.zip` files for each extension
+
+            ### Verification
+
+            All extensions are cryptographically signed. Verify the manifest signature before installation.
+
+            To verify a specific extension:
+            ```bash
+            sha256sum -c checksums.txt
+            ```
+
+            ### Changes
+
+            See [commit history](https://github.com/${{ github.repository }}/commits/v${{ steps.version.outputs.version }}) for details.
+          draft: false
+          prerelease: false
+          files: |
+            dist/manifest.json
+            dist/checksums.txt
+            dist/extensions/*.zip
+          fail_on_unmatched_files: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Commit version bump
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add manifest-version.json
+          git commit -m "chore: bump version to ${{ steps.version.outputs.version }} [skip ci]" || echo "No changes to commit"
+          git push || echo "No changes to push"

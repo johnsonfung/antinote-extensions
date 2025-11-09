@@ -1,9 +1,9 @@
-name: Build and Release Extensions
+name: Manual Release
+
+# Note: Automatic releases happen via ci.yml on merge to main
+# This workflow is for manual releases only
 
 on:
-  push:
-    tags:
-      - 'v*.*.*'
   workflow_dispatch:
     inputs:
       version_bump:
