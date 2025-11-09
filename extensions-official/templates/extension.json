@@ -38,6 +38,21 @@
       "name": "::one_on_one",
       "description": "Insert 1:1 meeting template",
       "type": "insert"
+    },
+    {
+      "name": "custom_template_1",
+      "description": "Insert custom template 1 (user-configurable)",
+      "type": "insert"
+    },
+    {
+      "name": "custom_template_2",
+      "description": "Insert custom template 2 (user-configurable)",
+      "type": "insert"
+    },
+    {
+      "name": "custom_template_3",
+      "description": "Insert custom template 3 (user-configurable)",
+      "type": "insert"
     }
   ],
   "official": true,
