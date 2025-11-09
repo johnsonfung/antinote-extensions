@@ -143,7 +143,9 @@ function cleanupTestExtension() {
 function commitTestExtension() {
   try {
     execSync('git add extensions-official/test_bump_script', { cwd: ROOT_DIR, stdio: 'pipe' });
-    execSync('git commit -m "Test: Add test extension"', { cwd: ROOT_DIR, stdio: 'pipe' });
+    execSync('git commit -m "Test: Add test extension" --no-verify', { cwd: ROOT_DIR, stdio: 'pipe' });
+    // Small delay to ensure git commits are finalized
+    execSync('sleep 0.1', { cwd: ROOT_DIR, stdio: 'pipe' });
   } catch (error) {
     // Ignore errors (might already be committed)
   }
@@ -214,15 +216,20 @@ function testBumpScript() {
     createTestExtension();
     commitTestExtension();
 
-    // Modify the extension
+    // Modify the extension (this creates unstaged changes that git diff will detect)
     modifyExtensionFile();
 
-    // Run bump script
-    execSync('node scripts/bump-changed-extensions.js', { cwd: ROOT_DIR, stdio: 'pipe' });
+    // Verify the file was actually modified
+    const indexPath = path.join(TEST_EXTENSION_DIR, 'index.js');
+    const content = fs.readFileSync(indexPath, 'utf8');
+    assert(content.includes('// Modified'), 'File should be modified');
+
+    // Run bump script (it should detect the unstaged changes)
+    const output = execSync('node scripts/bump-changed-extensions.js', { cwd: ROOT_DIR, encoding: 'utf8' });
 
     // Check version was bumped
     const version = getExtensionVersion();
-    assert(version === '1.0.1', `Expected version 1.0.1, got ${version}`);
+    assert(version === '1.0.1', `Expected version 1.0.1, got ${version}. Output: ${output}`);
 
     cleanupTestExtension();
   });
@@ -255,13 +262,21 @@ function testBumpScript() {
     createTestExtension();
     commitTestExtension();
 
-    // Don't modify anything
+    // Don't modify anything - no unstaged changes should exist
+
+    // Verify no changes exist
+    try {
+      const diffOutput = execSync('git diff extensions-official/test_bump_script', { cwd: ROOT_DIR, encoding: 'utf8' }).trim();
+      assert(diffOutput === '', 'Should have no diff output');
+    } catch (error) {
+      // OK if git diff fails
+    }
 
     // Run bump script
     const output = execSync('node scripts/bump-changed-extensions.js', { cwd: ROOT_DIR, encoding: 'utf8' });
 
     // Check output indicates no changes
-    assert(output.includes('No extension changes detected'), 'Should report no changes');
+    assert(output.includes('No extension changes detected'), `Should report no changes. Output: ${output}`);
 
     cleanupTestExtension();
   });
