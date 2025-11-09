@@ -21,100 +21,100 @@
   var customTemplate1Pref = new Preference(
     "custom_template_1",
     "Custom Template 1",
-    "string",
+    "paragraph",
     "",
     null,
-    "User-defined template text. Use \\n for line breaks."
+    "User-defined template text. Multi-line text editor supports line breaks."
   );
   extensionRoot.register_preference(customTemplate1Pref);
 
   var customTemplate2Pref = new Preference(
     "custom_template_2",
     "Custom Template 2",
-    "string",
+    "paragraph",
     "",
     null,
-    "User-defined template text. Use \\n for line breaks."
+    "User-defined template text. Multi-line text editor supports line breaks."
   );
   extensionRoot.register_preference(customTemplate2Pref);
 
   var customTemplate3Pref = new Preference(
     "custom_template_3",
     "Custom Template 3",
-    "string",
+    "paragraph",
     "",
     null,
-    "User-defined template text. Use \\n for line breaks."
+    "User-defined template text. Multi-line text editor supports line breaks."
   );
   extensionRoot.register_preference(customTemplate3Pref);
 
   var customTemplate4Pref = new Preference(
     "custom_template_4",
     "Custom Template 4",
-    "string",
+    "paragraph",
     "",
     null,
-    "User-defined template text. Use \\n for line breaks."
+    "User-defined template text. Multi-line text editor supports line breaks."
   );
   extensionRoot.register_preference(customTemplate4Pref);
 
   var customTemplate5Pref = new Preference(
     "custom_template_5",
     "Custom Template 5",
-    "string",
+    "paragraph",
     "",
     null,
-    "User-defined template text. Use \\n for line breaks."
+    "User-defined template text. Multi-line text editor supports line breaks."
   );
   extensionRoot.register_preference(customTemplate5Pref);
 
   var customTemplate6Pref = new Preference(
     "custom_template_6",
     "Custom Template 6",
-    "string",
+    "paragraph",
     "",
     null,
-    "User-defined template text. Use \\n for line breaks."
+    "User-defined template text. Multi-line text editor supports line breaks."
   );
   extensionRoot.register_preference(customTemplate6Pref);
 
   var customTemplate7Pref = new Preference(
     "custom_template_7",
     "Custom Template 7",
-    "string",
+    "paragraph",
     "",
     null,
-    "User-defined template text. Use \\n for line breaks."
+    "User-defined template text. Multi-line text editor supports line breaks."
   );
   extensionRoot.register_preference(customTemplate7Pref);
 
   var customTemplate8Pref = new Preference(
     "custom_template_8",
     "Custom Template 8",
-    "string",
+    "paragraph",
     "",
     null,
-    "User-defined template text. Use \\n for line breaks."
+    "User-defined template text. Multi-line text editor supports line breaks."
   );
   extensionRoot.register_preference(customTemplate8Pref);
 
   var customTemplate9Pref = new Preference(
     "custom_template_9",
     "Custom Template 9",
-    "string",
+    "paragraph",
     "",
     null,
-    "User-defined template text. Use \\n for line breaks."
+    "User-defined template text. Multi-line text editor supports line breaks."
   );
   extensionRoot.register_preference(customTemplate9Pref);
 
   var customTemplate10Pref = new Preference(
     "custom_template_10",
     "Custom Template 10",
-    "string",
+    "paragraph",
     "",
     null,
-    "User-defined template text. Use \\n for line breaks."
+    "User-defined template text. Multi-line text editor supports line breaks."
   );
   extensionRoot.register_preference(customTemplate10Pref);
 
@@ -353,9 +353,6 @@
       return new ReturnObject("error", "Custom template 1 is not configured. Please set it in extension preferences.");
     }
 
-    // Replace \n with actual newlines
-    template = template.replace(/\\n/g, "\n");
-
     return new ReturnObject("success", "Custom template 1 inserted", template);
   };
 
@@ -380,9 +377,6 @@
     if (!template || template.trim() === "") {
       return new ReturnObject("error", "Custom template 2 is not configured. Please set it in extension preferences.");
     }
-
-    // Replace \n with actual newlines
-    template = template.replace(/\\n/g, "\n");
 
     return new ReturnObject("success", "Custom template 2 inserted", template);
   };
@@ -409,9 +403,6 @@
       return new ReturnObject("error", "Custom template 3 is not configured. Please set it in extension preferences.");
     }
 
-    // Replace \n with actual newlines
-    template = template.replace(/\\n/g, "\n");
-
     return new ReturnObject("success", "Custom template 3 inserted", template);
   };
 
@@ -437,7 +428,6 @@
       return new ReturnObject("error", "Custom template 4 is not configured. Please set it in extension preferences.");
     }
 
-    template = template.replace(/\\n/g, "\n");
     return new ReturnObject("success", "Custom template 4 inserted", template);
   };
 
@@ -463,7 +453,6 @@
       return new ReturnObject("error", "Custom template 5 is not configured. Please set it in extension preferences.");
     }
 
-    template = template.replace(/\\n/g, "\n");
     return new ReturnObject("success", "Custom template 5 inserted", template);
   };
 
@@ -489,7 +478,6 @@
       return new ReturnObject("error", "Custom template 6 is not configured. Please set it in extension preferences.");
     }
 
-    template = template.replace(/\\n/g, "\n");
     return new ReturnObject("success", "Custom template 6 inserted", template);
   };
 
@@ -515,7 +503,6 @@
       return new ReturnObject("error", "Custom template 7 is not configured. Please set it in extension preferences.");
     }
 
-    template = template.replace(/\\n/g, "\n");
     return new ReturnObject("success", "Custom template 7 inserted", template);
   };
 
@@ -541,7 +528,6 @@
       return new ReturnObject("error", "Custom template 8 is not configured. Please set it in extension preferences.");
     }
 
-    template = template.replace(/\\n/g, "\n");
     return new ReturnObject("success", "Custom template 8 inserted", template);
   };
 
@@ -567,7 +553,6 @@
       return new ReturnObject("error", "Custom template 9 is not configured. Please set it in extension preferences.");
     }
 
-    template = template.replace(/\\n/g, "\n");
     return new ReturnObject("success", "Custom template 9 inserted", template);
   };
 
@@ -593,7 +578,6 @@
       return new ReturnObject("error", "Custom template 10 is not configured. Please set it in extension preferences.");
     }
 
-    template = template.replace(/\\n/g, "\n");
     return new ReturnObject("success", "Custom template 10 inserted", template);
   };
 
