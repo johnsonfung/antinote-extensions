@@ -1,6 +1,7 @@
 // ===============================
 // Antinote Extension: templates
 // Version 1.0.0
+// Auto-version bumping enabled
 // ===============================
 
 (function() {

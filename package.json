@@ -8,6 +8,7 @@
     "build:patch": "node scripts/build.js patch",
     "build:minor": "node scripts/build.js minor",
     "build:major": "node scripts/build.js major",
+    "bump-versions": "node scripts/bump-changed-extensions.js",
     "validate": "node scripts/validate.js",
     "test": "npm run validate && npm run test:extensions",
     "test:extensions": "node scripts/test-extensions.js"

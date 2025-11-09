@@ -376,12 +376,30 @@ function generateChecksums(zipInfo) {
   console.log(`  ✓ Generated checksums.txt`);
 }
 
+// Step 0: Auto-bump versions for changed extensions
+function autoBumpChangedExtensions() {
+  console.log('\n🔄 Auto-bumping versions for changed extensions...');
+
+  try {
+    const { execSync } = require('child_process');
+    const bumpScript = path.join(__dirname, 'bump-changed-extensions.js');
+    execSync(`node "${bumpScript}"`, { stdio: 'inherit', cwd: ROOT_DIR });
+    console.log('  ✓ Version bumping completed');
+  } catch (error) {
+    console.error('  ✗ Failed to auto-bump versions:', error.message);
+    // Don't fail the build if version bumping fails
+  }
+}
+
 // Main build process
 async function main() {
   console.log('🚀 Starting Antinote Extensions Build Process\n');
   console.log('='.repeat(50));
 
   try {
+    // Auto-bump versions for changed extensions
+    autoBumpChangedExtensions();
+
     // Increment version
     console.log(`\n📌 Incrementing version (${versionBump})...`);
     const versionData = readAndIncrementVersion();
