@@ -1,6 +1,6 @@
 {
   "name": "test_bump_script",
-  "version": "2.5.9",
+  "version": "1.0.0",
   "author": "test",
   "description": "Test extension for bump script",
   "license": "MIT",
