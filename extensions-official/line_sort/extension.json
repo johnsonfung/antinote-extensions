@@ -1,0 +1,35 @@
+{
+  "name": "line_sort",
+  "version": "1.0.0",
+  "author": "johnsonfung",
+  "description": "Sort lines in your notes alphabetically, numerically, or reverse order",
+  "license": "MIT",
+  "category": "Text Manipulation",
+  "dataScope": "full",
+  "endpoints": [],
+  "requiredAPIKeys": [],
+  "commands": [
+    {
+      "name": "sort_lines_alpha",
+      "description": "Sort lines alphabetically with optional reverse and skip first line",
+      "type": "replaceAll"
+    },
+    {
+      "name": "sort_lines_number",
+      "description": "Sort lines by the first number found in each line",
+      "type": "replaceAll"
+    },
+    {
+      "name": "sort_lines_number_last",
+      "description": "Sort lines by the last number found in each line",
+      "type": "replaceAll"
+    },
+    {
+      "name": "sort_lines_reverse",
+      "description": "Reverse the order of lines",
+      "type": "replaceAll"
+    }
+  ],
+  "official": true,
+  "includedByDefault": true
+}
