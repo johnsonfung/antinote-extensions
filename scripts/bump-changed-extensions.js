@@ -22,6 +22,7 @@ const EXTENSIONS_UNOFFICIAL_DIR = path.join(ROOT_DIR, 'extensions-unofficial');
 // Colors for console output
 const colors = {
   reset: '\x1b[0m',
+  red: '\x1b[31m',
   green: '\x1b[32m',
   yellow: '\x1b[33m',
   blue: '\x1b[34m',
@@ -114,6 +115,35 @@ function bumpPatchVersion(versionString) {
 }
 
 /**
+ * Get the last committed version of extension.json
+ */
+function getLastCommittedVersion(extensionInfo) {
+  const { name, isOfficial } = extensionInfo;
+  const folderType = isOfficial ? 'official' : 'unofficial';
+  const gitPath = `extensions-${folderType}/${name}/extension.json`;
+
+  try {
+    // Get the content from the last commit
+    const committedContent = execSync(`git show HEAD:"${gitPath}"`, {
+      encoding: 'utf8',
+      cwd: ROOT_DIR
+    });
+    const committedMetadata = JSON.parse(committedContent);
+    return committedMetadata.version || '1.0.0';
+  } catch (error) {
+    // If file doesn't exist in last commit (new extension), return default version
+    return '1.0.0';
+  }
+}
+
+/**
+ * Check if version was manually changed
+ */
+function wasVersionManuallyChanged(currentVersion, lastCommittedVersion) {
+  return currentVersion !== lastCommittedVersion;
+}
+
+/**
  * Update extension version in extension.json
  */
 function updateExtensionVersion(extensionInfo) {
@@ -121,14 +151,26 @@ function updateExtensionVersion(extensionInfo) {
 
   try {
     const metadata = JSON.parse(fs.readFileSync(metadataPath, 'utf8'));
-    const oldVersion = metadata.version || '1.0.0';
-    const newVersion = bumpPatchVersion(oldVersion);
+    const currentVersion = metadata.version || '1.0.0';
+    const lastCommittedVersion = getLastCommittedVersion(extensionInfo);
 
+    // Check if version was manually changed
+    if (wasVersionManuallyChanged(currentVersion, lastCommittedVersion)) {
+      return {
+        skipped: true,
+        currentVersion,
+        lastCommittedVersion,
+        reason: 'manually bumped'
+      };
+    }
+
+    // Auto-bump the version
+    const newVersion = bumpPatchVersion(currentVersion);
     metadata.version = newVersion;
 
     fs.writeFileSync(metadataPath, JSON.stringify(metadata, null, 2) + '\n');
 
-    return { oldVersion, newVersion };
+    return { oldVersion: currentVersion, newVersion };
   } catch (error) {
     console.error(`  ${colors.red}✗${colors.reset} Failed to update ${name}:`, error.message);
     return null;
@@ -152,21 +194,40 @@ function main() {
   console.log(`${colors.blue}Found ${changedExtensions.length} changed extension(s):${colors.reset}`);
 
   let bumpedCount = 0;
+  let skippedCount = 0;
 
   for (const extInfo of changedExtensions) {
     const result = updateExtensionVersion(extInfo);
 
     if (result) {
-      console.log(`  ${colors.green}✓${colors.reset} ${extInfo.name}: ${result.oldVersion} → ${result.newVersion}`);
-      console.log(`    ${colors.yellow}Changed files:${colors.reset}`);
-      extInfo.changedFiles.forEach(file => {
-        console.log(`      - ${file}`);
-      });
-      bumpedCount++;
+      if (result.skipped) {
+        console.log(`  ${colors.yellow}⊘${colors.reset} ${extInfo.name}: ${result.lastCommittedVersion} → ${result.currentVersion} (${result.reason})`);
+        console.log(`    ${colors.yellow}Changed files:${colors.reset}`);
+        extInfo.changedFiles.forEach(file => {
+          console.log(`      - ${file}`);
+        });
+        skippedCount++;
+      } else {
+        console.log(`  ${colors.green}✓${colors.reset} ${extInfo.name}: ${result.oldVersion} → ${result.newVersion} (auto-bumped)`);
+        console.log(`    ${colors.yellow}Changed files:${colors.reset}`);
+        extInfo.changedFiles.forEach(file => {
+          console.log(`      - ${file}`);
+        });
+        bumpedCount++;
+      }
     }
   }
 
-  console.log(`\n${colors.green}✅ Bumped ${bumpedCount} extension version(s)${colors.reset}\n`);
+  if (bumpedCount > 0 || skippedCount > 0) {
+    console.log(`\n${colors.green}✅ Summary:${colors.reset}`);
+    if (bumpedCount > 0) {
+      console.log(`  - Auto-bumped: ${bumpedCount} extension(s)`);
+    }
+    if (skippedCount > 0) {
+      console.log(`  - Manually bumped (skipped): ${skippedCount} extension(s)`);
+    }
+    console.log();
+  }
 }
 
 // Run the script
