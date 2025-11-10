@@ -7,6 +7,8 @@ Sort and manipulate lines in your notes with powerful sorting options including 
 - **Alphabetical Sorting** - Sort lines A-Z or Z-A
 - **Numerical Sorting** - Sort by first or last number in each line
 - **Reverse Order** - Flip the order of all lines
+- **Duplicate Detection** - Find duplicate lines and see which are repeated
+- **Duplicate Removal** - Remove duplicate lines keeping first or last occurrence
 - **Header Preservation** - Optionally keep the first line in place while sorting the rest
 - **Smart Number Handling** - Supports negative numbers, decimals, and mixed content
 
@@ -169,6 +171,92 @@ Third
 Second
 First
 ```
+
+---
+
+### dedupe_lines()
+
+Remove duplicate lines from the document, keeping either the first or last occurrence.
+
+**Parameters:**
+- `keepFirst` (bool, optional): Keep first occurrence (true) or last (false). Default: true
+- `ignoreFirstLine` (bool, optional): Skip first line when deduping. Default: false
+
+**Examples:**
+
+```
+dedupe_lines()
+```
+Remove duplicate lines, keeping the first occurrence of each.
+
+```
+dedupe_lines(false)
+```
+Remove duplicate lines, keeping the last occurrence of each.
+
+```
+dedupe_lines(true, true)
+```
+Remove duplicates while preserving the header line.
+
+**Use Cases:**
+- Clean up lists with accidental duplicates
+- Remove repeated entries from logs
+- Deduplicate imported data
+- Clean up copy-pasted content
+
+**Example:**
+```
+apple
+banana
+apple
+cherry
+banana
+```
+After `dedupe_lines()`:
+```
+apple
+banana
+cherry
+```
+
+---
+
+### get_dupes()
+
+Find and display duplicate lines grouped by their content. This is an **insert** command that adds a duplicate report at your cursor.
+
+**Parameters:**
+- `ignoreFirstLine` (bool, optional): Skip first line when finding duplicates. Default: false
+
+**Examples:**
+
+```
+get_dupes()
+```
+Find all duplicate lines in the document.
+
+```
+get_dupes(true)
+```
+Find duplicates, skipping the first line (header).
+
+**Output Format:**
+```
+# Duplicates Found
+
+# Duplicate group 1 (3 occurrences)
+apple
+
+# Duplicate group 2 (2 occurrences)
+banana
+```
+
+**Use Cases:**
+- Identify which lines are duplicated before cleaning
+- Audit data quality in lists
+- Find repeated items in TODO lists
+- Verify uniqueness of entries
 
 ---
 

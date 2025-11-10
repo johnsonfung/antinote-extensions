@@ -8,7 +8,7 @@ Transform, filter, and manipulate JSON and CSV data with powerful tools. Convert
 - **Sorting** - Sort arrays of objects by any key or sort primitive arrays
 - **Filtering** - Filter arrays with powerful operators (=, !=, >, <, contains, etc.)
 - **Key Manipulation** - Add, remove, set, append, or prepend values to keys
-- **Duplicate Detection** - Find and remove duplicate objects
+- **Duplicate Detection** - Find and remove duplicate objects or primitive values
 - **Flexible Parsing** - Supports loose JSON/JS syntax (single quotes, trailing commas, unquoted keys, comments)
 
 ## Configuration
@@ -281,22 +281,23 @@ Prepend https:// to all URLs: "example.com" → "https://example.com"
 
 ---
 
-### json_dupes(key, parentKey)
+### json_get_dupes(key, parentKey)
 
-Find and display duplicate objects grouped by a key value. This is an **insert** command that adds duplicate report to your note.
+Find and display duplicate objects by key value or duplicate primitive values. This is an **insert** command that adds a duplicate report to your note.
 
 **Parameters:**
-- `key` (string, required): Key to check for duplicates
+- `key` (string, optional): Key to check for duplicates. Leave empty for primitive arrays
 - `parentKey` (string, optional): Parent key containing the array
 
 **Examples:**
 
+**For arrays of objects:**
 ```
-json_dupes('email')
+json_get_dupes('email')
 ```
 Find all objects with duplicate email addresses.
 
-**Output Format:**
+**Output Format (objects):**
 ```
 # Duplicates Found
 
@@ -315,6 +316,25 @@ Find all objects with duplicate email addresses.
 # Duplicate group 2 (email="other@example.com")
 ...
 ```
+
+**For arrays of primitives:**
+```
+json_get_dupes()
+```
+Find duplicate values in array like `["apple", "banana", "apple", "cherry", "banana"]`
+
+**Output Format (primitives):**
+```
+# Duplicates Found
+
+# Duplicate group 1 (2 occurrences)
+apple
+
+# Duplicate group 2 (2 occurrences)
+banana
+```
+
+**Note:** The command automatically detects whether the array contains objects or primitive values and adjusts its behavior accordingly.
 
 ---
 
