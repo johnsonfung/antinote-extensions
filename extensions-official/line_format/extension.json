@@ -1,6 +1,6 @@
 {
   "name": "line_format",
-  "version": "1.0.4",
+  "version": "2.0.0",
   "author": "johnsonfung",
   "description": "Format the current line with various text transformations (uppercase, lowercase, camelCase, snake_case, etc.)",
   "license": "MIT",
@@ -8,6 +8,13 @@
   "dataScope": "line",
   "endpoints": [],
   "requiredAPIKeys": [],
+  "files": [
+    "index.js",
+    "helpers/case-converters.js",
+    "commands/basic-case.js",
+    "commands/code-case.js",
+    "commands/quote-removal.js"
+  ],
   "commands": [
     {
       "name": "uppercase_line",
@@ -53,7 +60,7 @@
   "official": true,
   "includedByDefault": true,
   "size": {
-    "total": 9219,
-    "totalKB": 9
+    "total": 11113,
+    "totalKB": 10.9
   }
 }

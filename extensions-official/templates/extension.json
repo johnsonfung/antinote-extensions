@@ -1,6 +1,6 @@
 {
   "name": "templates",
-  "version": "1.0.5",
+  "version": "2.0.0",
   "author": "johnsonfung",
   "description": "Insert useful text templates for daily tasks, meetings, and note-taking",
   "license": "MIT",
@@ -8,6 +8,12 @@
   "dataScope": "none",
   "endpoints": [],
   "requiredAPIKeys": [],
+  "files": [
+    "index.js",
+    "helpers/date-formatters.js",
+    "commands/builtin-templates.js",
+    "commands/custom-templates.js"
+  ],
   "commands": [
     {
       "name": "todo",
@@ -93,7 +99,7 @@
   "official": true,
   "includedByDefault": true,
   "size": {
-    "total": 7273,
-    "totalKB": 7.1
+    "total": 8898,
+    "totalKB": 8.7
   }
 }

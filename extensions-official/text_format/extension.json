@@ -1,6 +1,6 @@
 {
   "name": "text_format",
-  "version": "1.0.4",
+  "version": "2.0.0",
   "author": "johnsonfung",
   "description": "Format entire text with various transformations including find/replace, append, prepend, and case conversions",
   "license": "MIT",
@@ -8,6 +8,13 @@
   "dataScope": "full",
   "endpoints": [],
   "requiredAPIKeys": [],
+  "files": [
+    "index.js",
+    "helpers/case-converters.js",
+    "commands/text-manipulation.js",
+    "commands/case-conversion.js",
+    "commands/quote-removal.js"
+  ],
   "commands": [
     {
       "name": "replace",
@@ -58,7 +65,7 @@
   "official": true,
   "includedByDefault": true,
   "size": {
-    "total": 10704,
-    "totalKB": 10.5
+    "total": 12445,
+    "totalKB": 12.2
   }
 }

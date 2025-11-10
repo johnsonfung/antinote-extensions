@@ -1,6 +1,6 @@
 {
   "name": "line_sort",
-  "version": "1.0.5",
+  "version": "2.0.0",
   "author": "johnsonfung",
   "description": "Sort lines in your notes alphabetically, numerically, or reverse order",
   "license": "MIT",
@@ -8,6 +8,14 @@
   "dataScope": "full",
   "endpoints": [],
   "requiredAPIKeys": [],
+  "files": [
+    "index.js",
+    "helpers/extractors.js",
+    "commands/sort-alpha.js",
+    "commands/sort-numeric.js",
+    "commands/reverse.js",
+    "commands/dedupe.js"
+  ],
   "commands": [
     {
       "name": "sort_lines_alpha",
@@ -43,7 +51,7 @@
   "official": true,
   "includedByDefault": true,
   "size": {
-    "total": 13522,
-    "totalKB": 13.2
+    "total": 15871,
+    "totalKB": 15.5
   }
 }
