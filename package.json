@@ -9,6 +9,7 @@
     "build:minor": "node scripts/build.js minor",
     "build:major": "node scripts/build.js major",
     "bump-versions": "node scripts/bump-changed-extensions.js",
+    "calculate-sizes": "node scripts/calculate-sizes.js",
     "validate": "node scripts/validate.js",
     "test": "npm run test:scripts && npm run validate && npm run test:extensions",
     "test:scripts": "node scripts/test-scripts.js",

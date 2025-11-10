@@ -226,18 +226,84 @@ function validateMetadata(extension, allExtensions) {
     });
   }
 
+  // Validate multi-file support
+  if (metadata.files) {
+    if (!Array.isArray(metadata.files)) {
+      errors.push(`[${name}] files must be an array`);
+    } else if (metadata.files.length === 0) {
+      errors.push(`[${name}] files array cannot be empty (omit field for single-file extension)`);
+    } else {
+      // Check that index.js is first
+      if (metadata.files[0] !== 'index.js') {
+        errors.push(`[${name}] index.js must be the first file in the files array`);
+      }
+
+      // Check that all declared files exist
+      metadata.files.forEach((file, idx) => {
+        const filePath = path.join(extension.path, file);
+        if (!fs.existsSync(filePath)) {
+          errors.push(`[${name}] Declared file not found: ${file}`);
+        }
+
+        // Validate file naming for official extensions (enforce structure for PRs)
+        if (isOfficial && idx > 0) { // Skip index.js
+          // Check if file follows recommended structure
+          const hasValidPath = /^(helpers|commands|utils)\//.test(file);
+          if (!hasValidPath) {
+            warnings.push(`[${name}] File "${file}" should be in helpers/, commands/, or utils/ folder for consistency`);
+          }
+        }
+      });
+
+      // Check for .js files not declared in files array
+      const findJsFiles = (dir) => {
+        const files = [];
+        const entries = fs.readdirSync(dir, { withFileTypes: true });
+        for (const entry of entries) {
+          const fullPath = path.join(dir, entry.name);
+          if (entry.isDirectory()) {
+            files.push(...findJsFiles(fullPath));
+          } else if (entry.name.endsWith('.js') && entry.name !== 'index.test.js') {
+            const relativePath = path.relative(extension.path, fullPath);
+            files.push(relativePath);
+          }
+        }
+        return files;
+      };
+
+      const allJsFiles = findJsFiles(extension.path);
+      allJsFiles.forEach(file => {
+        if (!metadata.files.includes(file)) {
+          warnings.push(`[${name}] JavaScript file "${file}" exists but not declared in files array`);
+        }
+      });
+    }
+  }
+
   return metadata;
 }
 
-// Validation: Check index.js code for security disclosures
+// Validation: Check code for security disclosures (all files)
 function validateCodeDisclosures(extension, metadata, allExtensions) {
   const { indexPath, name } = extension;
 
-  if (!validateFileExists(extension, indexPath, 'index.js')) {
-    return;
+  // Read all extension code files
+  let code = '';
+  if (metadata.files && Array.isArray(metadata.files)) {
+    // Multi-file extension - read all files
+    for (const file of metadata.files) {
+      const filePath = path.join(extension.path, file);
+      if (fs.existsSync(filePath)) {
+        code += fs.readFileSync(filePath, 'utf8') + '\n';
+      }
+    }
+  } else {
+    // Single-file extension
+    if (!validateFileExists(extension, indexPath, 'index.js')) {
+      return;
+    }
+    code = fs.readFileSync(indexPath, 'utf8');
   }
-
-  const code = fs.readFileSync(indexPath, 'utf8');
 
   // Get inherited security disclosures from dependencies
   const inherited = getInheritedSecurityDisclosures(metadata, name, allExtensions);

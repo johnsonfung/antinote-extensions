@@ -1,6 +1,6 @@
 {
   "name": "json_tools",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "author": "johnsonfung",
   "description": "Transform, filter, and manipulate JSON and CSV data with powerful tools",
   "license": "MIT",
@@ -106,5 +106,9 @@
     }
   ],
   "official": true,
-  "includedByDefault": true
+  "includedByDefault": true,
+  "size": {
+    "total": 36005,
+    "totalKB": 35.2
+  }
 }

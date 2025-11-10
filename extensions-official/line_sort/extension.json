@@ -1,6 +1,6 @@
 {
   "name": "line_sort",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "author": "johnsonfung",
   "description": "Sort lines in your notes alphabetically, numerically, or reverse order",
   "license": "MIT",
@@ -41,5 +41,9 @@
     }
   ],
   "official": true,
-  "includedByDefault": true
+  "includedByDefault": true,
+  "size": {
+    "total": 13522,
+    "totalKB": 13.2
+  }
 }

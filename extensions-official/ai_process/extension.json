@@ -1,6 +1,6 @@
 {
   "name": "ai_process",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "author": "johnsonfung",
   "description": "AI-powered text processing: polish text, translate languages, and create structured lists",
   "license": "MIT",
@@ -29,5 +29,9 @@
     }
   ],
   "official": true,
-  "includedByDefault": true
+  "includedByDefault": true,
+  "size": {
+    "total": 9533,
+    "totalKB": 9.3
+  }
 }

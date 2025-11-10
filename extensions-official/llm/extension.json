@@ -1,6 +1,6 @@
 {
   "name": "llm",
-  "version": "3.0.3",
+  "version": "3.0.4",
   "author": "johnsonfung",
   "description": "General-purpose AI command for getting AI-generated responses using the ai_providers service",
   "license": "MIT",
@@ -19,5 +19,9 @@
     }
   ],
   "official": true,
-  "includedByDefault": true
+  "includedByDefault": true,
+  "size": {
+    "total": 3083,
+    "totalKB": 3
+  }
 }

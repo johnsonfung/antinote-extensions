@@ -16,6 +16,18 @@
     dataScope: "full"
   });
 
+  // --- Preferences ---
+
+  const formatPref = new Preference({
+    key: "format_style",
+    label: "JSON Formatting Style",
+    type: "selectOne",
+    defaultValue: "pretty",
+    options: ["pretty", "compact", "minified"],
+    helpText: "Default formatting for JSON output: pretty (2-space indent), compact (no indent), or minified (no whitespace)"
+  });
+  extensionRoot.register_preference(formatPref);
+
   // --- Helper Functions ---
 
   // Convert string to different casing styles

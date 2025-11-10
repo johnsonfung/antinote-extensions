@@ -18,7 +18,7 @@ Antinote supports custom JavaScript (ES6) extensions that let you add text to yo
 
 ## 📦 Extension Basics
 
-An extension is a container for one or more commands, implemented as a single JavaScript file. Each extension has:
+An extension is a container for one or more commands, implemented as JavaScript file(s). Each extension has:
 
 - A **name** (e.g., "random", "openai", "math")
 - A **version** (e.g., "1.0.0")
@@ -28,6 +28,38 @@ An extension is a container for one or more commands, implemented as a single Ja
 - One or more **commands**
 - Optional **preferences** for user configuration
 - Optional **API endpoints** and **required API keys** for network extensions
+
+### Single-File vs Multi-File Extensions
+
+Extensions can be implemented as:
+
+**Single-File (Simple):**
+```
+my_extension/
+  index.js
+  extension.json
+```
+
+**Multi-File (For Larger Extensions):**
+```
+my_extension/
+  index.js          (entry point)
+  helpers/          (shared utilities)
+    extractor.js
+    formatters.js
+  commands/         (command implementations)
+    csv.js
+    sort.js
+  extension.json    (with "files" array)
+```
+
+Multi-file extensions:
+- Must list all files in `extension.json` under `"files"` array
+- `index.js` must always be first
+- Files are loaded sequentially in order
+- Total size is calculated automatically
+
+See the **[Multi-File Extensions](#-multi-file-extensions)** section below for details.
 
 ### Extension Folder
 
@@ -557,6 +589,163 @@ Here's a complete extension with preferences, error handling, and best practices
   };
 })();
 ```
+
+---
+
+## 📁 Multi-File Extensions
+
+For larger extensions (>500 lines), you can split code across multiple files for better organization and maintainability.
+
+### When to Use Multi-File
+
+✅ **Use multi-file when:**
+- Extension is >500 lines
+- You have reusable helper functions
+- Commands can be logically grouped
+- Code is becoming hard to navigate
+
+❌ **Keep single-file when:**
+- Extension is <500 lines
+- Logic is straightforward
+- No clear separation of concerns
+
+### Structure
+
+**Recommended folder structure for official extensions:**
+```
+my_extension/
+  index.js                    # Entry point, setup
+  helpers/                    # Shared utilities
+    extractor.js
+    validators.js
+    formatters.js
+  commands/                   # Command implementations
+    csv-commands.js
+    sort-commands.js
+    filter-commands.js
+  extension.json              # Metadata with files array
+  README.md
+  index.test.js
+```
+
+### Declaring Files
+
+In `extension.json`, add a `files` array:
+
+```json
+{
+  "name": "json_tools",
+  "version": "2.0.0",
+  ...
+  "files": [
+    "index.js",
+    "helpers/extractor.js",
+    "helpers/validators.js",
+    "helpers/formatters.js",
+    "commands/csv-commands.js",
+    "commands/sort-commands.js",
+    "commands/filter-commands.js"
+  ]
+}
+```
+
+**Rules:**
+- `index.js` must be first
+- Files load sequentially in order
+- All files are concatenated before execution
+- Use relative paths from extension root
+
+### Sharing Code Between Files
+
+Use a shared namespace pattern:
+
+**index.js** (entry point):
+```js
+(function() {
+  const extensionName = "json_tools";
+
+  // Create shared namespace
+  const Shared = {};
+
+  const extensionRoot = new Extension({
+    name: extensionName,
+    version: "2.0.0",
+    ...
+  });
+
+  // Export for other files
+  if (typeof __EXTENSION_SHARED__ === 'undefined') {
+    var __EXTENSION_SHARED__ = {};
+  }
+  __EXTENSION_SHARED__[extensionName] = {
+    root: extensionRoot,
+    shared: Shared
+  };
+})();
+```
+
+**helpers/extractor.js**:
+```js
+(function() {
+  const ctx = __EXTENSION_SHARED__["json_tools"];
+
+  // Add utility to shared namespace
+  ctx.shared.extract = function(text, path) {
+    // ... extraction logic
+    return {data, prefix, suffix};
+  };
+})();
+```
+
+**commands/csv-commands.js**:
+```js
+(function() {
+  const ctx = __EXTENSION_SHARED__["json_tools"];
+  const extract = ctx.shared.extract;  // Use helper
+  const extensionRoot = ctx.root;
+
+  const csvToJson = new Command({
+    name: "csv_to_json",
+    extension: extensionRoot,
+    ...
+  });
+
+  csvToJson.execute = function(payload) {
+    const result = extract(payload.fullText);  // Use shared helper
+    // ...
+  };
+})();
+```
+
+### Size Tracking
+
+Extension sizes are automatically calculated:
+
+```json
+{
+  "name": "json_tools",
+  "size": {
+    "total": 36005,    // Total bytes
+    "totalKB": 35.2    // For display
+  }
+}
+```
+
+Run `npm run calculate-sizes` to update sizes for all extensions.
+
+### Validation
+
+The validation script checks:
+- ✅ All declared files exist
+- ✅ `index.js` is first
+- ✅ No undeclared .js files (warnings)
+- ✅ Official extensions follow folder structure (helpers/, commands/, utils/)
+
+Run `npm run validate` to check your extension.
+
+### Example: json_tools
+
+See `/extensions-official/json_tools/` for a complete multi-file example once it's migrated.
 
 ---
 
