@@ -57,7 +57,7 @@ Press **Tab** or **Enter** to execute the command.
 
 ## 🧠 Creating an Extension
 
-_Note_: Antinote Extensions uses [JavaScriptCore](https://developer.apple.com/documentation/javascriptcore), which means you are generally limited to ES5 JavaScript.
+_Note_: Antinote Extensions uses [JavaScriptCore](https://developer.apple.com/documentation/javascriptcore), which supports **full ES6 (ECMAScript 2015)** features on macOS 14+. You can use modern JavaScript including `const`/`let`, arrow functions, template literals, destructuring, spread operators, and more.
 
 ### Basic Extension Structure
 
@@ -541,7 +541,7 @@ Makes authenticated API call (for network extensions).
 3. **Use console.log()** for debugging - Enable logging in settings
 4. **Provide good examples** - Tutorial commands help users understand
 5. **Handle errors gracefully** - Always return a ReturnObject
-6. **Keep it simple** - ES5 only, avoid complex dependencies
+6. **Use modern JavaScript** - ES6 features available (const/let, arrow functions, template literals, etc.)
 7. **Document your code** - Add comments explaining logic
 8. **Test edge cases** - Invalid inputs, empty values, etc.
 
