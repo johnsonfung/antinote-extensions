@@ -6,15 +6,15 @@
 (function () {
   const extensionName = "line_format";
 
-  const extensionRoot = new Extension(
-    extensionName,
-    "1.0.0",
-    [],
-    [],
-    "johnsonfung",
-    "Text Formatting",
-    "line"  // Only needs current line access
-  );
+  const extensionRoot = new Extension({
+    name: extensionName,
+    version: "1.0.0",
+    endpoints: [],
+    requiredAPIKeys: [],
+    author: "johnsonfung",
+    category: "Text Formatting",
+    dataScope: "line"  // Only needs current line access
+  });
 
   // --- Helper Functions ---
 
@@ -137,138 +137,138 @@
   };
 
   // --- Command: uppercase_line ---
-  const uppercase_line = new Command(
-    "uppercase_line",
-    [],
-    "replaceLine",
-    "Convert the current line to uppercase.",
-    [
-      new TutorialCommand("uppercase_line", "Make current line uppercase")
+  const uppercase_line = new Command({
+    name: "uppercase_line",
+    parameters: [],
+    type: "replaceLine",
+    helpText: "Convert the current line to uppercase.",
+    tutorials: [
+      new TutorialCommand({command: "uppercase_line", description: "Make current line uppercase"})
     ],
-    extensionRoot
-  );
+    extension: extensionRoot
+  });
 
   uppercase_line.execute = function (payload) {
     const result = payload.fullText.toUpperCase();
-    return new ReturnObject("success", "Line converted to uppercase.", result);
+    return new ReturnObject({status: "success", message: "Line converted to uppercase.", payload: result});
   };
 
   // --- Command: lowercase_line ---
-  const lowercase_line = new Command(
-    "lowercase_line",
-    [],
-    "replaceLine",
-    "Convert the current line to lowercase.",
-    [
-      new TutorialCommand("lowercase_line", "Make current line lowercase")
+  const lowercase_line = new Command({
+    name: "lowercase_line",
+    parameters: [],
+    type: "replaceLine",
+    helpText: "Convert the current line to lowercase.",
+    tutorials: [
+      new TutorialCommand({command: "lowercase_line", description: "Make current line lowercase"})
     ],
-    extensionRoot
-  );
+    extension: extensionRoot
+  });
 
   lowercase_line.execute = function (payload) {
     const result = payload.fullText.toLowerCase();
-    return new ReturnObject("success", "Line converted to lowercase.", result);
+    return new ReturnObject({status: "success", message: "Line converted to lowercase.", payload: result});
   };
 
   // --- Command: sentence_case_line ---
-  const sentence_case_line = new Command(
-    "sentence_case_line",
-    [],
-    "replaceLine",
-    "Convert the current line to sentence case (first letter capitalized).",
-    [
-      new TutorialCommand("sentence_case_line", "Convert current line to sentence case")
+  const sentence_case_line = new Command({
+    name: "sentence_case_line",
+    parameters: [],
+    type: "replaceLine",
+    helpText: "Convert the current line to sentence case (first letter capitalized).",
+    tutorials: [
+      new TutorialCommand({command: "sentence_case_line", description: "Convert current line to sentence case"})
     ],
-    extensionRoot
-  );
+    extension: extensionRoot
+  });
 
   sentence_case_line.execute = function (payload) {
     const result = sentenceCase(payload.fullText);
-    return new ReturnObject("success", "Line converted to sentence case.", result);
+    return new ReturnObject({status: "success", message: "Line converted to sentence case.", payload: result});
   };
 
   // --- Command: title_case_line ---
-  const title_case_line = new Command(
-    "title_case_line",
-    [],
-    "replaceLine",
-    "Convert the current line to title case.",
-    [
-      new TutorialCommand("title_case_line", "Convert current line to title case")
+  const title_case_line = new Command({
+    name: "title_case_line",
+    parameters: [],
+    type: "replaceLine",
+    helpText: "Convert the current line to title case.",
+    tutorials: [
+      new TutorialCommand({command: "title_case_line", description: "Convert current line to title case"})
     ],
-    extensionRoot
-  );
+    extension: extensionRoot
+  });
 
   title_case_line.execute = function (payload) {
     const result = titleCase(payload.fullText);
-    return new ReturnObject("success", "Line converted to title case.", result);
+    return new ReturnObject({status: "success", message: "Line converted to title case.", payload: result});
   };
 
   // --- Command: camel_case ---
-  const camel_case = new Command(
-    "camel_case",
-    [],
-    "replaceLine",
-    "Convert the current line to camelCase.",
-    [
-      new TutorialCommand("camel_case", "Convert line to camelCase")
+  const camel_case = new Command({
+    name: "camel_case",
+    parameters: [],
+    type: "replaceLine",
+    helpText: "Convert the current line to camelCase.",
+    tutorials: [
+      new TutorialCommand({command: "camel_case", description: "Convert line to camelCase"})
     ],
-    extensionRoot
-  );
+    extension: extensionRoot
+  });
 
   camel_case.execute = function (payload) {
     const result = toCamelCase(payload.fullText);
-    return new ReturnObject("success", "Line converted to camelCase.", result);
+    return new ReturnObject({status: "success", message: "Line converted to camelCase.", payload: result});
   };
 
   // --- Command: snake_case ---
-  const snake_case = new Command(
-    "snake_case",
-    [],
-    "replaceLine",
-    "Convert the current line to snake_case.",
-    [
-      new TutorialCommand("snake_case", "Convert line to snake_case")
+  const snake_case = new Command({
+    name: "snake_case",
+    parameters: [],
+    type: "replaceLine",
+    helpText: "Convert the current line to snake_case.",
+    tutorials: [
+      new TutorialCommand({command: "snake_case", description: "Convert line to snake_case"})
     ],
-    extensionRoot
-  );
+    extension: extensionRoot
+  });
 
   snake_case.execute = function (payload) {
     const result = toSnakeCase(payload.fullText);
-    return new ReturnObject("success", "Line converted to snake_case.", result);
+    return new ReturnObject({status: "success", message: "Line converted to snake_case.", payload: result});
   };
 
   // --- Command: kebab_case ---
-  const kebab_case = new Command(
-    "kebab_case",
-    [],
-    "replaceLine",
-    "Convert the current line to kebab-case.",
-    [
-      new TutorialCommand("kebab_case", "Convert line to kebab-case")
+  const kebab_case = new Command({
+    name: "kebab_case",
+    parameters: [],
+    type: "replaceLine",
+    helpText: "Convert the current line to kebab-case.",
+    tutorials: [
+      new TutorialCommand({command: "kebab_case", description: "Convert line to kebab-case"})
     ],
-    extensionRoot
-  );
+    extension: extensionRoot
+  });
 
   kebab_case.execute = function (payload) {
     const result = toKebabCase(payload.fullText);
-    return new ReturnObject("success", "Line converted to kebab-case.", result);
+    return new ReturnObject({status: "success", message: "Line converted to kebab-case.", payload: result});
   };
 
   // --- Command: remove_quotes_line ---
-  const remove_quotes_line = new Command(
-    "remove_quotes_line",
-    [],
-    "replaceLine",
-    "Remove surrounding quotes from the current line.",
-    [
-      new TutorialCommand("remove_quotes_line", "Remove quotes from current line")
+  const remove_quotes_line = new Command({
+    name: "remove_quotes_line",
+    parameters: [],
+    type: "replaceLine",
+    helpText: "Remove surrounding quotes from the current line.",
+    tutorials: [
+      new TutorialCommand({command: "remove_quotes_line", description: "Remove quotes from current line"})
     ],
-    extensionRoot
-  );
+    extension: extensionRoot
+  });
 
   remove_quotes_line.execute = function (payload) {
     const result = removeQuotes(payload.fullText);
-    return new ReturnObject("success", "Quotes removed from line.", result);
+    return new ReturnObject({status: "success", message: "Quotes removed from line.", payload: result});
   };
 })();

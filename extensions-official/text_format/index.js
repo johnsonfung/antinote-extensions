@@ -6,15 +6,15 @@
 (function () {
   const extensionName = "text_format";
 
-  const extensionRoot = new Extension(
-    extensionName,
-    "1.0.0",
-    [],
-    [],
-    "johnsonfung",
-    "Text Formatting",
-    "full"  // Needs full document access
-  );
+  const extensionRoot = new Extension({
+    name: extensionName,
+    version: "1.0.0",
+    endpoints: [],
+    requiredAPIKeys: [],
+    author: "johnsonfung",
+    category: "Text Formatting",
+    dataScope: "full"  // Needs full document access
+  });
 
   // --- Helper Functions ---
 
@@ -112,20 +112,20 @@
   };
 
   // --- Command: replace ---
-  const replace = new Command(
-    "replace",
-    [
-      new Parameter("string", "find", "Text to find", ""),
-      new Parameter("string", "replaceWith", "Text to replace with", "")
+  const replace = new Command({
+    name: "replace",
+    parameters: [
+      new Parameter({type: "string", name: "find", helpText: "Text to find", default: ""}),
+      new Parameter({type: "string", name: "replaceWith", helpText: "Text to replace with", default: ""})
     ],
-    "replaceAll",
-    "Find and replace text throughout the entire document.",
-    [
+    type: "replaceAll",
+    helpText: "Find and replace text throughout the entire document.",
+    tutorials: [
       new TutorialCommand("replace(old, new)", "Replace 'old' with 'new'"),
       new TutorialCommand("replace(foo, bar)", "Replace all 'foo' with 'bar'")
     ],
-    extensionRoot
-  );
+    extension: extensionRoot
+  });
 
   replace.execute = function (payload) {
     const params = this.getParsedParams(payload);
@@ -133,27 +133,27 @@
     const replaceWith = params[1];
 
     if (!find) {
-      return new ReturnObject("error", "Please provide text to find.");
+      return new ReturnObject({status: "error", message: "Please provide text to find."});
     }
 
     const result = payload.fullText.split(find).join(replaceWith);
-    return new ReturnObject("success", "Text replaced.", result);
+    return new ReturnObject({status: "success", message: "Text replaced.", payload: result});
   };
 
   // --- Command: append ---
-  const append = new Command(
-    "append",
-    [
-      new Parameter("string", "text", "Text to append to each line", "")
+  const append = new Command({
+    name: "append",
+    parameters: [
+      new Parameter({type: "string", name: "text", helpText: "Text to append to each line", default: ""})
     ],
-    "replaceAll",
-    "Add text to the end of every line in the document.",
-    [
-      new TutorialCommand("append(;)", "Add semicolon to end of each line"),
-      new TutorialCommand("append( ->)", "Add arrow to end of each line")
+    type: "replaceAll",
+    helpText: "Add text to the end of every line in the document.",
+    tutorials: [
+      new TutorialCommand({command: "append(;)", description: "Add semicolon to end of each line"}),
+      new TutorialCommand({command: "append( ->)", description: "Add arrow to end of each line"})
     ],
-    extensionRoot
-  );
+    extension: extensionRoot
+  });
 
   append.execute = function (payload) {
     const params = this.getParsedParams(payload);
@@ -165,23 +165,23 @@
       line.trim().length > 0 ? line + text : line
     );
 
-    return new ReturnObject("success", "Text appended to all lines.", result.join("\n"));
+    return new ReturnObject({status: "success", message: "Text appended to all lines.", payload: result.join("\n")});
   };
 
   // --- Command: prepend ---
-  const prepend = new Command(
-    "prepend",
-    [
-      new Parameter("string", "text", "Text to prepend to each line", "")
+  const prepend = new Command({
+    name: "prepend",
+    parameters: [
+      new Parameter({type: "string", name: "text", helpText: "Text to prepend to each line", default: ""})
     ],
-    "replaceAll",
-    "Add text to the beginning of every line in the document.",
-    [
-      new TutorialCommand("prepend(- )", "Add dash bullet to each line"),
-      new TutorialCommand("prepend(> )", "Add quote marker to each line")
+    type: "replaceAll",
+    helpText: "Add text to the beginning of every line in the document.",
+    tutorials: [
+      new TutorialCommand({command: "prepend(- )", description: "Add dash bullet to each line"}),
+      new TutorialCommand({command: "prepend(> )", description: "Add quote marker to each line"})
     ],
-    extensionRoot
-  );
+    extension: extensionRoot
+  });
 
   prepend.execute = function (payload) {
     const params = this.getParsedParams(payload);
@@ -193,114 +193,114 @@
       line.trim().length > 0 ? text + line : line
     );
 
-    return new ReturnObject("success", "Text prepended to all lines.", result.join("\n"));
+    return new ReturnObject({status: "success", message: "Text prepended to all lines.", payload: result.join("\n")});
   };
 
   // --- Command: uppercase ---
-  const uppercase = new Command(
-    "uppercase",
-    [],
-    "replaceAll",
-    "Convert the entire document to uppercase.",
-    [
-      new TutorialCommand("uppercase", "Make entire document uppercase")
+  const uppercase = new Command({
+    name: "uppercase",
+    parameters: [],
+    type: "replaceAll",
+    helpText: "Convert the entire document to uppercase.",
+    tutorials: [
+      new TutorialCommand({command: "uppercase", description: "Make entire document uppercase"})
     ],
-    extensionRoot
-  );
+    extension: extensionRoot
+  });
 
   uppercase.execute = function (payload) {
     const result = payload.fullText.toUpperCase();
-    return new ReturnObject("success", "Document converted to uppercase.", result);
+    return new ReturnObject({status: "success", message: "Document converted to uppercase.", payload: result});
   };
 
   // --- Command: lowercase ---
-  const lowercase = new Command(
-    "lowercase",
-    [],
-    "replaceAll",
-    "Convert the entire document to lowercase.",
-    [
-      new TutorialCommand("lowercase", "Make entire document lowercase")
+  const lowercase = new Command({
+    name: "lowercase",
+    parameters: [],
+    type: "replaceAll",
+    helpText: "Convert the entire document to lowercase.",
+    tutorials: [
+      new TutorialCommand({command: "lowercase", description: "Make entire document lowercase"})
     ],
-    extensionRoot
-  );
+    extension: extensionRoot
+  });
 
   lowercase.execute = function (payload) {
     const result = payload.fullText.toLowerCase();
-    return new ReturnObject("success", "Document converted to lowercase.", result);
+    return new ReturnObject({status: "success", message: "Document converted to lowercase.", payload: result});
   };
 
   // --- Command: sentence_case ---
-  const sentence_case = new Command(
-    "sentence_case",
-    [],
-    "replaceAll",
-    "Convert the entire document to sentence case.",
-    [
-      new TutorialCommand("sentence_case", "Convert entire document to sentence case")
+  const sentence_case = new Command({
+    name: "sentence_case",
+    parameters: [],
+    type: "replaceAll",
+    helpText: "Convert the entire document to sentence case.",
+    tutorials: [
+      new TutorialCommand({command: "sentence_case", description: "Convert entire document to sentence case"})
     ],
-    extensionRoot
-  );
+    extension: extensionRoot
+  });
 
   sentence_case.execute = function (payload) {
     const lines = payload.fullText.split("\n");
     const result = lines.map(line => sentenceCase(line));
-    return new ReturnObject("success", "Document converted to sentence case.", result.join("\n"));
+    return new ReturnObject({status: "success", message: "Document converted to sentence case.", payload: result.join("\n")});
   };
 
   // --- Command: title_case ---
-  const title_case = new Command(
-    "title_case",
-    [],
-    "replaceAll",
-    "Convert the entire document to title case.",
-    [
-      new TutorialCommand("title_case", "Convert entire document to title case")
+  const title_case = new Command({
+    name: "title_case",
+    parameters: [],
+    type: "replaceAll",
+    helpText: "Convert the entire document to title case.",
+    tutorials: [
+      new TutorialCommand({command: "title_case", description: "Convert entire document to title case"})
     ],
-    extensionRoot
-  );
+    extension: extensionRoot
+  });
 
   title_case.execute = function (payload) {
     const lines = payload.fullText.split("\n");
     const result = lines.map(line => titleCase(line));
-    return new ReturnObject("success", "Document converted to title case.", result.join("\n"));
+    return new ReturnObject({status: "success", message: "Document converted to title case.", payload: result.join("\n")});
   };
 
   // --- Command: capitalize_first ---
-  const capitalize_first = new Command(
-    "capitalize_first",
-    [],
-    "replaceAll",
-    "Capitalize the first letter of each line in the document.",
-    [
-      new TutorialCommand("capitalize_first", "Capitalize first letter of each line")
+  const capitalize_first = new Command({
+    name: "capitalize_first",
+    parameters: [],
+    type: "replaceAll",
+    helpText: "Capitalize the first letter of each line in the document.",
+    tutorials: [
+      new TutorialCommand({command: "capitalize_first", description: "Capitalize first letter of each line"})
     ],
-    extensionRoot
-  );
+    extension: extensionRoot
+  });
 
   capitalize_first.execute = function (payload) {
     const lines = payload.fullText.split("\n");
     const result = lines.map(line =>
       line.length > 0 ? line.charAt(0).toUpperCase() + line.slice(1) : line
     );
-    return new ReturnObject("success", "First letter of each line capitalized.", result.join("\n"));
+    return new ReturnObject({status: "success", message: "First letter of each line capitalized.", payload: result.join("\n")});
   };
 
   // --- Command: remove_quotes ---
-  const remove_quotes = new Command(
-    "remove_quotes",
-    [],
-    "replaceAll",
-    "Remove surrounding quotes from each line in the document.",
-    [
-      new TutorialCommand("remove_quotes", "Remove quotes from all lines")
+  const remove_quotes = new Command({
+    name: "remove_quotes",
+    parameters: [],
+    type: "replaceAll",
+    helpText: "Remove surrounding quotes from each line in the document.",
+    tutorials: [
+      new TutorialCommand({command: "remove_quotes", description: "Remove quotes from all lines"})
     ],
-    extensionRoot
-  );
+    extension: extensionRoot
+  });
 
   remove_quotes.execute = function (payload) {
     const lines = payload.fullText.split("\n");
     const result = lines.map(line => removeQuotes(line));
-    return new ReturnObject("success", "Quotes removed from document.", result.join("\n"));
+    return new ReturnObject({status: "success", message: "Quotes removed from document.", payload: result.join("\n")});
   };
 })();

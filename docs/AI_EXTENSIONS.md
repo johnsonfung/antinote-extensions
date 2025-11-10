@@ -36,17 +36,17 @@ Antinote provides a **centralized AI service** (`ai_providers` extension) that h
 Your extension depends on `ai_providers`:
 
 ```js
-const extensionRoot = new Extension(
-  "my_ai_extension",
-  "1.0.0",
-  [],                   // No endpoints - ai_providers handles this
-  [],                   // No API keys - ai_providers handles this
-  "your_github",
-  "AI & ML",
-  "full",               // Or "line" depending on needs
-  ["ai_providers"],     // ⬅️ Declare dependency
-  false
-);
+const extensionRoot = new Extension({
+  name: "my_ai_extension",
+  version: "1.0.0",
+  endpoints: [],              // No endpoints - ai_providers handles this
+  requiredAPIKeys: [],        // No API keys - ai_providers handles this
+  author: "your_github",
+  category: "AI & ML",
+  dataScope: "full",          // Or "line" depending on needs
+  dependencies: ["ai_providers"], // ⬅️ Declare dependency
+  isService: false
+});
 ```
 
 ### 2. Check Service Availability
@@ -57,10 +57,10 @@ Always check if the service is loaded:
 my_command.execute = function(payload) {
   // Check if ai_providers service is available
   if (typeof callAIProvider === 'undefined') {
-    return new ReturnObject(
-      "error",
-      "AI Providers service not available. Please ensure the ai_providers extension is installed and enabled."
-    );
+    return new ReturnObject({
+      status: "error",
+      message: "AI Providers service not available. Please ensure the ai_providers extension is installed and enabled."
+    });
   }
 
   // Your code here...
@@ -72,13 +72,13 @@ my_command.execute = function(payload) {
 ```js
 my_command.execute = function(payload) {
   if (typeof callAIProvider === 'undefined') {
-    return new ReturnObject("error", "AI Providers service not available.");
+    return new ReturnObject({status: "error", message: "AI Providers service not available."});
   }
 
   const fullText = payload.fullText || "";
 
   if (!fullText?.trim()) {
-    return new ReturnObject("error", "No text to process.");
+    return new ReturnObject({status: "error", message: "No text to process."});
   }
 
   // Call AI with your custom prompt
@@ -134,43 +134,43 @@ Sends a prompt to the user's configured AI provider.
 (function() {
   const extensionName = "summarize";
 
-  const extensionRoot = new Extension(
-    extensionName,
-    "1.0.0",
-    [],                   // No endpoints
-    [],                   // No API keys
-    "your_github",
-    "AI & ML",
-    "full",               // Needs full text
-    ["ai_providers"],     // Depends on AI service
-    false
-  );
+  const extensionRoot = new Extension({
+    name: extensionName,
+    version: "1.0.0",
+    endpoints: [],              // No endpoints
+    requiredAPIKeys: [],        // No API keys
+    author: "your_github",
+    category: "AI & ML",
+    dataScope: "full",          // Needs full text
+    dependencies: ["ai_providers"], // Depends on AI service
+    isService: false
+  });
 
-  const summarize = new Command(
-    "summarize",
-    [
-      new Parameter("int", "maxWords", "Maximum words in summary", 100)
+  const summarize = new Command({
+    name: "summarize",
+    parameters: [
+      new Parameter({type: "int", name: "maxWords", helpText: "Maximum words in summary", default: 100})
     ],
-    "replaceAll",
-    "Summarize text using AI",
-    [
-      new TutorialCommand("summarize(50)", "Create a 50-word summary"),
-      new TutorialCommand("summarize(200)", "Create a detailed 200-word summary")
+    type: "replaceAll",
+    helpText: "Summarize text using AI",
+    tutorials: [
+      new TutorialCommand({command: "summarize(50)", description: "Create a 50-word summary"}),
+      new TutorialCommand({command: "summarize(200)", description: "Create a detailed 200-word summary"})
     ],
-    extensionRoot
-  );
+    extension: extensionRoot
+  });
 
   summarize.execute = function(payload) {
     // Check service
     if (typeof callAIProvider === 'undefined') {
-      return new ReturnObject("error", "AI Providers service not available.");
+      return new ReturnObject({status: "error", message: "AI Providers service not available."});
     }
 
     const [maxWords] = this.getParsedParams(payload);
     const fullText = payload.fullText || "";
 
     if (!fullText?.trim()) {
-      return new ReturnObject("error", "No text to summarize.");
+      return new ReturnObject({status: "error", message: "No text to summarize."});
     }
 
     // Call AI
@@ -191,59 +191,59 @@ Sends a prompt to the user's configured AI provider.
 (function() {
   const extensionName = "polish";
 
-  const extensionRoot = new Extension(
-    extensionName,
-    "1.0.0",
-    [],
-    [],
-    "your_github",
-    "AI & ML",
-    "full",
-    ["ai_providers"],
-    false
-  );
+  const extensionRoot = new Extension({
+    name: extensionName,
+    version: "1.0.0",
+    endpoints: [],
+    requiredAPIKeys: [],
+    author: "your_github",
+    category: "AI & ML",
+    dataScope: "full",
+    dependencies: ["ai_providers"],
+    isService: false
+  });
 
   // Add user preference for voice
-  const voicePref = new Preference(
-    "voice_print",
-    "Writing Voice (Optional)",
-    "string",
-    "",
-    null,
-    "Describe your writing style to maintain consistency (e.g., 'concise and direct')"
-  );
+  const voicePref = new Preference({
+    key: "voice_print",
+    label: "Writing Voice (Optional)",
+    type: "string",
+    defaultValue: "",
+    options: null,
+    helpText: "Describe your writing style to maintain consistency (e.g., 'concise and direct')"
+  });
   extensionRoot.register_preference(voicePref);
 
-  const polish = new Command(
-    "polish",
-    [
-      new Parameter("int", "level", "Polish level (1=casual, 2=professional, 3=formal)", 2)
+  const polish = new Command({
+    name: "polish",
+    parameters: [
+      new Parameter({type: "int", name: "level", helpText: "Polish level (1=casual, 2=professional, 3=formal)", default: 2})
     ],
-    "replaceAll",
-    "Polish text with AI",
-    [
-      new TutorialCommand("polish(1)", "Casual, friendly polish"),
-      new TutorialCommand("polish(2)", "Professional polish"),
-      new TutorialCommand("polish(3)", "Formal, sophisticated polish")
+    type: "replaceAll",
+    helpText: "Polish text with AI",
+    tutorials: [
+      new TutorialCommand({command: "polish(1)", description: "Casual, friendly polish"}),
+      new TutorialCommand({command: "polish(2)", description: "Professional polish"}),
+      new TutorialCommand({command: "polish(3)", description: "Formal, sophisticated polish"})
     ],
-    extensionRoot
-  );
+    extension: extensionRoot
+  });
 
   polish.execute = function(payload) {
     if (typeof callAIProvider === 'undefined') {
-      return new ReturnObject("error", "AI Providers service not available.");
+      return new ReturnObject({status: "error", message: "AI Providers service not available."});
     }
 
     const [level] = this.getParsedParams(payload);
     const fullText = payload.fullText || "";
 
     if (!fullText?.trim()) {
-      return new ReturnObject("error", "No text to polish.");
+      return new ReturnObject({status: "error", message: "No text to polish."});
     }
 
     // Validate level
     if (level < 1 || level > 3) {
-      return new ReturnObject("error", "Level must be 1 (casual), 2 (professional), or 3 (formal).");
+      return new ReturnObject({status: "error", message: "Level must be 1 (casual), 2 (professional), or 3 (formal)."});
     }
 
     // Define prompts for each level
@@ -279,54 +279,54 @@ Sends a prompt to the user's configured AI provider.
 (function() {
   const extensionName = "translate";
 
-  const extensionRoot = new Extension(
-    extensionName,
-    "1.0.0",
-    [],
-    [],
-    "your_github",
-    "AI & ML",
-    "full",
-    ["ai_providers"],
-    false
-  );
+  const extensionRoot = new Extension({
+    name: extensionName,
+    version: "1.0.0",
+    endpoints: [],
+    requiredAPIKeys: [],
+    author: "your_github",
+    category: "AI & ML",
+    dataScope: "full",
+    dependencies: ["ai_providers"],
+    isService: false
+  });
 
   // Default language preference
-  const langPref = new Preference(
-    "default_language",
-    "Default Target Language",
-    "string",
-    "Spanish",
-    null,
-    "Default language for translation when not specified"
-  );
+  const langPref = new Preference({
+    key: "default_language",
+    label: "Default Target Language",
+    type: "string",
+    defaultValue: "Spanish",
+    options: null,
+    helpText: "Default language for translation when not specified"
+  });
   extensionRoot.register_preference(langPref);
 
-  const translate = new Command(
-    "translate",
-    [
-      new Parameter("string", "language", "Target language (leave empty for default)", "")
+  const translate = new Command({
+    name: "translate",
+    parameters: [
+      new Parameter({type: "string", name: "language", helpText: "Target language (leave empty for default)", default: ""})
     ],
-    "replaceAll",
-    "Translate text to another language",
-    [
-      new TutorialCommand("translate(French)", "Translate to French"),
-      new TutorialCommand("translate(Japanese)", "Translate to Japanese"),
-      new TutorialCommand("translate()", "Translate to default language")
+    type: "replaceAll",
+    helpText: "Translate text to another language",
+    tutorials: [
+      new TutorialCommand({command: "translate(French)", description: "Translate to French"}),
+      new TutorialCommand({command: "translate(Japanese)", description: "Translate to Japanese"}),
+      new TutorialCommand({command: "translate()", description: "Translate to default language"})
     ],
-    extensionRoot
-  );
+    extension: extensionRoot
+  });
 
   translate.execute = function(payload) {
     if (typeof callAIProvider === 'undefined') {
-      return new ReturnObject("error", "AI Providers service not available.");
+      return new ReturnObject({status: "error", message: "AI Providers service not available."});
     }
 
     const [language] = this.getParsedParams(payload);
     const fullText = payload.fullText || "";
 
     if (!fullText?.trim()) {
-      return new ReturnObject("error", "No text to translate.");
+      return new ReturnObject({status: "error", message: "No text to translate."});
     }
 
     // Use default language if not specified
@@ -368,7 +368,7 @@ dataScope: "line"
 const fullText = payload.fullText || "";
 
 if (!fullText?.trim()) {
-  return new ReturnObject("error", "No text to process.");
+  return new ReturnObject({status: "error", message: "No text to process."});
 }
 ```
 
@@ -410,14 +410,14 @@ systemPrompt: "Polish this text to be professional and clear. Fix grammar and im
 Let users customize behavior:
 
 ```js
-const promptPref = new Preference(
-  "custom_prompt",
-  "Custom System Prompt",
-  "paragraph",  // Multi-line editor
-  "Default prompt here...",
-  null,
-  "Customize the AI instructions"
-);
+const promptPref = new Preference({
+  key: "custom_prompt",
+  label: "Custom System Prompt",
+  type: "paragraph",  // Multi-line editor
+  defaultValue: "Default prompt here...",
+  options: null,
+  helpText: "Customize the AI instructions"
+});
 extensionRoot.register_preference(promptPref);
 
 // Use in command

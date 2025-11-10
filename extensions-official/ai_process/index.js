@@ -7,106 +7,106 @@
   // Wrap in IIFE to avoid variable conflicts
   const extensionName = "ai_process";
 
-  const extensionRoot = new Extension(
-    extensionName,
-    "1.0.0",
-    [], // No endpoints - uses ai_providers
-    [], // No API keys - uses ai_providers
-    "johnsonfung",
-    "AI & ML",
-    "full", // Requires full note content
-    ["ai_providers"], // dependencies
-    false  // isService
-  );
+  const extensionRoot = new Extension({
+    name: extensionName,
+    version: "1.0.0",
+    endpoints: [], // No endpoints - uses ai_providers
+    requiredAPIKeys: [], // No API keys - uses ai_providers
+    author: "johnsonfung",
+    category: "AI & ML",
+    dataScope: "full", // Requires full note content
+    dependencies: ["ai_providers"], // dependencies
+    isService: false  // isService
+  });
 
   // Register extension preferences
 
   // Polish command preferences - custom prompts for each professionalism level
-  const polishLevel1Pref = new Preference(
-    "polish_level1_prompt",
-    "Polish Level 1 Prompt (Casual)",
-    "string",
-    "Polish this text to be clear and casual while maintaining the author's voice. Keep the tone friendly and approachable.",
-    null,
-    "System prompt for level 1 polish (casual/friendly)"
-  );
+  const polishLevel1Pref = new Preference({
+    key: "polish_level1_prompt",
+    label: "Polish Level 1 Prompt (Casual)",
+    type: "string",
+    defaultValue: "Polish this text to be clear and casual while maintaining the author's voice. Keep the tone friendly and approachable.",
+    options: null,
+    helpText: "System prompt for level 1 polish (casual/friendly)"
+  });
   extensionRoot.register_preference(polishLevel1Pref);
 
-  const polishLevel2Pref = new Preference(
-    "polish_level2_prompt",
-    "Polish Level 2 Prompt (Professional)",
-    "string",
-    "Polish this text to be professional and clear. Improve grammar, structure, and clarity while maintaining a business-appropriate tone.",
-    null,
-    "System prompt for level 2 polish (professional)"
-  );
+  const polishLevel2Pref = new Preference({
+    key: "polish_level2_prompt",
+    label: "Polish Level 2 Prompt (Professional)",
+    type: "string",
+    defaultValue: "Polish this text to be professional and clear. Improve grammar, structure, and clarity while maintaining a business-appropriate tone.",
+    options: null,
+    helpText: "System prompt for level 2 polish (professional)"
+  });
   extensionRoot.register_preference(polishLevel2Pref);
 
-  const polishLevel3Pref = new Preference(
-    "polish_level3_prompt",
-    "Polish Level 3 Prompt (Formal)",
-    "string",
-    "Polish this text to be highly formal and sophisticated. Use precise language, formal structure, and elevated vocabulary appropriate for academic or executive communication.",
-    null,
-    "System prompt for level 3 polish (formal/sophisticated)"
-  );
+  const polishLevel3Pref = new Preference({
+    key: "polish_level3_prompt",
+    label: "Polish Level 3 Prompt (Formal)",
+    type: "string",
+    defaultValue: "Polish this text to be highly formal and sophisticated. Use precise language, formal structure, and elevated vocabulary appropriate for academic or executive communication.",
+    options: null,
+    helpText: "System prompt for level 3 polish (formal/sophisticated)"
+  });
   extensionRoot.register_preference(polishLevel3Pref);
 
-  const voicePrintPref = new Preference(
-    "voice_print",
-    "Voice Print (Optional)",
-    "string",
-    "",
-    null,
-    "Optional description of your writing voice to maintain consistency when polishing (e.g., 'concise and direct', 'warm and conversational')"
-  );
+  const voicePrintPref = new Preference({
+    key: "voice_print",
+    label: "Voice Print (Optional)",
+    type: "string",
+    defaultValue: "",
+    options: null,
+    helpText: "Optional description of your writing voice to maintain consistency when polishing (e.g., 'concise and direct', 'warm and conversational')"
+  });
   extensionRoot.register_preference(voicePrintPref);
 
   // Translation preferences
-  const defaultLanguagePref = new Preference(
-    "default_language",
-    "Default Translation Language",
-    "string",
-    "Spanish",
-    null,
-    "Default target language for translation when not specified"
-  );
+  const defaultLanguagePref = new Preference({
+    key: "default_language",
+    label: "Default Translation Language",
+    type: "string",
+    defaultValue: "Spanish",
+    options: null,
+    helpText: "Default target language for translation when not specified"
+  });
   extensionRoot.register_preference(defaultLanguagePref);
 
   // Max tokens override
-  const maxTokensPref = new Preference(
-    "max_tokens",
-    "Max Tokens Override",
-    "string",
-    "",
-    null,
-    "Override max tokens for AI responses (leave empty to use ai_providers default)"
-  );
+  const maxTokensPref = new Preference({
+    key: "max_tokens",
+    label: "Max Tokens Override",
+    type: "string",
+    defaultValue: "",
+    options: null,
+    helpText: "Override max tokens for AI responses (leave empty to use ai_providers default)"
+  });
   extensionRoot.register_preference(maxTokensPref);
 
   // ===========================
   // POLISH COMMAND
   // ===========================
 
-  const polish = new Command(
-    "polish",
-    [
-      new Parameter("int", "level", "Professionalism level (1=casual, 2=professional, 3=formal)", 2)
+  const polish = new Command({
+    name: "polish",
+    parameters: [
+      new Parameter({type: "int", name: "level", helpText: "Professionalism level (1=casual, 2=professional, 3=formal)", default: 2})
     ],
-    "replaceAll",
-    "Polish text with AI to improve professionalism and clarity",
-    [
-      new TutorialCommand("polish(1)", "Polish text with casual, friendly tone"),
-      new TutorialCommand("polish(2)", "Polish text with professional tone (default)"),
-      new TutorialCommand("polish(3)", "Polish text with formal, sophisticated tone")
+    type: "replaceAll",
+    helpText: "Polish text with AI to improve professionalism and clarity",
+    tutorials: [
+      new TutorialCommand({command: "polish(1)", description: "Polish text with casual, friendly tone"}),
+      new TutorialCommand({command: "polish(2)", description: "Polish text with professional tone (default)"}),
+      new TutorialCommand({command: "polish(3)", description: "Polish text with formal, sophisticated tone"})
     ],
-    extensionRoot
-  );
+    extension: extensionRoot
+  });
 
   polish.execute = function(payload) {
     // Check if ai_providers service is available
     if (typeof callAIProvider === 'undefined') {
-      return new ReturnObject("error", "AI Providers service not available. The ai_process extension requires the ai_providers extension to be installed and enabled.");
+      return new ReturnObject({status: "error", message: "AI Providers service not available. The ai_process extension requires the ai_providers extension to be installed and enabled."});
     }
 
     const params = this.getParsedParams(payload);
@@ -115,11 +115,11 @@
 
     // Validate level
     if (level < 1 || level > 3) {
-      return new ReturnObject("error", "Level must be 1, 2, or 3 (1=casual, 2=professional, 3=formal)");
+      return new ReturnObject({status: "error", message: "Level must be 1, 2, or 3 (1=casual, 2=professional, 3=formal)"});
     }
 
     if (!fullText || fullText.trim() === "") {
-      return new ReturnObject("error", "No text to polish. The note appears to be empty.");
+      return new ReturnObject({status: "error", message: "No text to polish. The note appears to be empty."});
     }
 
     // Get the appropriate prompt for the level
@@ -152,25 +152,25 @@
   // TRANSLATE COMMAND
   // ===========================
 
-  const translate = new Command(
-    "translate",
-    [
-      new Parameter("string", "language", "Target language for translation", "")
+  const translate = new Command({
+    name: "translate",
+    parameters: [
+      new Parameter({type: "string", name: "language", helpText: "Target language for translation", default: ""})
     ],
-    "replaceAll",
-    "Translate text to another language using AI",
-    [
-      new TutorialCommand("translate(French)", "Translate text to French"),
-      new TutorialCommand("translate(Japanese)", "Translate text to Japanese"),
-      new TutorialCommand("translate()", "Translate to default language (from preferences)")
+    type: "replaceAll",
+    helpText: "Translate text to another language using AI",
+    tutorials: [
+      new TutorialCommand({command: "translate(French)", description: "Translate text to French"}),
+      new TutorialCommand({command: "translate(Japanese)", description: "Translate text to Japanese"}),
+      new TutorialCommand({command: "translate()", description: "Translate to default language (from preferences)"})
     ],
-    extensionRoot
-  );
+    extension: extensionRoot
+  });
 
   translate.execute = function(payload) {
     // Check if ai_providers service is available
     if (typeof callAIProvider === 'undefined') {
-      return new ReturnObject("error", "AI Providers service not available. The ai_process extension requires the ai_providers extension to be installed and enabled.");
+      return new ReturnObject({status: "error", message: "AI Providers service not available. The ai_process extension requires the ai_providers extension to be installed and enabled."});
     }
 
     const params = this.getParsedParams(payload);
@@ -178,7 +178,7 @@
     const fullText = payload.fullText || "";
 
     if (!fullText || fullText.trim() === "") {
-      return new ReturnObject("error", "No text to translate. The note appears to be empty.");
+      return new ReturnObject({status: "error", message: "No text to translate. The note appears to be empty."});
     }
 
     // Use default language if not specified
@@ -209,27 +209,27 @@
   // CREATE_LIST COMMAND
   // ===========================
 
-  const create_list = new Command(
-    "create_list",
-    [],
-    "replaceAll",
-    "Generate a structured list from text using AI",
-    [
-      new TutorialCommand("create_list()", "Convert text into a structured list")
+  const create_list = new Command({
+    name: "create_list",
+    parameters: [],
+    type: "replaceAll",
+    helpText: "Generate a structured list from text using AI",
+    tutorials: [
+      new TutorialCommand({command: "create_list()", description: "Convert text into a structured list"})
     ],
-    extensionRoot
-  );
+    extension: extensionRoot
+  });
 
   create_list.execute = function(payload) {
     // Check if ai_providers service is available
     if (typeof callAIProvider === 'undefined') {
-      return new ReturnObject("error", "AI Providers service not available. The ai_process extension requires the ai_providers extension to be installed and enabled.");
+      return new ReturnObject({status: "error", message: "AI Providers service not available. The ai_process extension requires the ai_providers extension to be installed and enabled."});
     }
 
     const fullText = payload.fullText || "";
 
     if (!fullText || fullText.trim() === "") {
-      return new ReturnObject("error", "No text to process. The note appears to be empty.");
+      return new ReturnObject({status: "error", message: "No text to process. The note appears to be empty."});
     }
 
     // Build system prompt with specific formatting instructions

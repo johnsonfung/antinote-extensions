@@ -6,15 +6,15 @@
 (function () {
   const extensionName = "json_tools";
 
-  const extensionRoot = new Extension(
-    extensionName,
-    "1.0.0",
-    [],
-    [],
-    "johnsonfung",
-    "Data Tools",
-    "full"
-  );
+  const extensionRoot = new Extension({
+    name: extensionName,
+    version: "1.0.0",
+    endpoints: [],
+    requiredAPIKeys: [],
+    author: "johnsonfung",
+    category: "Data Tools",
+    dataScope: "full"
+  });
 
   // --- Helper Functions ---
 
@@ -239,16 +239,16 @@
   };
 
   // --- Command: csv_to_json ---
-  const csv_to_json = new Command(
-    "csv_to_json",
-    [],
-    "replaceAll",
-    "Convert CSV to JSON array of objects using first row as keys.",
-    [
-      new TutorialCommand("csv_to_json", "Convert CSV with headers to JSON array")
+  const csv_to_json = new Command({
+    name: "csv_to_json",
+    parameters: [],
+    type: "replaceAll",
+    helpText: "Convert CSV to JSON array of objects using first row as keys.",
+    tutorials: [
+      new TutorialCommand({command: "csv_to_json", description: "Convert CSV with headers to JSON array"})
     ],
-    extensionRoot
-  );
+    extension: extensionRoot
+  });
 
   csv_to_json.execute = function (payload) {
     const casing = getExtensionPreference(extensionName, "key_casing") || "snake_case";
@@ -257,7 +257,7 @@
       const lines = parseCSV(payload.fullText);
 
       if (lines.length < 2) {
-        return new ReturnObject("error", "CSV must have at least a header row and one data row.", "");
+        return new ReturnObject({status: "error", message: "CSV must have at least a header row and one data row.", payload: ""});
       }
 
       const headers = lines[0].map(header => convertCasing(header.trim(), casing));
@@ -281,29 +281,29 @@
       }
 
       const output = JSON.stringify(result, null, 2);
-      return new ReturnObject("success", `Converted CSV to JSON (${result.length} objects).`, output);
+      return new ReturnObject({status: "success", message: `Converted CSV to JSON (${result.length} objects).`, payload: output});
     } catch (e) {
-      return new ReturnObject("error", `Invalid CSV: ${e.message}`, "");
+      return new ReturnObject({status: "error", message: `Invalid CSV: ${e.message}`, payload: ""});
     }
   };
 
   // --- Command: json_sort ---
-  const json_sort = new Command(
-    "json_sort",
-    [
-      new Parameter("string", "key", "Key to sort by", ""),
-      new Parameter("bool", "reverse", "Sort in reverse order", false),
-      new Parameter("string", "parentKey", "Parent key containing the array (optional)", "")
+  const json_sort = new Command({
+    name: "json_sort",
+    parameters: [
+      new Parameter({type: "string", name: "key", helpText: "Key to sort by", default: ""}),
+      new Parameter({type: "bool", name: "reverse", helpText: "Sort in reverse order", default: false}),
+      new Parameter({type: "string", name: "parentKey", helpText: "Parent key containing the array (optional)", default: ""})
     ],
-    "replaceAll",
-    "Sort array of objects by a key value.",
-    [
-      new TutorialCommand("json_sort('name')", "Sort by name field"),
-      new TutorialCommand("json_sort('age', true)", "Sort by age in descending order"),
-      new TutorialCommand("json_sort('id', false, 'users')", "Sort users array by id")
+    type: "replaceAll",
+    helpText: "Sort array of objects by a key value.",
+    tutorials: [
+      new TutorialCommand({command: "json_sort('name')", description: "Sort by name field"}),
+      new TutorialCommand({command: "json_sort('age', true)", description: "Sort by age in descending order"}),
+      new TutorialCommand({command: "json_sort('id', false, 'users')", description: "Sort users array by id"})
     ],
-    extensionRoot
-  );
+    extension: extensionRoot
+  });
 
   json_sort.execute = function (payload) {
     const params = this.getParsedParams(payload);
@@ -312,7 +312,7 @@
     const parentKey = params[2] || "";
 
     if (!key) {
-      return new ReturnObject("error", "Key parameter is required.", "");
+      return new ReturnObject({status: "error", message: "Key parameter is required.", payload: ""});
     }
 
     try {
@@ -324,7 +324,7 @@
       const hasKey = array.some(obj => obj.hasOwnProperty(key));
 
       if (!hasKey) {
-        return new ReturnObject("error", `Key '${key}' not found in array objects.`, "");
+        return new ReturnObject({status: "error", message: `Key '${key}' not found in array objects.`, payload: ""});
       }
 
       // Sort the array
@@ -351,30 +351,30 @@
       });
 
       const output = reconstructJSON(payload.fullText, data, array, found.isRoot, found.parentKey);
-      return new ReturnObject("success", `Sorted array by '${key}'.`, output);
+      return new ReturnObject({status: "success", message: `Sorted array by '${key}'.`, payload: output});
     } catch (e) {
-      return new ReturnObject("error", e.message, "");
+      return new ReturnObject({status: "error", message: e.message, payload: ""});
     }
   };
 
   // --- Command: json_filter ---
-  const json_filter = new Command(
-    "json_filter",
-    [
-      new Parameter("string", "key", "Key to filter by", ""),
-      new Parameter("string", "operator", "Comparison operator (=, !=, >, <, >=, <=, contains, startsWith, endsWith)", "="),
-      new Parameter("string", "value", "Value to compare against", ""),
-      new Parameter("string", "parentKey", "Parent key containing the array (optional)", "")
+  const json_filter = new Command({
+    name: "json_filter",
+    parameters: [
+      new Parameter({type: "string", name: "key", helpText: "Key to filter by", default: ""}),
+      new Parameter({type: "string", name: "operator", helpText: "Comparison operator (=, !=, >, <, >=, <=, contains, startsWith, endsWith)", default: "="}),
+      new Parameter({type: "string", name: "value", helpText: "Value to compare against", default: ""}),
+      new Parameter({type: "string", name: "parentKey", helpText: "Parent key containing the array (optional)", default: ""})
     ],
-    "replaceAll",
-    "Filter array of objects keeping only items matching criteria.",
-    [
-      new TutorialCommand("json_filter('status', '=', 'active')", "Keep only active items"),
-      new TutorialCommand("json_filter('age', '>', '18')", "Keep items where age > 18"),
-      new TutorialCommand("json_filter('name', 'contains', 'John')", "Keep items where name contains John")
+    type: "replaceAll",
+    helpText: "Filter array of objects keeping only items matching criteria.",
+    tutorials: [
+      new TutorialCommand({command: "json_filter('status', '=', 'active')", description: "Keep only active items"}),
+      new TutorialCommand({command: "json_filter('age', '>', '18')", description: "Keep items where age > 18"}),
+      new TutorialCommand({command: "json_filter('name', 'contains', 'John')", description: "Keep items where name contains John"})
     ],
-    extensionRoot
-  );
+    extension: extensionRoot
+  });
 
   json_filter.execute = function (payload) {
     const params = this.getParsedParams(payload);
@@ -384,7 +384,7 @@
     const parentKey = params[3] || "";
 
     if (!key) {
-      return new ReturnObject("error", "Key parameter is required.", "");
+      return new ReturnObject({status: "error", message: "Key parameter is required.", payload: ""});
     }
 
     try {
@@ -397,29 +397,29 @@
       );
 
       const output = reconstructJSON(payload.fullText, data, filtered, found.isRoot, found.parentKey);
-      return new ReturnObject("success", `Filtered to ${filtered.length} items (from ${array.length}).`, output);
+      return new ReturnObject({status: "success", message: `Filtered to ${filtered.length} items (from ${array.length}).`, payload: output});
     } catch (e) {
-      return new ReturnObject("error", e.message, "");
+      return new ReturnObject({status: "error", message: e.message, payload: ""});
     }
   };
 
   // --- Command: json_filter_out ---
-  const json_filter_out = new Command(
-    "json_filter_out",
-    [
-      new Parameter("string", "key", "Key to filter by", ""),
-      new Parameter("string", "operator", "Comparison operator", "="),
-      new Parameter("string", "value", "Value to compare against", ""),
-      new Parameter("string", "parentKey", "Parent key containing the array (optional)", "")
+  const json_filter_out = new Command({
+    name: "json_filter_out",
+    parameters: [
+      new Parameter({type: "string", name: "key", helpText: "Key to filter by", default: ""}),
+      new Parameter({type: "string", name: "operator", helpText: "Comparison operator", default: "="}),
+      new Parameter({type: "string", name: "value", helpText: "Value to compare against", default: ""}),
+      new Parameter({type: "string", name: "parentKey", helpText: "Parent key containing the array (optional)", default: ""})
     ],
-    "replaceAll",
-    "Filter array of objects removing items matching criteria.",
-    [
-      new TutorialCommand("json_filter_out('status', '=', 'deleted')", "Remove deleted items"),
-      new TutorialCommand("json_filter_out('age', '<', '18')", "Remove items where age < 18")
+    type: "replaceAll",
+    helpText: "Filter array of objects removing items matching criteria.",
+    tutorials: [
+      new TutorialCommand({command: "json_filter_out('status', '=', 'deleted')", description: "Remove deleted items"}),
+      new TutorialCommand({command: "json_filter_out('age', '<', '18')", description: "Remove items where age < 18"})
     ],
-    extensionRoot
-  );
+    extension: extensionRoot
+  });
 
   json_filter_out.execute = function (payload) {
     const params = this.getParsedParams(payload);
@@ -429,7 +429,7 @@
     const parentKey = params[3] || "";
 
     if (!key) {
-      return new ReturnObject("error", "Key parameter is required.", "");
+      return new ReturnObject({status: "error", message: "Key parameter is required.", payload: ""});
     }
 
     try {
@@ -442,28 +442,28 @@
       );
 
       const output = reconstructJSON(payload.fullText, data, filtered, found.isRoot, found.parentKey);
-      return new ReturnObject("success", `Removed ${array.length - filtered.length} items, kept ${filtered.length}.`, output);
+      return new ReturnObject({status: "success", message: `Removed ${array.length - filtered.length} items, kept ${filtered.length}.`, payload: output});
     } catch (e) {
-      return new ReturnObject("error", e.message, "");
+      return new ReturnObject({status: "error", message: e.message, payload: ""});
     }
   };
 
   // --- Command: json_add_key ---
-  const json_add_key = new Command(
-    "json_add_key",
-    [
-      new Parameter("string", "key", "Key to add", ""),
-      new Parameter("string", "value", "Value for the key (blank = null)", ""),
-      new Parameter("string", "parentKey", "Parent key containing the array (optional)", "")
+  const json_add_key = new Command({
+    name: "json_add_key",
+    parameters: [
+      new Parameter({type: "string", name: "key", helpText: "Key to add", default: ""}),
+      new Parameter({type: "string", name: "value", helpText: "Value for the key (blank = null)", default: ""}),
+      new Parameter({type: "string", name: "parentKey", helpText: "Parent key containing the array (optional)", default: ""})
     ],
-    "replaceAll",
-    "Add a key-value pair to all objects in array.",
-    [
-      new TutorialCommand("json_add_key('status', 'active')", "Add status=active to all objects"),
-      new TutorialCommand("json_add_key('created', '')", "Add created=null to all objects")
+    type: "replaceAll",
+    helpText: "Add a key-value pair to all objects in array.",
+    tutorials: [
+      new TutorialCommand({command: "json_add_key('status', 'active')", description: "Add status=active to all objects"}),
+      new TutorialCommand({command: "json_add_key('created', '')", description: "Add created=null to all objects"})
     ],
-    extensionRoot
-  );
+    extension: extensionRoot
+  });
 
   json_add_key.execute = function (payload) {
     const params = this.getParsedParams(payload);
@@ -472,7 +472,7 @@
     const parentKey = params[2] || "";
 
     if (!key) {
-      return new ReturnObject("error", "Key parameter is required.", "");
+      return new ReturnObject({status: "error", message: "Key parameter is required.", payload: ""});
     }
 
     try {
@@ -497,26 +497,26 @@
       }
 
       const output = reconstructJSON(payload.fullText, data, array, found.isRoot, found.parentKey);
-      return new ReturnObject("success", `Added '${key}' to ${array.length} objects.`, output);
+      return new ReturnObject({status: "success", message: `Added '${key}' to ${array.length} objects.`, payload: output});
     } catch (e) {
-      return new ReturnObject("error", e.message, "");
+      return new ReturnObject({status: "error", message: e.message, payload: ""});
     }
   };
 
   // --- Command: json_remove_key ---
-  const json_remove_key = new Command(
-    "json_remove_key",
-    [
-      new Parameter("string", "key", "Key to remove", ""),
-      new Parameter("string", "parentKey", "Parent key containing the array (optional)", "")
+  const json_remove_key = new Command({
+    name: "json_remove_key",
+    parameters: [
+      new Parameter({type: "string", name: "key", helpText: "Key to remove", default: ""}),
+      new Parameter({type: "string", name: "parentKey", helpText: "Parent key containing the array (optional)", default: ""})
     ],
-    "replaceAll",
-    "Remove a key from all objects in array.",
-    [
-      new TutorialCommand("json_remove_key('temp_id')", "Remove temp_id from all objects")
+    type: "replaceAll",
+    helpText: "Remove a key from all objects in array.",
+    tutorials: [
+      new TutorialCommand({command: "json_remove_key('temp_id')", description: "Remove temp_id from all objects"})
     ],
-    extensionRoot
-  );
+    extension: extensionRoot
+  });
 
   json_remove_key.execute = function (payload) {
     const params = this.getParsedParams(payload);
@@ -524,7 +524,7 @@
     const parentKey = params[1] || "";
 
     if (!key) {
-      return new ReturnObject("error", "Key parameter is required.", "");
+      return new ReturnObject({status: "error", message: "Key parameter is required.", payload: ""});
     }
 
     try {
@@ -541,28 +541,28 @@
       }
 
       const output = reconstructJSON(payload.fullText, data, array, found.isRoot, found.parentKey);
-      return new ReturnObject("success", `Removed '${key}' from ${count} objects.`, output);
+      return new ReturnObject({status: "success", message: `Removed '${key}' from ${count} objects.`, payload: output});
     } catch (e) {
-      return new ReturnObject("error", e.message, "");
+      return new ReturnObject({status: "error", message: e.message, payload: ""});
     }
   };
 
   // --- Command: json_set_key ---
-  const json_set_key = new Command(
-    "json_set_key",
-    [
-      new Parameter("string", "key", "Key to set", ""),
-      new Parameter("string", "value", "New value for the key", ""),
-      new Parameter("string", "parentKey", "Parent key containing the array (optional)", "")
+  const json_set_key = new Command({
+    name: "json_set_key",
+    parameters: [
+      new Parameter({type: "string", name: "key", helpText: "Key to set", default: ""}),
+      new Parameter({type: "string", name: "value", helpText: "New value for the key", default: ""}),
+      new Parameter({type: "string", name: "parentKey", helpText: "Parent key containing the array (optional)", default: ""})
     ],
-    "replaceAll",
-    "Set a key to a specific value in all objects.",
-    [
-      new TutorialCommand("json_set_key('verified', 'true')", "Set verified=true for all objects"),
-      new TutorialCommand("json_set_key('count', '0')", "Reset count to 0 for all objects")
+    type: "replaceAll",
+    helpText: "Set a key to a specific value in all objects.",
+    tutorials: [
+      new TutorialCommand({command: "json_set_key('verified', 'true')", description: "Set verified=true for all objects"}),
+      new TutorialCommand({command: "json_set_key('count', '0')", description: "Reset count to 0 for all objects"})
     ],
-    extensionRoot
-  );
+    extension: extensionRoot
+  });
 
   json_set_key.execute = function (payload) {
     const params = this.getParsedParams(payload);
@@ -571,7 +571,7 @@
     const parentKey = params[2] || "";
 
     if (!key) {
-      return new ReturnObject("error", "Key parameter is required.", "");
+      return new ReturnObject({status: "error", message: "Key parameter is required.", payload: ""});
     }
 
     try {
@@ -596,28 +596,28 @@
       }
 
       const output = reconstructJSON(payload.fullText, data, array, found.isRoot, found.parentKey);
-      return new ReturnObject("success", `Set '${key}' to '${value}' in ${array.length} objects.`, output);
+      return new ReturnObject({status: "success", message: `Set '${key}' to '${value}' in ${array.length} objects.`, payload: output});
     } catch (e) {
-      return new ReturnObject("error", e.message, "");
+      return new ReturnObject({status: "error", message: e.message, payload: ""});
     }
   };
 
   // --- Command: json_append_key ---
-  const json_append_key = new Command(
-    "json_append_key",
-    [
-      new Parameter("string", "key", "Key to append to", ""),
-      new Parameter("string", "value", "Value to append", ""),
-      new Parameter("string", "parentKey", "Parent key containing the array (optional)", "")
+  const json_append_key = new Command({
+    name: "json_append_key",
+    parameters: [
+      new Parameter({type: "string", name: "key", helpText: "Key to append to", default: ""}),
+      new Parameter({type: "string", name: "value", helpText: "Value to append", default: ""}),
+      new Parameter({type: "string", name: "parentKey", helpText: "Parent key containing the array (optional)", default: ""})
     ],
-    "replaceAll",
-    "Append value to the end of existing key values.",
-    [
-      new TutorialCommand("json_append_key('name', ' Jr.')", "Append ' Jr.' to all names"),
-      new TutorialCommand("json_append_key('url', '.com')", "Append .com to all URLs")
+    type: "replaceAll",
+    helpText: "Append value to the end of existing key values.",
+    tutorials: [
+      new TutorialCommand({command: "json_append_key('name', ' Jr.')", description: "Append ' Jr.' to all names"}),
+      new TutorialCommand({command: "json_append_key('url', '.com')", description: "Append .com to all URLs"})
     ],
-    extensionRoot
-  );
+    extension: extensionRoot
+  });
 
   json_append_key.execute = function (payload) {
     const params = this.getParsedParams(payload);
@@ -626,7 +626,7 @@
     const parentKey = params[2] || "";
 
     if (!key) {
-      return new ReturnObject("error", "Key parameter is required.", "");
+      return new ReturnObject({status: "error", message: "Key parameter is required.", payload: ""});
     }
 
     try {
@@ -643,28 +643,28 @@
       }
 
       const output = reconstructJSON(payload.fullText, data, array, found.isRoot, found.parentKey);
-      return new ReturnObject("success", `Appended to '${key}' in ${count} objects.`, output);
+      return new ReturnObject({status: "success", message: `Appended to '${key}' in ${count} objects.`, payload: output});
     } catch (e) {
-      return new ReturnObject("error", e.message, "");
+      return new ReturnObject({status: "error", message: e.message, payload: ""});
     }
   };
 
   // --- Command: json_prepend_key ---
-  const json_prepend_key = new Command(
-    "json_prepend_key",
-    [
-      new Parameter("string", "key", "Key to prepend to", ""),
-      new Parameter("string", "value", "Value to prepend", ""),
-      new Parameter("string", "parentKey", "Parent key containing the array (optional)", "")
+  const json_prepend_key = new Command({
+    name: "json_prepend_key",
+    parameters: [
+      new Parameter({type: "string", name: "key", helpText: "Key to prepend to", default: ""}),
+      new Parameter({type: "string", name: "value", helpText: "Value to prepend", default: ""}),
+      new Parameter({type: "string", name: "parentKey", helpText: "Parent key containing the array (optional)", default: ""})
     ],
-    "replaceAll",
-    "Prepend value to the beginning of existing key values.",
-    [
-      new TutorialCommand("json_prepend_key('name', 'Dr. ')", "Prepend 'Dr. ' to all names"),
-      new TutorialCommand("json_prepend_key('url', 'https://')", "Prepend https:// to all URLs")
+    type: "replaceAll",
+    helpText: "Prepend value to the beginning of existing key values.",
+    tutorials: [
+      new TutorialCommand({command: "json_prepend_key('name', 'Dr. ')", description: "Prepend 'Dr. ' to all names"}),
+      new TutorialCommand({command: "json_prepend_key('url', 'https://')", description: "Prepend https:// to all URLs"})
     ],
-    extensionRoot
-  );
+    extension: extensionRoot
+  });
 
   json_prepend_key.execute = function (payload) {
     const params = this.getParsedParams(payload);
@@ -673,7 +673,7 @@
     const parentKey = params[2] || "";
 
     if (!key) {
-      return new ReturnObject("error", "Key parameter is required.", "");
+      return new ReturnObject({status: "error", message: "Key parameter is required.", payload: ""});
     }
 
     try {
@@ -690,28 +690,28 @@
       }
 
       const output = reconstructJSON(payload.fullText, data, array, found.isRoot, found.parentKey);
-      return new ReturnObject("success", `Prepended to '${key}' in ${count} objects.`, output);
+      return new ReturnObject({status: "success", message: `Prepended to '${key}' in ${count} objects.`, payload: output});
     } catch (e) {
-      return new ReturnObject("error", e.message, "");
+      return new ReturnObject({status: "error", message: e.message, payload: ""});
     }
   };
 
   // --- Command: json_get_dupes ---
-  const json_get_dupes = new Command(
-    "json_get_dupes",
-    [
-      new Parameter("string", "key", "Key to check for duplicates (leave empty for primitive arrays)", ""),
-      new Parameter("string", "parentKey", "Parent key containing the array (optional)", "")
+  const json_get_dupes = new Command({
+    name: "json_get_dupes",
+    parameters: [
+      new Parameter({type: "string", name: "key", helpText: "Key to check for duplicates (leave empty for primitive arrays)", default: ""}),
+      new Parameter({type: "string", name: "parentKey", helpText: "Parent key containing the array (optional)", default: ""})
     ],
-    "insert",
-    "Find and display duplicate objects by key or duplicate primitives.",
-    [
-      new TutorialCommand("json_get_dupes('email')", "Find objects with duplicate emails"),
-      new TutorialCommand("json_get_dupes('id', 'users')", "Find duplicate IDs in users array"),
-      new TutorialCommand("json_get_dupes", "Find duplicate values in primitive array")
+    type: "insert",
+    helpText: "Find and display duplicate objects by key or duplicate primitives.",
+    tutorials: [
+      new TutorialCommand({command: "json_get_dupes('email')", description: "Find objects with duplicate emails"}),
+      new TutorialCommand({command: "json_get_dupes('id', 'users')", description: "Find duplicate IDs in users array"}),
+      new TutorialCommand({command: "json_get_dupes", description: "Find duplicate values in primitive array"})
     ],
-    extensionRoot
-  );
+    extension: extensionRoot
+  });
 
   json_get_dupes.execute = function (payload) {
     const params = this.getParsedParams(payload);
@@ -730,10 +730,10 @@
           if (Array.isArray(data[parentKey])) {
             array = data[parentKey];
           } else {
-            return new ReturnObject("error", `Key '${parentKey}' does not contain an array.`, "");
+            return new ReturnObject({status: "error", message: `Key '${parentKey}' does not contain an array.`, payload: ""});
           }
         } else {
-          return new ReturnObject("error", `Could not find key '${parentKey}'.`, "");
+          return new ReturnObject({status: "error", message: `Could not find key '${parentKey}'.`, payload: ""});
         }
       } else {
         if (Array.isArray(data)) {
@@ -751,7 +751,7 @@
             }
           }
           if (!foundArray) {
-            return new ReturnObject("error", "Could not find an array in the document.", "");
+            return new ReturnObject({status: "error", message: "Could not find an array in the document.", payload: ""});
           }
         }
       }
@@ -782,7 +782,7 @@
         }
 
         if (dupeGroups.length === 0) {
-          return new ReturnObject("success", "No duplicate values found.", "# No Duplicates Found");
+          return new ReturnObject({status: "success", message: "No duplicate values found.", payload: "# No Duplicates Found"});
         }
 
         // Build output for primitives
@@ -793,12 +793,12 @@
           output += `${group.value}\n\n`;
         }
 
-        return new ReturnObject("success", `Found ${dupeGroups.length} duplicate value groups.`, output);
+        return new ReturnObject({status: "success", message: `Found ${dupeGroups.length} duplicate value groups.`, payload: output});
       }
 
       // Handle array of objects with key
       if (!key) {
-        return new ReturnObject("error", "Key parameter is required for arrays of objects.", "");
+        return new ReturnObject({status: "error", message: "Key parameter is required for arrays of objects.", payload: ""});
       }
 
       // Group by key value
@@ -822,7 +822,7 @@
       }
 
       if (dupeGroups.length === 0) {
-        return new ReturnObject("success", `No duplicates found for key '${key}'.`, "# No Duplicates Found");
+        return new ReturnObject({status: "success", message: `No duplicates found for key '${key}'.`, payload: "# No Duplicates Found"});
       }
 
       // Build output for objects
@@ -836,27 +836,27 @@
         output += "\n";
       }
 
-      return new ReturnObject("success", `Found ${dupeGroups.length} duplicate groups.`, output);
+      return new ReturnObject({status: "success", message: `Found ${dupeGroups.length} duplicate groups.`, payload: output});
     } catch (e) {
-      return new ReturnObject("error", e.message, "");
+      return new ReturnObject({status: "error", message: e.message, payload: ""});
     }
   };
 
   // --- Command: json_dedupe ---
-  const json_dedupe = new Command(
-    "json_dedupe",
-    [
-      new Parameter("bool", "keepFirst", "Keep first occurrence (true) or last (false)", true),
-      new Parameter("string", "parentKey", "Parent key containing the array (optional)", "")
+  const json_dedupe = new Command({
+    name: "json_dedupe",
+    parameters: [
+      new Parameter({type: "bool", name: "keepFirst", helpText: "Keep first occurrence (true) or last (false)", default: true}),
+      new Parameter({type: "string", name: "parentKey", helpText: "Parent key containing the array (optional)", default: ""})
     ],
-    "replaceAll",
-    "Remove exact duplicate objects from array.",
-    [
-      new TutorialCommand("json_dedupe", "Remove duplicates, keeping first occurrence"),
-      new TutorialCommand("json_dedupe(false)", "Remove duplicates, keeping last occurrence")
+    type: "replaceAll",
+    helpText: "Remove exact duplicate objects from array.",
+    tutorials: [
+      new TutorialCommand({command: "json_dedupe", description: "Remove duplicates, keeping first occurrence"}),
+      new TutorialCommand({command: "json_dedupe(false)", description: "Remove duplicates, keeping last occurrence"})
     ],
-    extensionRoot
-  );
+    extension: extensionRoot
+  });
 
   json_dedupe.execute = function (payload) {
     const params = this.getParsedParams(payload);
@@ -892,28 +892,28 @@
       }
 
       const output = reconstructJSON(payload.fullText, data, unique, found.isRoot, found.parentKey);
-      return new ReturnObject("success", `Removed ${array.length - unique.length} duplicates, kept ${unique.length} unique objects.`, output);
+      return new ReturnObject({status: "success", message: `Removed ${array.length - unique.length} duplicates, kept ${unique.length} unique objects.`, payload: output});
     } catch (e) {
-      return new ReturnObject("error", e.message, "");
+      return new ReturnObject({status: "error", message: e.message, payload: ""});
     }
   };
 
   // --- Command: json_sort_array ---
-  const json_sort_array = new Command(
-    "json_sort_array",
-    [
-      new Parameter("bool", "reverse", "Sort in reverse order", false),
-      new Parameter("string", "parentKey", "Parent key containing the array (optional)", "")
+  const json_sort_array = new Command({
+    name: "json_sort_array",
+    parameters: [
+      new Parameter({type: "bool", name: "reverse", helpText: "Sort in reverse order", default: false}),
+      new Parameter({type: "string", name: "parentKey", helpText: "Parent key containing the array (optional)", default: ""})
     ],
-    "replaceAll",
-    "Sort an array of primitive values (strings/numbers).",
-    [
-      new TutorialCommand("json_sort_array", "Sort array of primitives"),
-      new TutorialCommand("json_sort_array(true)", "Sort in descending order"),
-      new TutorialCommand("json_sort_array(false, 'tags')", "Sort tags array")
+    type: "replaceAll",
+    helpText: "Sort an array of primitive values (strings/numbers).",
+    tutorials: [
+      new TutorialCommand({command: "json_sort_array", description: "Sort array of primitives"}),
+      new TutorialCommand({command: "json_sort_array(true)", description: "Sort in descending order"}),
+      new TutorialCommand({command: "json_sort_array(false, 'tags')", description: "Sort tags array"})
     ],
-    extensionRoot
-  );
+    extension: extensionRoot
+  });
 
   json_sort_array.execute = function (payload) {
     const params = this.getParsedParams(payload);
@@ -930,10 +930,10 @@
           if (Array.isArray(data[parentKey])) {
             array = data[parentKey];
           } else {
-            return new ReturnObject("error", `Key '${parentKey}' does not contain an array.`, "");
+            return new ReturnObject({status: "error", message: `Key '${parentKey}' does not contain an array.`, payload: ""});
           }
         } else {
-          return new ReturnObject("error", `Could not find key '${parentKey}'.`, "");
+          return new ReturnObject({status: "error", message: `Could not find key '${parentKey}'.`, payload: ""});
         }
       } else {
         if (Array.isArray(data)) {
@@ -951,7 +951,7 @@
             }
           }
           if (!foundArray) {
-            return new ReturnObject("error", "Could not find an array in the document.", "");
+            return new ReturnObject({status: "error", message: "Could not find an array in the document.", payload: ""});
           }
         }
       }
@@ -959,7 +959,7 @@
       // Check if array contains primitives
       for (const item of array) {
         if (typeof item === 'object' && item !== null) {
-          return new ReturnObject("error", "Array contains objects. Use json_sort for arrays of objects.", "");
+          return new ReturnObject({status: "error", message: "Array contains objects. Use json_sort for arrays of objects.", payload: ""});
         }
       }
 
@@ -979,9 +979,9 @@
       });
 
       const output = isRoot ? JSON.stringify(array, null, 2) : JSON.stringify(data, null, 2);
-      return new ReturnObject("success", `Sorted array of ${array.length} items.`, output);
+      return new ReturnObject({status: "success", message: `Sorted array of ${array.length} items.`, payload: output});
     } catch (e) {
-      return new ReturnObject("error", e.message, "");
+      return new ReturnObject({status: "error", message: e.message, payload: ""});
     }
   };
 })();

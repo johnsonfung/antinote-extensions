@@ -7,35 +7,35 @@
   // Wrap in IIFE to avoid variable conflicts
   const extensionName = "date";
 
-  const extensionRoot = new Extension(
-    extensionName,
-    "1.0.0",
-    [], // No external API endpoints
-    [],  // No API keys required
-    "johnsonfung",  // Author (GitHub username)
-    "Date & Time",  // Category
-    "none"  // Data scope: "none", "line", or "full" - doesn't need note content
-  );
+  const extensionRoot = new Extension({
+    name: extensionName,
+    version: "1.0.0",
+    endpoints: [], // No external API endpoints
+    requiredAPIKeys: [],  // No API keys required
+    author: "johnsonfung",  // Author (GitHub username)
+    category: "Date & Time",  // Category
+    dataScope: "none"  // Data scope: "none", "line", or "full" - doesn't need note content
+  });
 
   // Register extension preferences
-  const formatPref = new Preference(
-    "format",
-    "Date Format",
-    "selectOne",
-    "local_long_date",
-    ["local_long_date", "local_short_date", "us_mdy", "yyyy-mm-dd"],
-    "Choose the default date format for all date commands"
-  );
+  const formatPref = new Preference({
+    key: "format",
+    label: "Date Format",
+    type: "selectOne",
+    defaultValue: "local_long_date",
+    options: ["local_long_date", "local_short_date", "us_mdy", "yyyy-mm-dd"],
+    helpText: "Choose the default date format for all date commands"
+  });
   extensionRoot.register_preference(formatPref);
 
-  const localePref = new Preference(
-    "locale",
-    "Locale",
-    "string",
-    "",
-    null,
-    "Optional locale code (e.g., 'en-CA', 'fr-FR'). Leave empty for system default."
-  );
+  const localePref = new Preference({
+    key: "locale",
+    label: "Locale",
+    type: "string",
+    defaultValue: "",
+    options: null,
+    helpText: "Optional locale code (e.g., 'en-CA', 'fr-FR'). Leave empty for system default."
+  });
   extensionRoot.register_preference(localePref);
 
   // --- helpers ---
@@ -96,21 +96,21 @@
   };
 
   // --- command: today ---
-  const today = new Command(
-    "today",
-    [
+  const today = new Command({
+    name: "today",
+    parameters: [
       // Optional days offset - can be positive or negative
-      new Parameter("int", "daysOffset", "Days to add/subtract from today", 0)
+      new Parameter({type: "int", name: "daysOffset", helpText: "Days to add/subtract from today", default: 0})
     ],
-    "insert",
-    "Insert today's date, optionally offset by days.",
-    [
-      new TutorialCommand("today", "Insert today's date"),
-      new TutorialCommand("today(7)", "Insert date 7 days from today"),
-      new TutorialCommand("today(-5)", "Insert date 5 days ago")
+    type: "insert",
+    helpText: "Insert today's date, optionally offset by days.",
+    tutorials: [
+      new TutorialCommand({command: "today", description: "Insert today's date"}),
+      new TutorialCommand({command: "today(7)", description: "Insert date 7 days from today"}),
+      new TutorialCommand({command: "today(-5)", description: "Insert date 5 days ago"})
     ],
-    extensionRoot
-  );
+    extension: extensionRoot
+  });
 
   today.execute = function (payload) {
     const [daysOffset] = this.getParsedParams(payload);
@@ -118,25 +118,25 @@
     const locale = getExtensionPreference(extensionName, "locale") || "";
     const targetDate = getDateWithOffset(new Date(), daysOffset);
     const out = formatDateOnly(targetDate, format, locale);
-    return new ReturnObject("success", "Inserted date.", out);
+    return new ReturnObject({status: "success", message: "Inserted date.", payload: out});
   };
 
   // --- command: tomorrow ---
-  const tomorrow = new Command(
-    "tomorrow",
-    [
+  const tomorrow = new Command({
+    name: "tomorrow",
+    parameters: [
       // Optional additional days offset (added to base +1)
-      new Parameter("int", "daysOffset", "Additional days to add/subtract", 0)
+      new Parameter({type: "int", name: "daysOffset", helpText: "Additional days to add/subtract", default: 0})
     ],
-    "insert",
-    "Insert tomorrow's date, optionally offset by additional days.",
-    [
-      new TutorialCommand("tomorrow", "Insert tomorrow's date"),
-      new TutorialCommand("tomorrow(7)", "Insert date 8 days from today (tomorrow + 7)"),
-      new TutorialCommand("tomorrow(-1)", "Insert today's date (tomorrow - 1)")
+    type: "insert",
+    helpText: "Insert tomorrow's date, optionally offset by additional days.",
+    tutorials: [
+      new TutorialCommand({command: "tomorrow", description: "Insert tomorrow's date"}),
+      new TutorialCommand({command: "tomorrow(7)", description: "Insert date 8 days from today (tomorrow + 7)"}),
+      new TutorialCommand({command: "tomorrow(-1)", description: "Insert today's date (tomorrow - 1)"})
     ],
-    extensionRoot
-  );
+    extension: extensionRoot
+  });
 
   tomorrow.execute = function (payload) {
     const [daysOffset] = this.getParsedParams(payload);
@@ -144,25 +144,25 @@
     const locale = getExtensionPreference(extensionName, "locale") || "";
     const targetDate = getDateWithOffset(new Date(), 1 + daysOffset);
     const out = formatDateOnly(targetDate, format, locale);
-    return new ReturnObject("success", "Inserted date.", out);
+    return new ReturnObject({status: "success", message: "Inserted date.", payload: out});
   };
 
   // --- command: yesterday ---
-  const yesterday = new Command(
-    "yesterday",
-    [
+  const yesterday = new Command({
+    name: "yesterday",
+    parameters: [
       // Optional additional days offset (added to base -1)
-      new Parameter("int", "daysOffset", "Additional days to add/subtract", 0)
+      new Parameter({type: "int", name: "daysOffset", helpText: "Additional days to add/subtract", default: 0})
     ],
-    "insert",
-    "Insert yesterday's date, optionally offset by additional days.",
-    [
-      new TutorialCommand("yesterday", "Insert yesterday's date"),
-      new TutorialCommand("yesterday(-7)", "Insert date 8 days ago (yesterday - 7)"),
-      new TutorialCommand("yesterday(1)", "Insert today's date (yesterday + 1)")
+    type: "insert",
+    helpText: "Insert yesterday's date, optionally offset by additional days.",
+    tutorials: [
+      new TutorialCommand({command: "yesterday", description: "Insert yesterday's date"}),
+      new TutorialCommand({command: "yesterday(-7)", description: "Insert date 8 days ago (yesterday - 7)"}),
+      new TutorialCommand({command: "yesterday(1)", description: "Insert today's date (yesterday + 1)"})
     ],
-    extensionRoot
-  );
+    extension: extensionRoot
+  });
 
   yesterday.execute = function (payload) {
     const [daysOffset] = this.getParsedParams(payload);
@@ -170,26 +170,26 @@
     const locale = getExtensionPreference(extensionName, "locale") || "";
     const targetDate = getDateWithOffset(new Date(), -1 + daysOffset);
     const out = formatDateOnly(targetDate, format, locale);
-    return new ReturnObject("success", "Inserted date.", out);
+    return new ReturnObject({status: "success", message: "Inserted date.", payload: out});
   };
 
   // --- command: business_day ---
-  const business_day = new Command(
-    "business_day",
-    [
+  const business_day = new Command({
+    name: "business_day",
+    parameters: [
       // Business days offset (positive = future, negative = past, 0 = today if weekday or next Monday)
-      new Parameter("int", "businessDaysOffset", "Business days to add/subtract", 0)
+      new Parameter({type: "int", name: "businessDaysOffset", helpText: "Business days to add/subtract", default: 0})
     ],
-    "insert",
-    "Insert a date offset by business days (excludes weekends).",
-    [
-      new TutorialCommand("business_day", "Insert today if weekday, or next Monday if weekend"),
-      new TutorialCommand("business_day(1)", "Insert next business day (tomorrow if weekday)"),
-      new TutorialCommand("business_day(5)", "Insert date 5 business days from now"),
-      new TutorialCommand("business_day(-3)", "Insert date 3 business days ago")
+    type: "insert",
+    helpText: "Insert a date offset by business days (excludes weekends).",
+    tutorials: [
+      new TutorialCommand({command: "business_day", description: "Insert today if weekday, or next Monday if weekend"}),
+      new TutorialCommand({command: "business_day(1)", description: "Insert next business day (tomorrow if weekday)"}),
+      new TutorialCommand({command: "business_day(5)", description: "Insert date 5 business days from now"}),
+      new TutorialCommand({command: "business_day(-3)", description: "Insert date 3 business days ago"})
     ],
-    extensionRoot
-  );
+    extension: extensionRoot
+  });
 
   business_day.execute = function (payload) {
     const [businessDaysOffset] = this.getParsedParams(payload);
@@ -213,6 +213,6 @@
     }
 
     const out = formatDateOnly(targetDate, format, locale);
-    return new ReturnObject("success", "Inserted business day.", out);
+    return new ReturnObject({status: "success", message: "Inserted business day.", payload: out});
   };
 })();

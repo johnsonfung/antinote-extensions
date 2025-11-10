@@ -6,15 +6,15 @@
 (function () {
   const extensionName = "line_sort";
 
-  const extensionRoot = new Extension(
-    extensionName,
-    "1.0.0",
-    [],
-    [],
-    "johnsonfung",
-    "Text Manipulation",
-    "full"  // Needs full document access
-  );
+  const extensionRoot = new Extension({
+    name: extensionName,
+    version: "1.0.0",
+    endpoints: [],
+    requiredAPIKeys: [],
+    author: "johnsonfung",
+    category: "Text Manipulation",
+    dataScope: "full"  // Needs full document access
+  });
 
   // --- Helper Functions ---
 
@@ -29,22 +29,22 @@
   };
 
   // --- Command: sort_lines_alpha ---
-  const sort_lines_alpha = new Command(
-    "sort_lines_alpha",
-    [
-      new Parameter("bool", "reverse", "Sort in reverse order", false),
-      new Parameter("bool", "ignoreFirstLine", "Skip first line when sorting", false)
+  const sort_lines_alpha = new Command({
+    name: "sort_lines_alpha",
+    parameters: [
+      new Parameter({type: "bool", name: "reverse", helpText: "Sort in reverse order", default: false}),
+      new Parameter({type: "bool", name: "ignoreFirstLine", helpText: "Skip first line when sorting", default: false})
     ],
-    "replaceAll",
-    "Sort lines alphabetically with optional reverse and skip first line.",
-    [
-      new TutorialCommand("sort_lines_alpha", "Sort lines alphabetically"),
-      new TutorialCommand("sort_lines_alpha(true)", "Sort lines in reverse alphabetical order"),
-      new TutorialCommand("sort_lines_alpha(false, true)", "Sort lines alphabetically, keeping first line in place"),
-      new TutorialCommand("sort_lines_alpha(true, true)", "Sort lines in reverse, keeping first line in place")
+    type: "replaceAll",
+    helpText: "Sort lines alphabetically with optional reverse and skip first line.",
+    tutorials: [
+      new TutorialCommand({command: "sort_lines_alpha", description: "Sort lines alphabetically"}),
+      new TutorialCommand({command: "sort_lines_alpha(true)", description: "Sort lines in reverse alphabetical order"}),
+      new TutorialCommand({command: "sort_lines_alpha(false, true)", description: "Sort lines alphabetically, keeping first line in place"}),
+      new TutorialCommand({command: "sort_lines_alpha(true, true)", description: "Sort lines in reverse, keeping first line in place"})
     ],
-    extensionRoot
-  );
+    extension: extensionRoot
+  });
 
   sort_lines_alpha.execute = function (payload) {
     const params = this.getParsedParams(payload);
@@ -54,7 +54,7 @@
     const lines = payload.fullText.split("\n");
 
     if (lines.length === 0) {
-      return new ReturnObject("success", "No lines to sort.", payload.fullText);
+      return new ReturnObject({status: "success", message: "No lines to sort.", payload: payload.fullText});
     }
 
     let firstLine = "";
@@ -79,26 +79,26 @@
       : linesToSort.join("\n");
 
     const message = reverse ? "Lines sorted in reverse alphabetical order." : "Lines sorted alphabetically.";
-    return new ReturnObject("success", message, result);
+    return new ReturnObject({status: "success", message: message, payload: result});
   };
 
   // --- Command: sort_lines_number ---
-  const sort_lines_number = new Command(
-    "sort_lines_number",
-    [
-      new Parameter("bool", "reverse", "Sort in reverse order", false),
-      new Parameter("bool", "ignoreFirstLine", "Skip first line when sorting", false)
+  const sort_lines_number = new Command({
+    name: "sort_lines_number",
+    parameters: [
+      new Parameter({type: "bool", name: "reverse", helpText: "Sort in reverse order", default: false}),
+      new Parameter({type: "bool", name: "ignoreFirstLine", helpText: "Skip first line when sorting", default: false})
     ],
-    "replaceAll",
-    "Sort lines by the first number found in each line.",
-    [
-      new TutorialCommand("sort_lines_number", "Sort lines by first number"),
-      new TutorialCommand("sort_lines_number(true)", "Sort lines by first number in reverse"),
-      new TutorialCommand("sort_lines_number(false, true)", "Sort by first number, keeping first line in place"),
-      new TutorialCommand("sort_lines_number(true, true)", "Sort by first number in reverse, keeping first line in place")
+    type: "replaceAll",
+    helpText: "Sort lines by the first number found in each line.",
+    tutorials: [
+      new TutorialCommand({command: "sort_lines_number", description: "Sort lines by first number"}),
+      new TutorialCommand({command: "sort_lines_number(true)", description: "Sort lines by first number in reverse"}),
+      new TutorialCommand({command: "sort_lines_number(false, true)", description: "Sort by first number, keeping first line in place"}),
+      new TutorialCommand({command: "sort_lines_number(true, true)", description: "Sort by first number in reverse, keeping first line in place"})
     ],
-    extensionRoot
-  );
+    extension: extensionRoot
+  });
 
   sort_lines_number.execute = function (payload) {
     const params = this.getParsedParams(payload);
@@ -108,7 +108,7 @@
     const lines = payload.fullText.split("\n");
 
     if (lines.length === 0) {
-      return new ReturnObject("success", "No lines to sort.", payload.fullText);
+      return new ReturnObject({status: "success", message: "No lines to sort.", payload: payload.fullText});
     }
 
     let firstLine = "";
@@ -139,26 +139,26 @@
       : linesToSort.join("\n");
 
     const message = reverse ? "Lines sorted by first number (reverse)." : "Lines sorted by first number.";
-    return new ReturnObject("success", message, result);
+    return new ReturnObject({status: "success", message: message, payload: result});
   };
 
   // --- Command: sort_lines_number_last ---
-  const sort_lines_number_last = new Command(
-    "sort_lines_number_last",
-    [
-      new Parameter("bool", "reverse", "Sort in reverse order", false),
-      new Parameter("bool", "ignoreFirstLine", "Skip first line when sorting", false)
+  const sort_lines_number_last = new Command({
+    name: "sort_lines_number_last",
+    parameters: [
+      new Parameter({type: "bool", name: "reverse", helpText: "Sort in reverse order", default: false}),
+      new Parameter({type: "bool", name: "ignoreFirstLine", helpText: "Skip first line when sorting", default: false})
     ],
-    "replaceAll",
-    "Sort lines by the last number found in each line.",
-    [
-      new TutorialCommand("sort_lines_number_last", "Sort lines by last number"),
-      new TutorialCommand("sort_lines_number_last(true)", "Sort lines by last number in reverse"),
-      new TutorialCommand("sort_lines_number_last(false, true)", "Sort by last number, keeping first line in place"),
-      new TutorialCommand("sort_lines_number_last(true, true)", "Sort by last number in reverse, keeping first line in place")
+    type: "replaceAll",
+    helpText: "Sort lines by the last number found in each line.",
+    tutorials: [
+      new TutorialCommand({command: "sort_lines_number_last", description: "Sort lines by last number"}),
+      new TutorialCommand({command: "sort_lines_number_last(true)", description: "Sort lines by last number in reverse"}),
+      new TutorialCommand({command: "sort_lines_number_last(false, true)", description: "Sort by last number, keeping first line in place"}),
+      new TutorialCommand({command: "sort_lines_number_last(true, true)", description: "Sort by last number in reverse, keeping first line in place"})
     ],
-    extensionRoot
-  );
+    extension: extensionRoot
+  });
 
   sort_lines_number_last.execute = function (payload) {
     const params = this.getParsedParams(payload);
@@ -168,7 +168,7 @@
     const lines = payload.fullText.split("\n");
 
     if (lines.length === 0) {
-      return new ReturnObject("success", "No lines to sort.", payload.fullText);
+      return new ReturnObject({status: "success", message: "No lines to sort.", payload: payload.fullText});
     }
 
     let firstLine = "";
@@ -199,23 +199,23 @@
       : linesToSort.join("\n");
 
     const message = reverse ? "Lines sorted by last number (reverse)." : "Lines sorted by last number.";
-    return new ReturnObject("success", message, result);
+    return new ReturnObject({status: "success", message: message, payload: result});
   };
 
   // --- Command: sort_lines_reverse ---
-  const sort_lines_reverse = new Command(
-    "sort_lines_reverse",
-    [
-      new Parameter("bool", "ignoreFirstLine", "Skip first line when reversing", false)
+  const sort_lines_reverse = new Command({
+    name: "sort_lines_reverse",
+    parameters: [
+      new Parameter({type: "bool", name: "ignoreFirstLine", helpText: "Skip first line when reversing", default: false})
     ],
-    "replaceAll",
-    "Reverse the order of lines in the document.",
-    [
-      new TutorialCommand("sort_lines_reverse", "Reverse all lines"),
-      new TutorialCommand("sort_lines_reverse(true)", "Reverse lines, keeping first line in place")
+    type: "replaceAll",
+    helpText: "Reverse the order of lines in the document.",
+    tutorials: [
+      new TutorialCommand({command: "sort_lines_reverse", description: "Reverse all lines"}),
+      new TutorialCommand({command: "sort_lines_reverse(true)", description: "Reverse lines, keeping first line in place"})
     ],
-    extensionRoot
-  );
+    extension: extensionRoot
+  });
 
   sort_lines_reverse.execute = function (payload) {
     const params = this.getParsedParams(payload);
@@ -224,7 +224,7 @@
     const lines = payload.fullText.split("\n");
 
     if (lines.length === 0) {
-      return new ReturnObject("success", "No lines to reverse.", payload.fullText);
+      return new ReturnObject({status: "success", message: "No lines to reverse.", payload: payload.fullText});
     }
 
     let firstLine = "";
@@ -242,25 +242,25 @@
       ? [firstLine, ...linesToReverse].join("\n")
       : linesToReverse.join("\n");
 
-    return new ReturnObject("success", "Lines reversed.", result);
+    return new ReturnObject({status: "success", message: "Lines reversed.", payload: result});
   };
 
   // --- Command: dedupe_lines ---
-  const dedupe_lines = new Command(
-    "dedupe_lines",
-    [
-      new Parameter("bool", "keepFirst", "Keep first occurrence (true) or last (false)", true),
-      new Parameter("bool", "ignoreFirstLine", "Skip first line when deduping", false)
+  const dedupe_lines = new Command({
+    name: "dedupe_lines",
+    parameters: [
+      new Parameter({type: "bool", name: "keepFirst", helpText: "Keep first occurrence (true) or last (false)", default: true}),
+      new Parameter({type: "bool", name: "ignoreFirstLine", helpText: "Skip first line when deduping", default: false})
     ],
-    "replaceAll",
-    "Remove duplicate lines keeping first or last occurrence.",
-    [
-      new TutorialCommand("dedupe_lines", "Remove duplicates, keeping first occurrence"),
-      new TutorialCommand("dedupe_lines(false)", "Remove duplicates, keeping last occurrence"),
-      new TutorialCommand("dedupe_lines(true, true)", "Remove duplicates, keeping first line as header")
+    type: "replaceAll",
+    helpText: "Remove duplicate lines keeping first or last occurrence.",
+    tutorials: [
+      new TutorialCommand({command: "dedupe_lines", description: "Remove duplicates, keeping first occurrence"}),
+      new TutorialCommand({command: "dedupe_lines(false)", description: "Remove duplicates, keeping last occurrence"}),
+      new TutorialCommand({command: "dedupe_lines(true, true)", description: "Remove duplicates, keeping first line as header"})
     ],
-    extensionRoot
-  );
+    extension: extensionRoot
+  });
 
   dedupe_lines.execute = function (payload) {
     const params = this.getParsedParams(payload);
@@ -270,7 +270,7 @@
     const lines = payload.fullText.split("\n");
 
     if (lines.length === 0) {
-      return new ReturnObject("success", "No lines to dedupe.", payload.fullText);
+      return new ReturnObject({status: "success", message: "No lines to dedupe.", payload: payload.fullText});
     }
 
     let firstLine = "";
@@ -307,23 +307,23 @@
       : unique.join("\n");
 
     const removed = linesToDedupe.length - unique.length;
-    return new ReturnObject("success", `Removed ${removed} duplicate lines, kept ${unique.length} unique.`, result);
+    return new ReturnObject({status: "success", message: `Removed ${removed} duplicate lines, kept ${unique.length} unique.`, payload: result});
   };
 
   // --- Command: get_dupes ---
-  const get_dupes = new Command(
-    "get_dupes",
-    [
-      new Parameter("bool", "ignoreFirstLine", "Skip first line when finding dupes", false)
+  const get_dupes = new Command({
+    name: "get_dupes",
+    parameters: [
+      new Parameter({type: "bool", name: "ignoreFirstLine", helpText: "Skip first line when finding dupes", default: false})
     ],
-    "insert",
-    "Find and display duplicate lines grouped together.",
-    [
-      new TutorialCommand("get_dupes", "Find all duplicate lines"),
-      new TutorialCommand("get_dupes(true)", "Find duplicates, skipping first line")
+    type: "insert",
+    helpText: "Find and display duplicate lines grouped together.",
+    tutorials: [
+      new TutorialCommand({command: "get_dupes", description: "Find all duplicate lines"}),
+      new TutorialCommand({command: "get_dupes(true)", description: "Find duplicates, skipping first line"})
     ],
-    extensionRoot
-  );
+    extension: extensionRoot
+  });
 
   get_dupes.execute = function (payload) {
     const params = this.getParsedParams(payload);
@@ -332,7 +332,7 @@
     const lines = payload.fullText.split("\n");
 
     if (lines.length === 0) {
-      return new ReturnObject("success", "No lines to check.", "# No Duplicates Found");
+      return new ReturnObject({status: "success", message: "No lines to check.", payload: "# No Duplicates Found"});
     }
 
     let linesToCheck = lines;
@@ -359,7 +359,7 @@
     }
 
     if (dupeGroups.length === 0) {
-      return new ReturnObject("success", "No duplicate lines found.", "# No Duplicates Found");
+      return new ReturnObject({status: "success", message: "No duplicate lines found.", payload: "# No Duplicates Found"});
     }
 
     // Build output
@@ -370,6 +370,6 @@
       output += `${group.line}\n\n`;
     }
 
-    return new ReturnObject("success", `Found ${dupeGroups.length} duplicate line groups.`, output);
+    return new ReturnObject({status: "success", message: `Found ${dupeGroups.length} duplicate line groups.`, payload: output});
   };
 })();

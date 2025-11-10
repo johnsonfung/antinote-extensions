@@ -80,17 +80,17 @@ Wrap your extension in an IIFE (Immediately Invoked Function Expression) to avoi
   var extensionName = "my_extension";
 
   // Create the extension root
-  var extensionRoot = new Extension(
-    extensionName,      // Name of your extension
-    "1.0.0",           // Version
-    [],                // API endpoints (if making network requests)
-    [],                // Required API key IDs
-    "your_github",     // Author (GitHub username)
-    "Utilities",       // Category
-    "none",            // Data scope: "none", "line", or "full"
-    [],                // Dependencies (optional - other extensions this depends on)
-    false              // isService (optional - true if this provides services to other extensions)
-  );
+  var extensionRoot = new Extension({
+    name: extensionName,      // Name of your extension
+    version: "1.0.0",         // Version
+    endpoints: [],            // API endpoints (if making network requests)
+    requiredAPIKeys: [],      // Required API key IDs
+    author: "your_github",    // Author (GitHub username)
+    category: "Utilities",    // Category
+    dataScope: "none",        // Data scope: "none", "line", or "full"
+    dependencies: [],         // Dependencies (optional - other extensions this depends on)
+    isService: false          // isService (optional - true if this provides services to other extensions)
+  });
 
   // Define commands here...
 })();
@@ -98,7 +98,7 @@ Wrap your extension in an IIFE (Immediately Invoked Function Expression) to avoi
 
 ### Extension Parameters
 
-#### `new Extension(name, version, endpoints, requiredAPIKeys, author, category, dataScope, dependencies, isService)`
+#### `Extension({name, version, endpoints, requiredAPIKeys, author, category, dataScope, dependencies, isService})`
 
 - **`name`** (string): Unique name for your extension
 - **`version`** (string): Version number (e.g., "1.0.0")
@@ -149,29 +149,29 @@ Each command within an extension can have:
 ### Command Structure
 
 ```js
-var my_command = new Command(
-  "my_command",        // Command name (what user types)
+var my_command = new Command({
+  name: "my_command",  // Command name (what user types)
 
   // Parameters array
-  [
-    new Parameter("float", "from", "Bottom range", 0),
-    new Parameter("float", "to", "Top range", 100),
-    new Parameter("bool", "int", "Round to nearest whole number", true)
+  parameters: [
+    new Parameter({type: "float", name: "from", helpText: "Bottom range", default: 0}),
+    new Parameter({type: "float", name: "to", helpText: "Top range", default: 100}),
+    new Parameter({type: "bool", name: "int", helpText: "Round to nearest whole number", default: true})
   ],
 
-  "replaceLine",       // Type: "insert", "replaceLine", "replaceAll", "openURL"
+  type: "replaceLine", // Type: "insert", "replaceLine", "replaceAll", "openURL"
 
-  "Generate a random number between two values.",  // Help text
+  helpText: "Generate a random number between two values.",  // Help text
 
   // Tutorial examples
-  [
-    new TutorialCommand("my_command", "Generate a random number from 0 to 100"),
-    new TutorialCommand("my_command(10, 20)", "Generate from 10 to 20"),
-    new TutorialCommand("my_command(10, 20, false)", "Generate decimal from 10 to 20")
+  tutorials: [
+    new TutorialCommand({command: "my_command", description: "Generate a random number from 0 to 100"}),
+    new TutorialCommand({command: "my_command(10, 20)", description: "Generate from 10 to 20"}),
+    new TutorialCommand({command: "my_command(10, 20, false)", description: "Generate decimal from 10 to 20"})
   ],
 
-  extensionRoot        // Parent extension
-);
+  extension: extensionRoot  // Parent extension
+});
 ```
 
 ### Command Types
@@ -184,7 +184,7 @@ var my_command = new Command(
 ### Parameters
 
 ```js
-new Parameter(type, name, helpText, defaultValue)
+new Parameter({type, name, helpText, default})
 ```
 
 **Parameter Types:**
@@ -207,7 +207,7 @@ my_command.execute = function(payload) {
 
   // Validate inputs
   if (from > to) {
-    return new ReturnObject("error", "The 'from' value cannot be greater than 'to'.");
+    return new ReturnObject({status: "error", message: "The 'from' value cannot be greater than 'to'."});
   }
 
   // Execute logic
@@ -217,7 +217,7 @@ my_command.execute = function(payload) {
   }
 
   // Return result
-  return new ReturnObject("success", "Random number generated.", result);
+  return new ReturnObject({status: "success", message: "Random number generated.", payload: result});
 };
 ```
 
@@ -244,7 +244,7 @@ Your function receives a `payload` object:
 ### Return Object
 
 ```js
-new ReturnObject(status, message, payload)
+new ReturnObject({status, message, payload})
 ```
 
 - **`status`**: `"success"` or `"error"`
@@ -261,15 +261,15 @@ Extensions can make external API calls using the secure `callAPI` bridge functio
 
 ```js
 // 1. Declare endpoints and API keys
-const extensionRoot = new Extension(
-  "weather",
-  "1.0.0",
-  ["https://api.weatherapi.com/v1"],  // Endpoints
-  ["apikey_weather"],                  // Required keys
-  "your_github",
-  "Utilities",
-  "none"
-);
+const extensionRoot = new Extension({
+  name: "weather",
+  version: "1.0.0",
+  endpoints: ["https://api.weatherapi.com/v1"],  // Endpoints
+  requiredAPIKeys: ["apikey_weather"],            // Required keys
+  author: "your_github",
+  category: "Utilities",
+  dataScope: "none"
+});
 
 // 2. Make API call
 my_command.execute = function(payload) {
@@ -277,11 +277,11 @@ my_command.execute = function(payload) {
   const result = callAPI("apikey_weather", url, "GET", JSON.stringify({}), "");
 
   if (!result.success) {
-    return new ReturnObject("error", `API failed: ${result.error}`);
+    return new ReturnObject({status: "error", message: `API failed: ${result.error}`});
   }
 
   const data = JSON.parse(result.data);
-  return new ReturnObject("success", "Weather retrieved", data.current.temp_f + "°F");
+  return new ReturnObject({status: "success", message: "Weather retrieved", payload: data.current.temp_f + "°F"});
 };
 ```
 
@@ -304,14 +304,14 @@ Extensions can define user-configurable preferences that appear in Settings.
 
 ```js
 // After creating extensionRoot, register preferences
-var modelPref = new Preference(
-  "model",                    // Key (used in code)
-  "OpenAI Model",            // Label (shown to user)
-  "selectOne",               // Type: "bool", "string", "selectOne", "selectMultiple"
-  "gpt-4o",                  // Default value
-  ["gpt-4o", "gpt-4o-mini"], // Options (for select types)
-  "Select which model to use" // Help text
-);
+var modelPref = new Preference({
+  key: "model",                       // Key (used in code)
+  label: "OpenAI Model",              // Label (shown to user)
+  type: "selectOne",                  // Type: "bool", "string", "selectOne", "selectMultiple"
+  defaultValue: "gpt-4o",             // Default value
+  options: ["gpt-4o", "gpt-4o-mini"], // Options (for select types)
+  helpText: "Select which model to use" // Help text
+});
 extensionRoot.register_preference(modelPref);
 ```
 
@@ -352,23 +352,23 @@ Antinote provides a centralized **AI Providers Service** (`ai_providers`) that h
 
 ```js
 // 1. Declare dependency on ai_providers
-const extensionRoot = new Extension(
-  "my_ai_extension",
-  "1.0.0",
-  [],                   // No endpoints - ai_providers handles this
-  [],                   // No API keys - ai_providers handles this
-  "your_github",
-  "AI & ML",
-  "full",
-  ["ai_providers"],     // Dependency
-  false
-);
+const extensionRoot = new Extension({
+  name: "my_ai_extension",
+  version: "1.0.0",
+  endpoints: [],              // No endpoints - ai_providers handles this
+  requiredAPIKeys: [],        // No API keys - ai_providers handles this
+  author: "your_github",
+  category: "AI & ML",
+  dataScope: "full",
+  dependencies: ["ai_providers"], // Dependency
+  isService: false
+});
 
 // 2. Use the AI service
 my_command.execute = function(payload) {
   // Check availability
   if (typeof callAIProvider === 'undefined') {
-    return new ReturnObject("error", "AI Providers service not available.");
+    return new ReturnObject({status: "error", message: "AI Providers service not available."});
   }
 
   const fullText = payload.fullText || "";
@@ -409,22 +409,22 @@ Service extensions provide reusable functionality for other extensions. The `ai_
 Declare the dependency and check availability:
 
 ```js
-const extensionRoot = new Extension(
-  "my_extension",
-  "1.0.0",
-  [],
-  [],
-  "your_github",
-  "Utilities",
-  "none",
-  ["ai_providers"],  // Depends on ai_providers
-  false
-);
+const extensionRoot = new Extension({
+  name: "my_extension",
+  version: "1.0.0",
+  endpoints: [],
+  requiredAPIKeys: [],
+  author: "your_github",
+  category: "Utilities",
+  dataScope: "none",
+  dependencies: ["ai_providers"],  // Depends on ai_providers
+  isService: false
+});
 
 my_command.execute = function(payload) {
   // Always check if service is available
   if (typeof callAIProvider === 'undefined') {
-    return new ReturnObject("error", "AI Providers service not available.");
+    return new ReturnObject({status: "error", message: "AI Providers service not available."});
   }
 
   // Use the service
@@ -438,21 +438,21 @@ my_command.execute = function(payload) {
 Set `isService: true` and export global functions:
 
 ```js
-const extensionRoot = new Extension(
-  "my_service",
-  "1.0.0",
-  [],
-  [],
-  "your_github",
-  "Services",
-  "none",
-  [],
-  true  // This is a service
-);
+const extensionRoot = new Extension({
+  name: "my_service",
+  version: "1.0.0",
+  endpoints: [],
+  requiredAPIKeys: [],
+  author: "your_github",
+  category: "Services",
+  dataScope: "none",
+  dependencies: [],
+  isService: true  // This is a service
+});
 
 function myServiceFunction(input) {
   // ... service logic
-  return new ReturnObject("success", "Processed", result);
+  return new ReturnObject({status: "success", message: "Processed", payload: result});
 }
 
 // Export globally
@@ -509,42 +509,42 @@ Here's a complete extension with preferences, error handling, and best practices
 (function() {
   var extensionName = "random";
 
-  var extensionRoot = new Extension(
-    extensionName,
-    "1.0.0",
-    [],              // No network calls
-    [],              // No API keys
-    "johnsonfung",
-    "Random Generators",
-    "none"           // Doesn't need note content
-  );
+  var extensionRoot = new Extension({
+    name: extensionName,
+    version: "1.0.0",
+    endpoints: [],         // No network calls
+    requiredAPIKeys: [],   // No API keys
+    author: "johnsonfung",
+    category: "Random Generators",
+    dataScope: "none"      // Doesn't need note content
+  });
 
-  var random_number = new Command(
-    "random_number",
-    [
-      new Parameter("float", "from", "Bottom range", 0),
-      new Parameter("float", "to", "Top range", 100),
-      new Parameter("bool", "int", "Round to nearest whole number", true)
+  var random_number = new Command({
+    name: "random_number",
+    parameters: [
+      new Parameter({type: "float", name: "from", helpText: "Bottom range", default: 0}),
+      new Parameter({type: "float", name: "to", helpText: "Top range", default: 100}),
+      new Parameter({type: "bool", name: "int", helpText: "Round to nearest whole number", default: true})
     ],
-    "replaceLine",
-    "Generate a random number between two values.",
-    [
-      new TutorialCommand("random_number", "Generate random integer 0-100"),
-      new TutorialCommand("random_number(10, 20)", "Generate random integer 10-20"),
-      new TutorialCommand("random_number(10, 20, false)", "Generate decimal 10-20")
+    type: "replaceLine",
+    helpText: "Generate a random number between two values.",
+    tutorials: [
+      new TutorialCommand({command: "random_number", description: "Generate random integer 0-100"}),
+      new TutorialCommand({command: "random_number(10, 20)", description: "Generate random integer 10-20"}),
+      new TutorialCommand({command: "random_number(10, 20, false)", description: "Generate decimal 10-20"})
     ],
-    extensionRoot
-  );
+    extension: extensionRoot
+  });
 
   random_number.execute = function(payload) {
     var [from, to, int] = this.getParsedParams(payload);
 
     // Validation
     if (from > to) {
-      return new ReturnObject("error", "'from' cannot be greater than 'to'.");
+      return new ReturnObject({status: "error", message: "'from' cannot be greater than 'to'."});
     }
     if (from < 0 || to < 0) {
-      return new ReturnObject("error", "Values cannot be negative.");
+      return new ReturnObject({status: "error", message: "Values cannot be negative."});
     }
 
     // Logic
@@ -553,7 +553,7 @@ Here's a complete extension with preferences, error handling, and best practices
       result = Math.floor(result);
     }
 
-    return new ReturnObject("success", "Random number generated.", result);
+    return new ReturnObject({status: "success", message: "Random number generated.", payload: result});
   };
 })();
 ```
@@ -609,26 +609,26 @@ To become an official extension (included with Antinote by default):
 
 ### Constructors
 
-#### `Extension(name, version, endpoints, requiredAPIKeys, author, category, dataScope, dependencies, isService)`
+#### `Extension({name, version, endpoints, requiredAPIKeys, author, category, dataScope, dependencies, isService})`
 Creates extension container.
 - **dependencies** (optional): Array of extension names this depends on
 - **isService** (optional): Boolean - true if providing services to other extensions
 
-#### `Command(name, parameters, type, helpText, tutorials, extension)`
+#### `Command({name, parameters, type, helpText, tutorials, extension})`
 Registers a command (note: aliases parameter has been removed).
 
-#### `Parameter(type, name, helpText, defaultValue)`
+#### `Parameter({type, name, helpText, default})`
 Defines command parameter.
 - Types: `"float"`, `"int"`, `"bool"`, `"string"`, `"paragraph"`
 
-#### `TutorialCommand(command, description)`
+#### `TutorialCommand({command, description})`
 Example usage for users.
 
-#### `Preference(key, label, type, defaultValue, options, helpText)`
+#### `Preference({key, label, type, defaultValue, options, helpText})`
 User-configurable preference.
 - Types: `"bool"`, `"string"`, `"paragraph"`, `"selectOne"`, `"selectMultiple"`
 
-#### `ReturnObject(status, message, payload)`
+#### `ReturnObject({status, message, payload})`
 Standard return value.
 - Status: `"success"` or `"error"`
 

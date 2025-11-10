@@ -1,6 +1,6 @@
 {
   "name": "dice",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "author": "Antinote Community",
   "description": "Roll dice of various types (D2, D3, D4, D6, D8, D10, D12, D20, etc.)",
   "license": "MIT",

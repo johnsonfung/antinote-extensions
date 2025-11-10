@@ -82,57 +82,57 @@
         }
     }
 
-    const extensionRoot = new Extension(
-        extensionName,
-        "1.0.0",
-        allEndpoints,
-        allApiKeys,
-        "johnsonfung",
-        "AI & ML",
-        "none",
-        [],      // dependencies
-        true     // isService
-    );
+    const extensionRoot = new Extension({
+        name: extensionName,
+        version: "1.0.0",
+        endpoints: allEndpoints,
+        requiredAPIKeys: allApiKeys,
+        author: "johnsonfung",
+        category: "AI & ML",
+        dataScope: "none",
+        dependencies: [],      // dependencies
+        isService: true     // isService
+    });
 
     // Register shared preferences
-    const providerPref = new Preference(
-        "provider",
-        "AI Provider",
-        "selectOne",
-        "openai",
-        ["openai", "anthropic", "google", "openrouter", "ollama"],
-        "Default AI provider for all AI-powered extensions"
-    );
+    const providerPref = new Preference({
+    key: "provider",
+    label: "AI Provider",
+    type: "selectOne",
+    defaultValue: "openai",
+    options: ["openai", "anthropic", "google", "openrouter", "ollama"],
+    helpText: "Default AI provider for all AI-powered extensions"
+  });
     extensionRoot.register_preference(providerPref);
 
-    const modelPref = new Preference(
-        "model",
-        "Model",
-        "string",
-        "gpt-4o",
-        null,
-        "Default model name (depends on provider). See README for available models."
-    );
+    const modelPref = new Preference({
+    key: "model",
+    label: "Model",
+    type: "string",
+    defaultValue: "gpt-4o",
+    options: null,
+    helpText: "Default model name (depends on provider). See README for available models."
+  });
     extensionRoot.register_preference(modelPref);
 
-    const systemPromptPref = new Preference(
-        "systemPrompt",
-        "System Prompt",
-        "string",
-        "You are a helpful assistant integrated into a plaintext scratch notes app. Be concise and direct.",
-        null,
-        "Default system prompt for AI requests"
-    );
+    const systemPromptPref = new Preference({
+    key: "systemPrompt",
+    label: "System Prompt",
+    type: "string",
+    defaultValue: "You are a helpful assistant integrated into a plaintext scratch notes app. Be concise and direct.",
+    options: null,
+    helpText: "Default system prompt for AI requests"
+  });
     extensionRoot.register_preference(systemPromptPref);
 
-    const defaultMaxTokensPref = new Preference(
-        "defaultMaxTokens",
-        "Default Max Tokens",
-        "string",
-        "150",
-        null,
-        "Default maximum tokens for AI responses"
-    );
+    const defaultMaxTokensPref = new Preference({
+    key: "defaultMaxTokens",
+    label: "Default Max Tokens",
+    type: "string",
+    defaultValue: "150",
+    options: null,
+    helpText: "Default maximum tokens for AI responses"
+  });
     extensionRoot.register_preference(defaultMaxTokensPref);
 
     // Helper function to build request for different providers
@@ -276,7 +276,7 @@
 
             // Validation
             if (!prompt || prompt.trim() === "") {
-                return new ReturnObject("error", "Please provide a prompt.");
+                return new ReturnObject({status: "error", message: "Please provide a prompt."});
             }
 
             // Get preferences (use options to override)
@@ -294,11 +294,11 @@
 
             // Validate parameters
             if (maxTokens < 1 || maxTokens > 4000) {
-                return new ReturnObject("error", "maxTokens must be between 1 and 4000.");
+                return new ReturnObject({status: "error", message: "maxTokens must be between 1 and 4000."});
             }
 
             if (temperature < 0 || temperature > 2) {
-                return new ReturnObject("error", "temperature must be between 0.0 and 2.0.");
+                return new ReturnObject({status: "error", message: "temperature must be between 0.0 and 2.0."});
             }
 
             console.log("AI Provider Service - Calling with provider:", provider);
@@ -308,7 +308,7 @@
             const request = buildRequest(provider, model, systemPrompt, prompt, maxTokens, temperature);
 
             if (!request) {
-                return new ReturnObject("error", `Invalid provider configuration: ${provider}`);
+                return new ReturnObject({status: "error", message: `Invalid provider configuration: ${provider}`});
             }
 
             // Call the API
@@ -335,10 +335,7 @@
             console.log("AI Provider Service - API call completed");
 
             if (!result.success) {
-                return new ReturnObject(
-                    "error",
-                    `API call failed: ${result.error || "Unknown error"}`
-                );
+                return new ReturnObject({status: "error", message: `API call failed: ${result.error || "Unknown error"}`});
             }
 
             // Parse the response
@@ -350,30 +347,21 @@
                 if (typeof errorMessage === "object") {
                     errorMessage = JSON.stringify(errorMessage);
                 }
-                return new ReturnObject(
-                    "error",
-                    `API error: ${errorMessage}`
-                );
+                return new ReturnObject({status: "error", message: `API error: ${errorMessage}`});
             }
 
             // Extract response text based on provider
             const responseText = parseResponse(provider, responseData);
 
             if (!responseText) {
-                return new ReturnObject(
-                    "error",
-                    `Could not parse response from ${provider}. Response: ${JSON.stringify(responseData)}`
-                );
+                return new ReturnObject({status: "error", message: `Could not parse response from ${provider}. Response: ${JSON.stringify(responseData)}`});
             }
 
-            return new ReturnObject("success", "AI response generated", responseText);
+            return new ReturnObject({status: "success", message: "AI response generated", payload: responseText});
 
         } catch (error) {
             console.error("AI Provider Service error:", error);
-            return new ReturnObject(
-                "error",
-                `AI Provider Service error: ${error.toString()}`
-            );
+            return new ReturnObject({status: "error", message: `AI Provider Service error: ${error.toString()}`});
         }
     }
 

@@ -1,6 +1,6 @@
 {
   "name": "date",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "author": "johnsonfung",
   "description": "Insert dates with various formats and offsets, including business days",
   "license": "MIT",

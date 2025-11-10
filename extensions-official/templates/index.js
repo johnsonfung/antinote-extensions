@@ -7,26 +7,26 @@
 (function() {
   const extensionName = "templates";
 
-  const extensionRoot = new Extension(
-    extensionName,
-    "1.0.0",
-    [],
-    [],
-    "johnsonfung",
-    "Productivity",
-    "none"
-  );
+  const extensionRoot = new Extension({
+    name: extensionName,
+    version: "1.0.0",
+    endpoints: [],
+    requiredAPIKeys: [],
+    author: "johnsonfung",
+    category: "Productivity",
+    dataScope: "none"
+  });
 
   // Register preferences for custom templates using a loop
   for (let i = 1; i <= 10; i++) {
-    const pref = new Preference(
-      `custom_template_${i}`,
-      `Custom Template ${i}`,
-      "paragraph",
-      "",
-      null,
-      "User-defined template text. Multi-line text editor supports line breaks."
-    );
+    const pref = new Preference({
+      key: `custom_template_${i}`,
+      label: `Custom Template ${i}`,
+      type: "paragraph",
+      defaultValue: "",
+      options: null,
+      helpText: "User-defined template text. Multi-line text editor supports line breaks."
+    });
     extensionRoot.register_preference(pref);
   }
 
@@ -52,14 +52,14 @@
   // TODO COMMAND (GSD Framework)
   // ===========================
 
-  const todo = new Command(
-    "todo",
-    [],
-    "insert",
-    "Insert daily to-do list template with GSD (Get Stuff Done) framework",
-    [new TutorialCommand("todo()", "Insert GSD-based daily to-do template")],
-    extensionRoot
-  );
+  const todo = new Command({
+    name: "todo",
+    parameters: [],
+    type: "insert",
+    helpText: "Insert daily to-do list template with GSD (Get Stuff Done) framework",
+    tutorials: [new TutorialCommand({command: "todo()", description: "Insert GSD-based daily to-do template"})],
+    extension: extensionRoot
+  });
 
   todo.execute = function(payload) {
     const template = `list:To-Do - ${getCurrentDate()}
@@ -75,21 +75,21 @@ Tasks to complete today
 Review quarterly goals
 
 `;
-    return new ReturnObject("success", "Daily to-do template inserted", template);
+    return new ReturnObject({status: "success", message: "Daily to-do template inserted", payload: template});
   };
 
   // ===========================
   // BULLET COMMAND
   // ===========================
 
-  const bullet = new Command(
-    "bullet",
-    [],
-    "insert",
-    "Insert bullet journal template",
-    [new TutorialCommand("bullet()", "Insert bullet journal template")],
-    extensionRoot
-  );
+  const bullet = new Command({
+    name: "bullet",
+    parameters: [],
+    type: "insert",
+    helpText: "Insert bullet journal template",
+    tutorials: [new TutorialCommand({command: "bullet()", description: "Insert bullet journal template"})],
+    extension: extensionRoot
+  });
 
   bullet.execute = function(payload) {
     const template = `# ${getCurrentDate()}
@@ -109,21 +109,21 @@ Review quarterly goals
 ## Migrated
 >
 `;
-    return new ReturnObject("success", "Bullet journal template inserted", template);
+    return new ReturnObject({status: "success", message: "Bullet journal template inserted", payload: template});
   };
 
   // ===========================
   // SORRY COMMAND
   // ===========================
 
-  const sorry = new Command(
-    "sorry",
-    [],
-    "insert",
-    "Insert apology template",
-    [new TutorialCommand("sorry()", "Insert apology template")],
-    extensionRoot
-  );
+  const sorry = new Command({
+    name: "sorry",
+    parameters: [],
+    type: "insert",
+    helpText: "Insert apology template",
+    tutorials: [new TutorialCommand({command: "sorry()", description: "Insert apology template"})],
+    extension: extensionRoot
+  });
 
   sorry.execute = function(payload) {
     const template = `Hi [Name],
@@ -139,21 +139,21 @@ I value [our relationship/working together/etc.] and appreciate your understandi
 Best,
 [Your name]`;
 
-    return new ReturnObject("success", "Apology template inserted", template);
+    return new ReturnObject({status: "success", message: "Apology template inserted", payload: template});
   };
 
   // ===========================
   // REFLECT COMMAND
   // ===========================
 
-  const reflect = new Command(
-    "reflect",
-    [],
-    "insert",
-    "Insert daily reflection template",
-    [new TutorialCommand("reflect()", "Insert daily reflection template")],
-    extensionRoot
-  );
+  const reflect = new Command({
+    name: "reflect",
+    parameters: [],
+    type: "insert",
+    helpText: "Insert daily reflection template",
+    tutorials: [new TutorialCommand({command: "reflect()", description: "Insert daily reflection template"})],
+    extension: extensionRoot
+  });
 
   reflect.execute = function(payload) {
     const template = `# Daily Reflection - ${getCurrentDate()}
@@ -173,21 +173,21 @@ Best,
 ## Tomorrow's focus:
 
 `;
-    return new ReturnObject("success", "Daily reflection template inserted", template);
+    return new ReturnObject({status: "success", message: "Daily reflection template inserted", payload: template});
   };
 
   // ===========================
   // STANDUP COMMAND
   // ===========================
 
-  const standup = new Command(
-    "standup",
-    [],
-    "insert",
-    "Insert standup meeting template",
-    [new TutorialCommand("standup()", "Insert standup meeting template")],
-    extensionRoot
-  );
+  const standup = new Command({
+    name: "standup",
+    parameters: [],
+    type: "insert",
+    helpText: "Insert standup meeting template",
+    tutorials: [new TutorialCommand({command: "standup()", description: "Insert standup meeting template"})],
+    extension: extensionRoot
+  });
 
   standup.execute = function(payload) {
     const template = `# Standup - ${getShortDate()}
@@ -204,21 +204,21 @@ What I'm working on:
 Challenges or help needed:
 
 `;
-    return new ReturnObject("success", "Standup template inserted", template);
+    return new ReturnObject({status: "success", message: "Standup template inserted", payload: template});
   };
 
   // ===========================
   // ONE_ON_ONE COMMAND
   // ===========================
 
-  const one_on_one = new Command(
-    "one_on_one",
-    [],
-    "insert",
-    "Insert 1:1 meeting template with manager",
-    [new TutorialCommand("one_on_one()", "Insert 1:1 meeting template")],
-    extensionRoot
-  );
+  const one_on_one = new Command({
+    name: "one_on_one",
+    parameters: [],
+    type: "insert",
+    helpText: "Insert 1:1 meeting template with manager",
+    tutorials: [new TutorialCommand({command: "one_on_one()", description: "Insert 1:1 meeting template"})],
+    extension: extensionRoot
+  });
 
   one_on_one.execute = function(payload) {
     const template = `# 1:1 Meeting - ${getShortDate()}
@@ -246,7 +246,7 @@ Growth opportunities or skills to develop:
 ## Action Items
 
 `;
-    return new ReturnObject("success", "1:1 meeting template inserted", template);
+    return new ReturnObject({status: "success", message: "1:1 meeting template inserted", payload: template});
   };
 
   // ===========================
@@ -255,23 +255,23 @@ Growth opportunities or skills to develop:
 
   // Generate 10 custom template commands dynamically
   for (let i = 1; i <= 10; i++) {
-    const cmd = new Command(
-      `custom_template_${i}`,
-      [],
-      "insert",
-      `Insert custom template ${i} (user-configurable in preferences)`,
-      [new TutorialCommand(`custom_template_${i}()`, `Insert your custom template ${i}`)],
-      extensionRoot
-    );
+    const cmd = new Command({
+      name: `custom_template_${i}`,
+      parameters: [],
+      type: "insert",
+      helpText: `Insert custom template ${i} (user-configurable in preferences)`,
+      tutorials: [new TutorialCommand({command: `custom_template_${i}()`, description: `Insert your custom template ${i}`})],
+      extension: extensionRoot
+    });
 
     cmd.execute = function(payload) {
       const template = getExtensionPreference(extensionName, `custom_template_${i}`) || "";
 
       if (!template?.trim()) {
-        return new ReturnObject("error", `Custom template ${i} is not configured. Please set it in extension preferences.`);
+        return new ReturnObject({status: "error", message: `Custom template ${i} is not configured. Please set it in extension preferences.`});
       }
 
-      return new ReturnObject("success", `Custom template ${i} inserted`, template);
+      return new ReturnObject({status: "success", message: `Custom template ${i} inserted`, payload: template});
     };
   }
 })();

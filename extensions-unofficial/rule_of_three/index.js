@@ -2,53 +2,48 @@
   // Wrap in IIFE to avoid variable conflicts
   var extensionName = "rule_of_three";
 
-  var extensionRoot = new Extension(
-    extensionName,
-    "1.0.0",
-    [], // No external API endpoints
-    [],  // No API keys required
-    "johnsonfung",  // Author (GitHub username)
-    "Math",  // Category
-    "none"  // Data scope: "none", "line", or "full" - doesn't need note content
-  );
+  var extensionRoot = new Extension({
+    name: extensionName,
+    version: "1.0.1",
+    endpoints: [], // No external API endpoints
+    requiredAPIKeys: [],  // No API keys required
+    author: "johnsonfung",  // Author (GitHub username)
+    category: "Math",  // Category
+    dataScope: "none"  // Data scope: "none", "line", or "full" - doesn't need note content
+  });
 
-  var three = new Command(
-    "three",
-
-    [
-      new Parameter("string", "ref1", "Reference 1", "1"),
-      new Parameter("string", "ref2", "Reference 2", "1"),
-      new Parameter("string", "req1", "Required 1", "1"),
-      new Parameter("string", "req2", "Required 2", "1"),
-      new Parameter("bool", "logic", "Add rule of three logic", false)
+  var three = new Command({
+    name: "three",
+    parameters: [
+      new Parameter({type: "string", name: "ref1", helpText: "Reference 1", default: "1"}),
+      new Parameter({type: "string", name: "ref2", helpText: "Reference 2", default: "1"}),
+      new Parameter({type: "string", name: "req1", helpText: "Required 1", default: "1"}),
+      new Parameter({type: "string", name: "req2", helpText: "Required 2", default: "1"}),
+      new Parameter({type: "bool", name: "logic", helpText: "Add rule of three logic", default: false})
     ],
-
-    "replaceLine",
-
-    "Compute rule of three, either req1 or req2 must be set to 'x'. If you set the last parameter to true, a nice diagram will be outputed.",
-
-    [
-      new TutorialCommand("three(5, 10, 1, x)", "Compute rule of three for x on the right."),
-      new TutorialCommand("three(5, 10, x, 2)", "Compute rule of three for x on the left."),
-      new TutorialCommand("three(5, 10, x, 2, true)", "Compute rule of three for x on the left, and show the rule of three logic."),
-      new TutorialCommand("three(5L, 10m^3, x, 2m^3)", "Compute rule of thirds with units."),
-      new TutorialCommand("three(5L, 10m^3, x, 2m^3, true)", "Compute rule of thirds with units, and show the rule of three logic.")
+    type: "replaceLine",
+    helpText: "Compute rule of three, either req1 or req2 must be set to 'x'. If you set the last parameter to true, a nice diagram will be outputed.",
+    tutorials: [
+      new TutorialCommand({command: "three(5, 10, 1, x)", description: "Compute rule of three for x on the right."}),
+      new TutorialCommand({command: "three(5, 10, x, 2)", description: "Compute rule of three for x on the left."}),
+      new TutorialCommand({command: "three(5, 10, x, 2, true)", description: "Compute rule of three for x on the left, and show the rule of three logic."}),
+      new TutorialCommand({command: "three(5L, 10m^3, x, 2m^3)", description: "Compute rule of thirds with units."}),
+      new TutorialCommand({command: "three(5L, 10m^3, x, 2m^3, true)", description: "Compute rule of thirds with units, and show the rule of three logic."})
     ],
-
-    extensionRoot
-  );
+    extension: extensionRoot
+  });
 
   three.execute = function(payload) {
     var [ref1, ref2, req1, req2, logic] = this.getParsedParams(payload);
 
     if (req1 == "x" && req2 == "x") {
-      return new ReturnObject("error", "Only one parameter must be 'x'");
+      return new ReturnObject({status: "error", message: "Only one parameter must be 'x'"});
     }
     if (req1 != "x" && req2 != "x") {
-      return new ReturnObject("error", "Either the 3rd or 4th parameter must be 'x'");
+      return new ReturnObject({status: "error", message: "Either the 3rd or 4th parameter must be 'x'"});
     }
     if (ref1 == "x" || ref2 == "x") {
-      return new ReturnObject("error", "The first 2 parameters must not be 'x'");
+      return new ReturnObject({status: "error", message: "The first 2 parameters must not be 'x'"});
     }
 
     var unitSep = /^(\d*\.\d+|\d+)(\s*.*)?$/;
@@ -88,6 +83,6 @@
       }
     }
 
-    return new ReturnObject("success", "Rule of three calculated.", out);
+    return new ReturnObject({status: "success", message: "Rule of three calculated.", payload: out});
   };
 })();

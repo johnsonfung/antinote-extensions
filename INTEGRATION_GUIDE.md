@@ -361,11 +361,11 @@ All share same AI configuration
 
 ```javascript
 (function() {
-    var extensionRoot = new Extension(/*...*/);
+    var extensionRoot = new Extension({/*... object literal properties ...*/});
 
     function callAIProvider(prompt, options) {
         // Implementation...
-        return new ReturnObject("success", "Response", text);
+        return new ReturnObject({status: "success", message: "Response", payload: text});
     }
 
     // Export globally
@@ -378,14 +378,14 @@ All share same AI configuration
 
 ```javascript
 (function() {
-    var extensionRoot = new Extension(/*...*/);
+    var extensionRoot = new Extension({/*... object literal properties ...*/});
 
-    var ai = new Command(/*...*/);
+    var ai = new Command({/*... object literal properties ...*/});
 
     ai.execute = function(payload) {
         // Check dependency available
         if (typeof callAIProvider === 'undefined') {
-            return new ReturnObject("error", "AI Providers service not available");
+            return new ReturnObject({status: "error", message: "AI Providers service not available"});
         }
 
         // Use the service

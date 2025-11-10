@@ -13,35 +13,35 @@
 
     // This extension depends on ai_providers service
     // No endpoints or API keys needed - all handled by ai_providers
-    const extensionRoot = new Extension(
-        extensionName,
-        "3.0.0",
-        [],  // No endpoints - uses ai_providers
-        [],  // No API keys - uses ai_providers
-        "johnsonfung",
-        "AI & ML",
-        "none",
-        ["ai_providers"],  // dependencies
-        false  // isService
-    );
+    const extensionRoot = new Extension({
+        name: extensionName,
+        version: "3.0.0",
+        endpoints: [],  // No endpoints - uses ai_providers
+        requiredAPIKeys: [],  // No API keys - uses ai_providers
+        author: "johnsonfung",
+        category: "AI & ML",
+        dataScope: "none",
+        dependencies: ["ai_providers"],  // dependencies
+        isService: false  // isService
+    });
 
     // Create the ai command
-    const ai = new Command(
-        "ai",
-        [
-            new Parameter("string", "prompt", "The prompt to send to the AI", "Hello, how are you?"),
-            new Parameter("int", "max_tokens", "Maximum tokens in the response (0 = use default)", 0),
-            new Parameter("float", "temperature", "Randomness of the response (0.0-2.0)", 0.7)
+    const ai = new Command({
+    name: "ai",
+    parameters: [
+            new Parameter({type: "string", name: "prompt", helpText: "The prompt to send to the AI", default: "Hello, how are you?"}),
+            new Parameter({type: "int", name: "max_tokens", helpText: "Maximum tokens in the response (0 = use default)", default: 0}),
+            new Parameter({type: "float", name: "temperature", helpText: "Randomness of the response (0.0-2.0)", default: 0.7})
         ],
-        "insert",
-        "Insert an AI-generated response to your prompt",
-        [
-            new TutorialCommand("ai(What is the capital of France?)", "Get an AI response to a simple question"),
-            new TutorialCommand("ai(Explain quantum computing in simple terms, 300)", "Get a longer explanation with 300 tokens"),
-            new TutorialCommand("ai(Write a haiku about coding, 100, 1.2)", "More creative response with higher temperature")
+    type: "insert",
+    helpText: "Insert an AI-generated response to your prompt",
+    tutorials: [
+            new TutorialCommand({command: "ai(What is the capital of France?)", description: "Get an AI response to a simple question"}),
+            new TutorialCommand({command: "ai(Explain quantum computing in simple terms, 300)", description: "Get a longer explanation with 300 tokens"}),
+            new TutorialCommand({command: "ai(Write a haiku about coding, 100, 1.2)", description: "More creative response with higher temperature"})
         ],
-        extensionRoot
-    );
+    extension: extensionRoot
+  });
 
     ai.execute = function (payload) {
         try {
@@ -49,15 +49,12 @@
 
             // Validation
             if (!prompt || prompt.trim() === "") {
-                return new ReturnObject("error", "Please provide a prompt.");
+                return new ReturnObject({status: "error", message: "Please provide a prompt."});
             }
 
             // Check if ai_providers service is available
             if (typeof callAIProvider === 'undefined') {
-                return new ReturnObject(
-                    "error",
-                    "AI Providers service not available. Please ensure the ai_providers extension is installed and enabled."
-                );
+                return new ReturnObject({status: "error", message: "AI Providers service not available. Please ensure the ai_providers extension is installed and enabled."});
             }
 
             // Call the AI Providers service
@@ -70,10 +67,10 @@
 
         } catch (error) {
             console.error("LLM Extension error:", error);
-            return new ReturnObject(
-                "error",
-                `Extension error: ${error.toString()}`
-            );
+            return new ReturnObject({
+                status: "error",
+                message: `Extension error: ${error.toString()}`
+            });
         }
     };
 })();

@@ -3,16 +3,17 @@
 if (typeof global === 'undefined') { var global = this; }
 global.commandRegistry = new Array();
 
-function Command(name, parameters, type, helpText, tutorials, extension) {
-  this.name = name;
-  this.parameters = parameters || [];
-  this.extension = extension;
-  this.type = type || "replaceLine";     // Types: insert, replaceAll, replaceLine, openURL
-  this.helpText = helpText ||  "This command replaces text in a line.";
-  this.tutorials = tutorials || [];
+// Accepts object literal: {name: "cmd", parameters: [], type: "insert", helpText: "Help", tutorials: [], extension: ext}
+function Command(config) {
+  this.name = config.name;
+  this.parameters = config.parameters || [];
+  this.extension = config.extension;
+  this.type = config.type || "replaceLine";     // Types: insert, replaceAll, replaceLine, openURL
+  this.helpText = config.helpText ||  "This command replaces text in a line.";
+  this.tutorials = config.tutorials || [];
 
-  if (extension && typeof extension.register_command === "function") {
-    extension.register_command(this);
+  if (config.extension && typeof config.extension.register_command === "function") {
+    config.extension.register_command(this);
   }
 
   // Add this command to the global registry
@@ -65,19 +66,20 @@ Command.prototype.execute = function() {
 };
 
 // Extension constructor function
-function Extension(name, version, endpoints, requiredAPIKeys, author, category, dataScope, dependencies, isService) {
-  this.name = name;
-  this.version = version || "1.0.0";
+// Accepts object literal: {name: "ext", version: "1.0.0", endpoints: [], requiredAPIKeys: [], author: "user", category: "Cat", dataScope: "none", dependencies: [], isService: false}
+function Extension(config) {
+  this.name = config.name;
+  this.version = config.version || "1.0.0";
   this.commands = [];
-  this.endpoints = endpoints || [];  // Array of endpoint URLs this extension calls
-  this.requiredAPIKeys = requiredAPIKeys || [];  // Array of API key IDs this extension requires
+  this.endpoints = config.endpoints || [];  // Array of endpoint URLs this extension calls
+  this.requiredAPIKeys = config.requiredAPIKeys || [];  // Array of API key IDs this extension requires
   this.preferences = [];  // Array of preference definitions
-  this.author = author || "";  // GitHub username or author name
-  this.category = category || "Utilities";  // Category for organizing extensions
+  this.author = config.author || "";  // GitHub username or author name
+  this.category = config.category || "Utilities";  // Category for organizing extensions
   // Data access scope: "none" (no note content), "line" (current line only), "full" (entire note)
-  this.dataScope = dataScope || "full";  // Default to "full" for backwards compatibility
-  this.dependencies = dependencies || [];  // Array of extension names this extension depends on
-  this.isService = isService || false;  // Whether this extension is a service (provides functionality for other extensions)
+  this.dataScope = config.dataScope || "full";  // Default to "full" for backwards compatibility
+  this.dependencies = config.dependencies || [];  // Array of extension names this extension depends on
+  this.isService = config.isService || false;  // Whether this extension is a service (provides functionality for other extensions)
 }
 
 Extension.prototype.register_command = function(cmd) {
@@ -85,13 +87,14 @@ Extension.prototype.register_command = function(cmd) {
 };
 
 // Preference constructor function
-function Preference(key, label, type, defaultValue, options, helpText) {
-  this.key = key;
-  this.label = label;
-  this.type = type; // "bool", "string", "selectOne", "selectMultiple"
-  this.defaultValue = defaultValue;
-  this.options = options || null; // Array of strings for select types
-  this.helpText = helpText || null;
+// Accepts object literal: {key: "pref_key", label: "Label", type: "bool", defaultValue: true, options: null, helpText: "Help"}
+function Preference(config) {
+  this.key = config.key;
+  this.label = config.label;
+  this.type = config.type; // "bool", "string", "selectOne", "selectMultiple"
+  this.defaultValue = config.defaultValue;
+  this.options = config.options || null; // Array of strings for select types
+  this.helpText = config.helpText || null;
 }
 
 Extension.prototype.register_preference = function(pref) {
@@ -99,21 +102,25 @@ Extension.prototype.register_preference = function(pref) {
 };
 
 // Parameter constructor function
-function Parameter(parameterType, name, helpText, defaultValue) {
-  this.parameterType = parameterType;
-  this.name = name;
-  this.helpText = helpText || "This parameter needs help text."
-  this.defaultValue = (defaultValue !== undefined) ? defaultValue : null;
+// Accepts object literal: {type: "float", name: "from", helpText: "Help text", default: 0}
+function Parameter(config) {
+  this.parameterType = config.type;
+  this.name = config.name;
+  this.helpText = config.helpText || "This parameter needs help text.";
+  this.defaultValue = (config.default !== undefined) ? config.default : null;
 }
 
-function TutorialCommand(command, description) {
-  this.command = command;
-  this.description = description;
+// TutorialCommand constructor function
+// Accepts object literal: {command: "cmd()", description: "Description"}
+function TutorialCommand(config) {
+  this.command = config.command;
+  this.description = config.description;
 }
 
-
-function ReturnObject(status, message, payload) {
-  this.status = status || "error";
-  this.message = message || "Undefined error.";
-  this.payload = payload || "";
+// ReturnObject constructor function
+// Accepts object literal: {status: "success", message: "Done", payload: "result"}
+function ReturnObject(config) {
+  this.status = config.status || "error";
+  this.message = config.message || "Undefined error.";
+  this.payload = config.payload || "";
 }

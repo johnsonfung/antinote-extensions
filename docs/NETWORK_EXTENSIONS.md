@@ -24,17 +24,17 @@ Extension (JS) → callAPI() → Swift Bridge → Validates → HTTP Request →
 ### 1. Declare Endpoints and API Keys
 
 ```js
-const extensionRoot = new Extension(
-  "weather",
-  "1.0.0",
+const extensionRoot = new Extension({
+  name: "weather",
+  version: "1.0.0",
   // Declare ALL endpoints you'll call
-  ["https://api.weatherapi.com/v1"],
+  endpoints: ["https://api.weatherapi.com/v1"],
   // Declare required API key IDs
-  ["apikey_weather"],
-  "your_github",
-  "Utilities",
-  "none"  // Weather doesn't need note content
-);
+  requiredAPIKeys: ["apikey_weather"],
+  author: "your_github",
+  category: "Utilities",
+  dataScope: "none"  // Weather doesn't need note content
+});
 ```
 
 ### 2. Make API Call
@@ -60,11 +60,11 @@ my_command.execute = function(payload) {
 
   // Handle response
   if (!result.success) {
-    return new ReturnObject("error", `API failed: ${result.error}`);
+    return new ReturnObject({status: "error", message: `API failed: ${result.error}`});
   }
 
   const data = JSON.parse(result.data);
-  return new ReturnObject("success", "Weather retrieved", data.current.temp_f + "°F");
+  return new ReturnObject({status: "success", message: "Weather retrieved", payload: data.current.temp_f + "°F"});
 };
 ```
 
@@ -120,16 +120,16 @@ Makes an authenticated HTTP request through the Swift bridge.
 Declare all endpoints your extension will call:
 
 ```js
-new Extension(
-  "my_extension",
-  "1.0.0",
-  [
+new Extension({
+  name: "my_extension",
+  version: "1.0.0",
+  endpoints: [
     "https://api.service.com/v1/endpoint1",
     "https://api.service.com/v1/endpoint2"
   ],
-  ["apikey_service"],
-  ...
-)
+  requiredAPIKeys: ["apikey_service"],
+  // ... other properties
+})
 ```
 
 ### Prefix Matching
@@ -239,11 +239,13 @@ Some APIs are public and don't need authentication:
 
 ```js
 // No API keys declared
-new Extension("public_api", "1.0.0",
-  ["https://api.public.com"],
-  [],  // Empty - no keys needed
-  ...
-)
+new Extension({
+  name: "public_api",
+  version: "1.0.0",
+  endpoints: ["https://api.public.com"],
+  requiredAPIKeys: [],  // Empty - no keys needed
+  // ... other properties
+})
 
 // Use empty string for apiKeyId
 const result = callAPI(
@@ -265,35 +267,35 @@ const result = callAPI(
 (function() {
   const extensionName = "weather";
 
-  const extensionRoot = new Extension(
-    extensionName,
-    "1.0.0",
-    ["https://api.weatherapi.com/v1"],
-    ["apikey_weather"],
-    "your_github",
-    "Utilities",
-    "none"
-  );
+  const extensionRoot = new Extension({
+    name: extensionName,
+    version: "1.0.0",
+    endpoints: ["https://api.weatherapi.com/v1"],
+    requiredAPIKeys: ["apikey_weather"],
+    author: "your_github",
+    category: "Utilities",
+    dataScope: "none"
+  });
 
-  const weather = new Command(
-    "weather",
-    [
-      new Parameter("string", "city", "City name", "Boston")
+  const weather = new Command({
+    name: "weather",
+    parameters: [
+      new Parameter({type: "string", name: "city", helpText: "City name", default: "Boston"})
     ],
-    "insert",
-    "Get current weather for a city",
-    [
-      new TutorialCommand("weather(Boston)", "Get Boston weather"),
-      new TutorialCommand("weather(London)", "Get London weather")
+    type: "insert",
+    helpText: "Get current weather for a city",
+    tutorials: [
+      new TutorialCommand({command: "weather(Boston)", description: "Get Boston weather"}),
+      new TutorialCommand({command: "weather(London)", description: "Get London weather"})
     ],
-    extensionRoot
-  );
+    extension: extensionRoot
+  });
 
   weather.execute = function(payload) {
     const [city] = this.getParsedParams(payload);
 
     if (!city?.trim()) {
-      return new ReturnObject("error", "Please provide a city name.");
+      return new ReturnObject({status: "error", message: "Please provide a city name."});
     }
 
     // Build URL with API key placeholder
@@ -306,7 +308,7 @@ const result = callAPI(
     const result = callAPI("apikey_weather", url, "GET", headers, "");
 
     if (!result.success) {
-      return new ReturnObject("error", `Weather API error: ${result.error}`);
+      return new ReturnObject({status: "error", message: `Weather API error: ${result.error}`});
     }
 
     // Parse and format response
@@ -315,7 +317,7 @@ const result = callAPI(
     const condition = data.current.condition.text;
     const output = `${city}: ${temp}°F, ${condition}`;
 
-    return new ReturnObject("success", "Weather retrieved", output);
+    return new ReturnObject({status: "success", message: "Weather retrieved", payload: output});
   };
 })();
 ```
@@ -326,36 +328,36 @@ const result = callAPI(
 (function() {
   const extensionName = "task_manager";
 
-  const extensionRoot = new Extension(
-    extensionName,
-    "1.0.0",
-    ["https://api.tasks.com/v1"],
-    ["apikey_tasks"],
-    "your_github",
-    "Productivity",
-    "line"  // Gets current line only
-  );
+  const extensionRoot = new Extension({
+    name: extensionName,
+    version: "1.0.0",
+    endpoints: ["https://api.tasks.com/v1"],
+    requiredAPIKeys: ["apikey_tasks"],
+    author: "your_github",
+    category: "Productivity",
+    dataScope: "line"  // Gets current line only
+  });
 
-  const create_task = new Command(
-    "create_task",
-    [
-      new Parameter("string", "priority", "Priority (low, medium, high)", "medium")
+  const create_task = new Command({
+    name: "create_task",
+    parameters: [
+      new Parameter({type: "string", name: "priority", helpText: "Priority (low, medium, high)", default: "medium"})
     ],
-    "insert",
-    "Create a task from current line",
-    [
-      new TutorialCommand("create_task(high)", "Create high priority task"),
-      new TutorialCommand("create_task(low)", "Create low priority task")
+    type: "insert",
+    helpText: "Create a task from current line",
+    tutorials: [
+      new TutorialCommand({command: "create_task(high)", description: "Create high priority task"}),
+      new TutorialCommand({command: "create_task(low)", description: "Create low priority task"})
     ],
-    extensionRoot
-  );
+    extension: extensionRoot
+  });
 
   create_task.execute = function(payload) {
     const [priority] = this.getParsedParams(payload);
     const taskText = payload.fullText?.trim();
 
     if (!taskText) {
-      return new ReturnObject("error", "No task text provided.");
+      return new ReturnObject({status: "error", message: "No task text provided."});
     }
 
     // Prepare POST request
@@ -374,11 +376,11 @@ const result = callAPI(
     const result = callAPI("apikey_tasks", url, "POST", headers, body);
 
     if (!result.success) {
-      return new ReturnObject("error", `Failed to create task: ${result.error}`);
+      return new ReturnObject({status: "error", message: `Failed to create task: ${result.error}`});
     }
 
     const data = JSON.parse(result.data);
-    return new ReturnObject("success", "Task created", `Task #${data.id} created`);
+    return new ReturnObject({status: "success", message: "Task created", payload: `Task #${data.id} created`});
   };
 })();
 ```
@@ -389,26 +391,26 @@ const result = callAPI(
 (function() {
   const extensionName = "dad_joke";
 
-  const extensionRoot = new Extension(
-    extensionName,
-    "1.0.0",
-    ["https://icanhazdadjoke.com"],
-    [],  // No API key needed
-    "your_github",
-    "Fun",
-    "none"
-  );
+  const extensionRoot = new Extension({
+    name: extensionName,
+    version: "1.0.0",
+    endpoints: ["https://icanhazdadjoke.com"],
+    requiredAPIKeys: [],  // No API key needed
+    author: "your_github",
+    category: "Fun",
+    dataScope: "none"
+  });
 
-  const joke = new Command(
-    "joke",
-    [],
-    "insert",
-    "Insert a random dad joke",
-    [
-      new TutorialCommand("joke", "Get a random dad joke")
+  const joke = new Command({
+    name: "joke",
+    parameters: [],
+    type: "insert",
+    helpText: "Insert a random dad joke",
+    tutorials: [
+      new TutorialCommand({command: "joke", description: "Get a random dad joke"})
     ],
-    extensionRoot
-  );
+    extension: extensionRoot
+  });
 
   joke.execute = function(payload) {
     const url = "https://icanhazdadjoke.com/";
@@ -420,11 +422,11 @@ const result = callAPI(
     const result = callAPI("", url, "GET", headers, "");
 
     if (!result.success) {
-      return new ReturnObject("error", `Failed to fetch joke: ${result.error}`);
+      return new ReturnObject({status: "error", message: `Failed to fetch joke: ${result.error}`});
     }
 
     const data = JSON.parse(result.data);
-    return new ReturnObject("success", "Joke retrieved", data.joke);
+    return new ReturnObject({status: "success", message: "Joke retrieved", payload: data.joke});
   };
 })();
 ```
@@ -442,7 +444,7 @@ const url = `https://api.service.com?q=${safeCity}`;
 
 // Validation
 if (!input?.trim()) {
-  return new ReturnObject("error", "Input required.");
+  return new ReturnObject({status: "error", message: "Input required."});
 }
 ```
 
@@ -451,20 +453,20 @@ if (!input?.trim()) {
 ```js
 if (!result.success) {
   // Provide helpful error message
-  return new ReturnObject(
-    "error",
-    `API call failed: ${result.error}. Please check your API key in Preferences.`
-  );
+  return new ReturnObject({
+    status: "error",
+    message: `API call failed: ${result.error}. Please check your API key in Preferences.`
+  });
 }
 
 // Validate response structure
 try {
   const data = JSON.parse(result.data);
   if (!data.expected_field) {
-    return new ReturnObject("error", "Unexpected API response format.");
+    return new ReturnObject({status: "error", message: "Unexpected API response format."});
   }
 } catch (e) {
-  return new ReturnObject("error", "Failed to parse API response.");
+  return new ReturnObject({status: "error", message: "Failed to parse API response."});
 }
 ```
 
@@ -499,14 +501,14 @@ That's it! The extension will now work.
 
 ```js
 // Let users configure base URL, units, etc.
-const unitPref = new Preference(
-  "temperature_unit",
-  "Temperature Unit",
-  "selectOne",
-  "fahrenheit",
-  ["fahrenheit", "celsius"],
-  "Choose temperature unit for weather"
-);
+const unitPref = new Preference({
+  key: "temperature_unit",
+  label: "Temperature Unit",
+  type: "selectOne",
+  defaultValue: "fahrenheit",
+  options: ["fahrenheit", "celsius"],
+  helpText: "Choose temperature unit for weather"
+});
 extensionRoot.register_preference(unitPref);
 
 // Use in command
@@ -550,15 +552,17 @@ for (let page = 1; page <= 3; page++) {
 
 ```js
 // Declare multiple endpoints
-new Extension("github", "1.0.0",
-  [
+new Extension({
+  name: "github",
+  version: "1.0.0",
+  endpoints: [
     "https://api.github.com/users",
     "https://api.github.com/repos",
     "https://api.github.com/gists"
   ],
-  ["apikey_github"],
-  ...
-)
+  requiredAPIKeys: ["apikey_github"],
+  // ... other properties
+})
 
 // Use different endpoints in different commands
 const getUserInfo = () => callAPI("apikey_github", "https://api.github.com/users/...", ...);
@@ -575,7 +579,7 @@ my_command.execute = function(payload) {
 
   // Check cache first
   if (cache[cacheKey]) {
-    return new ReturnObject("success", "From cache", cache[cacheKey]);
+    return new ReturnObject({status: "success", message: "From cache", payload: cache[cacheKey]});
   }
 
   // Make API call
@@ -598,10 +602,12 @@ my_command.execute = function(payload) {
 
 **Fix:** Add the endpoint to your extension declaration:
 ```js
-new Extension("name", "1.0.0",
-  ["https://api.newservice.com/v1"],  // Add this
-  ...
-)
+new Extension({
+  name: "name",
+  version: "1.0.0",
+  endpoints: ["https://api.newservice.com/v1"],  // Add this
+  // ... other properties
+})
 ```
 
 ### "API key not found"
@@ -619,7 +625,7 @@ new Extension("name", "1.0.0",
 try {
   const data = JSON.parse(result.data);
 } catch (e) {
-  return new ReturnObject("error", `API returned invalid response: ${result.data.substring(0, 100)}`);
+  return new ReturnObject({status: "error", message: `API returned invalid response: ${result.data.substring(0, 100)}`});
 }
 ```
 
