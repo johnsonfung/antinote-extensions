@@ -66,7 +66,7 @@ describe("JSON Tools Extension - Metadata Validation", function() {
 
   it("should have required version field", function() {
     expect(metadata.version).toBeDefined();
-    expect(metadata.version).toBe("1.0.0");
+    expect(metadata.version).toBe("1.0.1");
   });
 
   it("should have required author field", function() {
@@ -410,7 +410,7 @@ describe("JSON Tools Extension - Command Execution Tests", function() {
     });
   });
 
-  describe("json_dupes command", function() {
+  describe("json_get_dupes command", function() {
     it("should find duplicate objects by key", function() {
       var payload = {
         parameters: ["email"],
@@ -419,7 +419,7 @@ describe("JSON Tools Extension - Command Execution Tests", function() {
         preferences: {}
       };
 
-      var result = json_dupes.execute(payload);
+      var result = json_get_dupes.execute(payload);
       expect(result.status).toBe("success");
       expect(result.payload).toContain("Duplicates Found");
       expect(result.payload).toContain("test@test.com");
@@ -433,9 +433,24 @@ describe("JSON Tools Extension - Command Execution Tests", function() {
         preferences: {}
       };
 
-      var result = json_dupes.execute(payload);
+      var result = json_get_dupes.execute(payload);
       expect(result.status).toBe("success");
       expect(result.payload).toContain("No Duplicates Found");
+    });
+
+    it("should find duplicate primitives in array", function() {
+      var payload = {
+        parameters: [""],
+        fullText: '["apple", "banana", "apple", "cherry", "banana"]',
+        userSettings: {},
+        preferences: {}
+      };
+
+      var result = json_get_dupes.execute(payload);
+      expect(result.status).toBe("success");
+      expect(result.payload).toContain("Duplicates Found");
+      expect(result.payload).toContain("apple");
+      expect(result.payload).toContain("banana");
     });
   });
 

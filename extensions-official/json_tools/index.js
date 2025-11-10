@@ -723,35 +723,110 @@
     }
   };
 
-  // --- Command: json_dupes ---
-  var json_dupes = new Command(
-    "json_dupes",
+  // --- Command: json_get_dupes ---
+  var json_get_dupes = new Command(
+    "json_get_dupes",
     [
-      new Parameter("string", "key", "Key to check for duplicates", ""),
+      new Parameter("string", "key", "Key to check for duplicates (leave empty for primitive arrays)", ""),
       new Parameter("string", "parentKey", "Parent key containing the array (optional)", "")
     ],
     "insert",
-    "Find and display duplicate objects by key value.",
+    "Find and display duplicate objects by key or duplicate primitives.",
     [
-      new TutorialCommand("json_dupes('email')", "Find objects with duplicate emails"),
-      new TutorialCommand("json_dupes('id', 'users')", "Find duplicate IDs in users array")
+      new TutorialCommand("json_get_dupes('email')", "Find objects with duplicate emails"),
+      new TutorialCommand("json_get_dupes('id', 'users')", "Find duplicate IDs in users array"),
+      new TutorialCommand("json_get_dupes", "Find duplicate values in primitive array")
     ],
     extensionRoot
   );
 
-  json_dupes.execute = function (payload) {
+  json_get_dupes.execute = function (payload) {
     var params = this.getParsedParams(payload);
     var key = params[0];
     var parentKey = params[1] || "";
 
-    if (!key) {
-      return new ReturnObject("error", "Key parameter is required.", "");
-    }
-
     try {
       var data = parseLooseJSON(payload.fullText);
-      var found = findArrayOfObjects(data, parentKey);
-      var array = found.array;
+      var array;
+      var isRoot = false;
+      var isPrimitiveArray = false;
+
+      // Find array - try parentKey first, then look for array
+      if (parentKey) {
+        if (data && typeof data === 'object' && data[parentKey]) {
+          if (Array.isArray(data[parentKey])) {
+            array = data[parentKey];
+          } else {
+            return new ReturnObject("error", "Key '" + parentKey + "' does not contain an array.", "");
+          }
+        } else {
+          return new ReturnObject("error", "Could not find key '" + parentKey + "'.", "");
+        }
+      } else {
+        if (Array.isArray(data)) {
+          array = data;
+          isRoot = true;
+        } else {
+          // Try to find first array
+          var foundArray = false;
+          for (var k in data) {
+            if (data.hasOwnProperty(k) && Array.isArray(data[k])) {
+              array = data[k];
+              parentKey = k;
+              foundArray = true;
+              break;
+            }
+          }
+          if (!foundArray) {
+            return new ReturnObject("error", "Could not find an array in the document.", "");
+          }
+        }
+      }
+
+      // Check if it's a primitive array or array of objects
+      if (array.length > 0 && (typeof array[0] !== 'object' || array[0] === null)) {
+        isPrimitiveArray = true;
+      }
+
+      // Handle primitive arrays
+      if (isPrimitiveArray || (!key && array.length > 0)) {
+        // Group primitive values
+        var groups = {};
+        for (var i = 0; i < array.length; i++) {
+          var val = String(array[i]);
+          if (!groups[val]) {
+            groups[val] = [];
+          }
+          groups[val].push(array[i]);
+        }
+
+        // Find groups with more than one item
+        var dupeGroups = [];
+        for (var val in groups) {
+          if (groups.hasOwnProperty(val) && groups[val].length > 1) {
+            dupeGroups.push({ value: val, count: groups[val].length });
+          }
+        }
+
+        if (dupeGroups.length === 0) {
+          return new ReturnObject("success", "No duplicate values found.", "# No Duplicates Found");
+        }
+
+        // Build output for primitives
+        var output = "# Duplicates Found\n\n";
+        for (var i = 0; i < dupeGroups.length; i++) {
+          var group = dupeGroups[i];
+          output += "# Duplicate group " + (i + 1) + " (" + group.count + " occurrences)\n";
+          output += group.value + "\n\n";
+        }
+
+        return new ReturnObject("success", "Found " + dupeGroups.length + " duplicate value groups.", output);
+      }
+
+      // Handle array of objects with key
+      if (!key) {
+        return new ReturnObject("error", "Key parameter is required for arrays of objects.", "");
+      }
 
       // Group by key value
       var groups = {};
@@ -778,7 +853,7 @@
         return new ReturnObject("success", "No duplicates found for key '" + key + "'.", "# No Duplicates Found");
       }
 
-      // Build output
+      // Build output for objects
       var output = "# Duplicates Found\n\n";
       for (var i = 0; i < dupeGroups.length; i++) {
         var group = dupeGroups[i];

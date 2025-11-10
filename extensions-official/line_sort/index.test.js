@@ -61,7 +61,7 @@ describe("Line Sort Extension - Metadata Validation", function() {
 
   it("should have required version field", function() {
     expect(metadata.version).toBeDefined();
-    expect(metadata.version).toBe("1.0.0");
+    expect(metadata.version).toBe("1.0.1");
   });
 
   it("should have required author field", function() {
@@ -102,12 +102,14 @@ describe("Line Sort Extension - Metadata Validation", function() {
     expect(metadata.commands.length).toBeGreaterThanOrEqual(1);
   });
 
-  it("should have 4 commands (sort_lines_alpha, sort_lines_number, sort_lines_number_last, sort_lines_reverse)", function() {
-    expect(metadata.commands.length).toBe(4);
+  it("should have 6 commands", function() {
+    expect(metadata.commands.length).toBe(6);
     expect(metadata.commands[0].name).toBe("sort_lines_alpha");
     expect(metadata.commands[1].name).toBe("sort_lines_number");
     expect(metadata.commands[2].name).toBe("sort_lines_number_last");
     expect(metadata.commands[3].name).toBe("sort_lines_reverse");
+    expect(metadata.commands[4].name).toBe("dedupe_lines");
+    expect(metadata.commands[5].name).toBe("get_dupes");
   });
 });
 
@@ -353,6 +355,83 @@ describe("Line Sort Extension - Command Execution Tests", function() {
       var result = sort_lines_reverse.execute(payload);
       expect(result.status).toBe("success");
       expect(result.payload).toBe("");
+    });
+  });
+
+  describe("dedupe_lines command", function() {
+    it("should remove duplicate lines keeping first", function() {
+      var payload = {
+        parameters: [],
+        fullText: "apple\nbanana\napple\ncherry\nbanana",
+        userSettings: {},
+        preferences: {}
+      };
+
+      var result = dedupe_lines.execute(payload);
+      expect(result.status).toBe("success");
+      expect(result.payload).toBe("apple\nbanana\ncherry");
+    });
+
+    it("should remove duplicate lines keeping last", function() {
+      var payload = {
+        parameters: ["false"],
+        fullText: "apple\nbanana\napple\ncherry",
+        userSettings: {},
+        preferences: {}
+      };
+
+      var result = dedupe_lines.execute(payload);
+      expect(result.status).toBe("success");
+      expect(result.payload).toBe("banana\napple\ncherry");
+    });
+
+    it("should ignore first line when deduping", function() {
+      var payload = {
+        parameters: ["true", "true"],
+        fullText: "Header\napple\nbanana\napple\nbanana",
+        userSettings: {},
+        preferences: {}
+      };
+
+      var result = dedupe_lines.execute(payload);
+      expect(result.status).toBe("success");
+      expect(result.payload).toBe("Header\napple\nbanana");
+    });
+  });
+
+  describe("get_dupes command", function() {
+    it("should find duplicate lines", function() {
+      var payload = {
+        parameters: [],
+        fullText: "apple\nbanana\napple\ncherry\nbanana\napple",
+        userSettings: {},
+        preferences: {}
+      };
+
+      var result = get_dupes.execute(payload);
+      expect(result.status).toBe("success");
+      // Should contain apple and banana as dupes
+      var hasApple = result.payload.indexOf("apple") !== -1;
+      var hasBanana = result.payload.indexOf("banana") !== -1;
+      if (!hasApple || !hasBanana) {
+        throw new Error("Expected to find both apple and banana as duplicates");
+      }
+    });
+
+    it("should return message when no duplicates found", function() {
+      var payload = {
+        parameters: [],
+        fullText: "apple\nbanana\ncherry",
+        userSettings: {},
+        preferences: {}
+      };
+
+      var result = get_dupes.execute(payload);
+      expect(result.status).toBe("success");
+      var hasNoDupes = result.payload.indexOf("No Duplicates Found") !== -1;
+      if (!hasNoDupes) {
+        throw new Error("Expected 'No Duplicates Found' message");
+      }
     });
   });
 });

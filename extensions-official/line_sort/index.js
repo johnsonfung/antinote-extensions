@@ -244,4 +244,131 @@
 
     return new ReturnObject("success", "Lines reversed.", result);
   };
+
+  // --- Command: dedupe_lines ---
+  var dedupe_lines = new Command(
+    "dedupe_lines",
+    [
+      new Parameter("bool", "keepFirst", "Keep first occurrence (true) or last (false)", true),
+      new Parameter("bool", "ignoreFirstLine", "Skip first line when deduping", false)
+    ],
+    "replaceAll",
+    "Remove duplicate lines keeping first or last occurrence.",
+    [
+      new TutorialCommand("dedupe_lines", "Remove duplicates, keeping first occurrence"),
+      new TutorialCommand("dedupe_lines(false)", "Remove duplicates, keeping last occurrence"),
+      new TutorialCommand("dedupe_lines(true, true)", "Remove duplicates, keeping first line as header")
+    ],
+    extensionRoot
+  );
+
+  dedupe_lines.execute = function (payload) {
+    var params = this.getParsedParams(payload);
+    var keepFirst = params[0];
+    var ignoreFirstLine = params[1];
+
+    var lines = payload.fullText.split("\n");
+
+    if (lines.length === 0) {
+      return new ReturnObject("success", "No lines to dedupe.", payload.fullText);
+    }
+
+    var firstLine = "";
+    var linesToDedupe = lines;
+
+    if (ignoreFirstLine && lines.length > 1) {
+      firstLine = lines[0];
+      linesToDedupe = lines.slice(1);
+    }
+
+    var seen = [];
+    var unique = [];
+
+    if (keepFirst) {
+      for (var i = 0; i < linesToDedupe.length; i++) {
+        if (seen.indexOf(linesToDedupe[i]) === -1) {
+          seen.push(linesToDedupe[i]);
+          unique.push(linesToDedupe[i]);
+        }
+      }
+    } else {
+      // Keep last - process in reverse
+      for (var i = linesToDedupe.length - 1; i >= 0; i--) {
+        if (seen.indexOf(linesToDedupe[i]) === -1) {
+          seen.push(linesToDedupe[i]);
+          unique.unshift(linesToDedupe[i]); // Add to beginning to maintain order
+        }
+      }
+    }
+
+    var result = ignoreFirstLine && lines.length > 1
+      ? [firstLine].concat(unique).join("\n")
+      : unique.join("\n");
+
+    var removed = linesToDedupe.length - unique.length;
+    return new ReturnObject("success", "Removed " + removed + " duplicate lines, kept " + unique.length + " unique.", result);
+  };
+
+  // --- Command: get_dupes ---
+  var get_dupes = new Command(
+    "get_dupes",
+    [
+      new Parameter("bool", "ignoreFirstLine", "Skip first line when finding dupes", false)
+    ],
+    "insert",
+    "Find and display duplicate lines grouped together.",
+    [
+      new TutorialCommand("get_dupes", "Find all duplicate lines"),
+      new TutorialCommand("get_dupes(true)", "Find duplicates, skipping first line")
+    ],
+    extensionRoot
+  );
+
+  get_dupes.execute = function (payload) {
+    var params = this.getParsedParams(payload);
+    var ignoreFirstLine = params[0];
+
+    var lines = payload.fullText.split("\n");
+
+    if (lines.length === 0) {
+      return new ReturnObject("success", "No lines to check.", "# No Duplicates Found");
+    }
+
+    var linesToCheck = lines;
+    if (ignoreFirstLine && lines.length > 1) {
+      linesToCheck = lines.slice(1);
+    }
+
+    // Group lines by their content
+    var groups = {};
+    for (var i = 0; i < linesToCheck.length; i++) {
+      var line = linesToCheck[i];
+      if (!groups[line]) {
+        groups[line] = [];
+      }
+      groups[line].push(i);
+    }
+
+    // Find groups with more than one line
+    var dupeGroups = [];
+    for (var line in groups) {
+      if (groups.hasOwnProperty(line) && groups[line].length > 1) {
+        dupeGroups.push({ line: line, count: groups[line].length });
+      }
+    }
+
+    if (dupeGroups.length === 0) {
+      return new ReturnObject("success", "No duplicate lines found.", "# No Duplicates Found");
+    }
+
+    // Build output
+    var output = "# Duplicates Found\n\n";
+    for (var i = 0; i < dupeGroups.length; i++) {
+      var group = dupeGroups[i];
+      output += "# Duplicate group " + (i + 1) + " (" + group.count + " occurrences)\n";
+      output += group.line + "\n\n";
+    }
+
+    return new ReturnObject("success", "Found " + dupeGroups.length + " duplicate line groups.", output);
+  };
 })();

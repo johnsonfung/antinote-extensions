@@ -1,6 +1,6 @@
 {
   "name": "line_sort",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": "johnsonfung",
   "description": "Sort lines in your notes alphabetically, numerically, or reverse order",
   "license": "MIT",
@@ -28,6 +28,16 @@
       "name": "sort_lines_reverse",
       "description": "Reverse the order of lines",
       "type": "replaceAll"
+    },
+    {
+      "name": "dedupe_lines",
+      "description": "Remove duplicate lines keeping first or last occurrence",
+      "type": "replaceAll"
+    },
+    {
+      "name": "get_dupes",
+      "description": "Find and display duplicate lines grouped together",
+      "type": "insert"
     }
   ],
   "official": true,

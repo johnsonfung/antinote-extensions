@@ -1,6 +1,6 @@
 {
   "name": "json_tools",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": "johnsonfung",
   "description": "Transform, filter, and manipulate JSON and CSV data with powerful tools",
   "license": "MIT",
@@ -15,12 +15,30 @@
       "type": "select",
       "default": "snake_case",
       "options": [
-        {"label": "snake_case", "value": "snake_case"},
-        {"label": "camelCase", "value": "camelCase"},
-        {"label": "PascalCase", "value": "PascalCase"},
-        {"label": "kebab-case", "value": "kebab-case"},
-        {"label": "UPPER_CASE", "value": "UPPER_CASE"},
-        {"label": "lowercase", "value": "lowercase"}
+        {
+          "label": "snake_case",
+          "value": "snake_case"
+        },
+        {
+          "label": "camelCase",
+          "value": "camelCase"
+        },
+        {
+          "label": "PascalCase",
+          "value": "PascalCase"
+        },
+        {
+          "label": "kebab-case",
+          "value": "kebab-case"
+        },
+        {
+          "label": "UPPER_CASE",
+          "value": "UPPER_CASE"
+        },
+        {
+          "label": "lowercase",
+          "value": "lowercase"
+        }
       ],
       "description": "Default casing style for JSON keys when converting from CSV"
     }
@@ -72,8 +90,8 @@
       "type": "replaceAll"
     },
     {
-      "name": "json_dupes",
-      "description": "Find and display duplicate objects by key value",
+      "name": "json_get_dupes",
+      "description": "Find and display duplicate objects by key or duplicate primitives",
       "type": "insert"
     },
     {
