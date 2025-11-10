@@ -230,5 +230,14 @@ function main() {
   }
 }
 
-// Run the script
-main();
+// Run the script if executed directly
+if (require.main === module) {
+  main();
+}
+
+// Export functions for testing
+module.exports = {
+  parseVersion,
+  bumpPatchVersion,
+  wasVersionManuallyChanged
+};
