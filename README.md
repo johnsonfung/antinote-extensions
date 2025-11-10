@@ -75,7 +75,9 @@ Wrap your extension in an IIFE (Immediately Invoked Function Expression) to avoi
     [],                // Required API key IDs
     "your_github",     // Author (GitHub username)
     "Utilities",       // Category
-    "none"             // Data scope: "none", "line", or "full"
+    "none",            // Data scope: "none", "line", or "full"
+    [],                // Dependencies (optional - other extensions this depends on)
+    false              // isService (optional - true if this provides services to other extensions)
   );
 
   // Define commands here...
@@ -84,7 +86,7 @@ Wrap your extension in an IIFE (Immediately Invoked Function Expression) to avoi
 
 ### Extension Parameters
 
-#### `new Extension(name, version, endpoints, requiredAPIKeys, author, category, dataScope)`
+#### `new Extension(name, version, endpoints, requiredAPIKeys, author, category, dataScope, dependencies, isService)`
 
 - **`name`** (string): Unique name for your extension
 - **`version`** (string): Version number (e.g., "1.0.0")
@@ -93,6 +95,8 @@ Wrap your extension in an IIFE (Immediately Invoked Function Expression) to avoi
 - **`author`** (string): Your GitHub username or name
 - **`category`** (string): Category for organization (e.g., "AI", "Math", "Date & Time", "Utilities")
 - **`dataScope`** (string): Data access level - see [Data Privacy](#-data-privacy--scopes) below
+- **`dependencies`** (array, optional): Other extension names this depends on (e.g., `["ai_providers"]`)
+- **`isService`** (boolean, optional): Set to `true` if this extension provides services for other extensions (default: `false`)
 
 ---
 
@@ -174,6 +178,7 @@ new Parameter(type, name, helpText, defaultValue)
 - `"int"` - Whole numbers
 - `"bool"` - true/false (accepts: true, false, "true", "false")
 - `"string"` - Text (use quotes if contains commas: `"hello, world"`)
+- `"paragraph"` - Multi-line text editor (shown as textarea in UI)
 
 ---
 
@@ -243,21 +248,21 @@ Extensions can make external API calls using the `callAPI` bridge function.
 1. In Antinote, go to **Preferences > Extensions > API Keys**
 2. Click **Add API Key**
 3. Enter:
-   - **Name**: Display name (e.g., "OpenAI")
-   - **Keychain Key**: ID for code (e.g., "apikey_openai")
+   - **Name**: Display name (e.g., "Weather API")
+   - **Keychain Key**: ID for code (e.g., "apikey_weather")
    - **API Key Value**: Your actual API key
 
 ### Declaring API Requirements
 
 ```js
-var extensionRoot = new Extension(
-  "openai",
+const extensionRoot = new Extension(
+  "weather",
   "1.0.0",
-  ["https://api.openai.com/v1/chat/completions"],  // Endpoints
-  ["apikey_openai"],                                // Required keys
-  "anthropics",
-  "AI",
-  "line"
+  ["https://api.weatherapi.com/v1/current.json"],  // Endpoints
+  ["apikey_weather"],                               // Required keys
+  "your_github",
+  "Utilities",
+  "none"
 );
 ```
 
@@ -265,42 +270,41 @@ var extensionRoot = new Extension(
 
 ```js
 my_command.execute = function(payload) {
-  var [prompt] = this.getParsedParams(payload);
+  const [city] = this.getParsedParams(payload);
 
   // Prepare request
-  var url = "https://api.openai.com/v1/chat/completions";
-  var headers = JSON.stringify({
-    "Content-Type": "application/json",
-    "Authorization": "Bearer {{API_KEY}}"  // Replaced automatically
-  });
-  var body = JSON.stringify({
-    model: "gpt-4o",
-    messages: [{ role: "user", content: prompt }]
+  const url = `https://api.weatherapi.com/v1/current.json?key={{API_KEY}}&q=${encodeURIComponent(city)}`;
+  const headers = JSON.stringify({
+    "Content-Type": "application/json"
   });
 
   // Call API
   // Note: Extension identity is automatically determined by the system for security
-  var result = callAPI(
-    "apikey_openai",    // API key ID
+  const result = callAPI(
+    "apikey_weather",    // API key ID
     url,
-    "POST",
+    "GET",
     headers,
-    body
+    ""  // Empty body for GET requests
   );
 
   // Handle response
   if (!result.success) {
-    return new ReturnObject("error", "API call failed: " + result.error);
+    return new ReturnObject("error", `API call failed: ${result.error}`);
   }
 
-  var data = JSON.parse(result.data);
-  var response = data.choices[0].message.content;
+  const data = JSON.parse(result.data);
+  const temp = data.current.temp_f;
+  const condition = data.current.condition.text;
+  const response = `${city}: ${temp}°F, ${condition}`;
 
-  return new ReturnObject("success", "Response received", response);
+  return new ReturnObject("success", "Weather retrieved", response);
 };
 ```
 
 **Security**: `{{API_KEY}}` placeholders are replaced with actual keys from the macOS Keychain.
+
+**Note for AI/LLM Extensions**: Instead of calling AI APIs directly, use the `ai_providers` service extension. See [AI & LLM Extensions](#-ai--llm-extensions) below.
 
 ---
 
@@ -327,6 +331,7 @@ extensionRoot.register_preference(modelPref);
 
 - **`"bool"`** - Toggle on/off
 - **`"string"`** - Free text input
+- **`"paragraph"`** - Multi-line text editor (textarea)
 - **`"selectOne"`** - Dropdown with single selection
 - **`"selectMultiple"`** - Multiple checkboxes
 
@@ -341,6 +346,264 @@ my_command.execute = function(payload) {
   // ... use in your logic
 };
 ```
+
+---
+
+## 🤖 AI & LLM Extensions
+
+Antinote provides a centralized **AI Providers Service** (`ai_providers`) that handles AI/LLM integrations. Instead of calling AI APIs directly, use this service for a consistent, maintainable approach.
+
+### Why Use the AI Providers Service?
+
+- **Unified Interface**: Single API for OpenAI, Anthropic, Google AI, OpenRouter, and Ollama
+- **User Configuration**: Users configure their preferred provider and API keys once
+- **No Duplicate Code**: Don't reimplement AI provider logic in each extension
+- **Centralized Updates**: Provider changes update all AI extensions at once
+- **Better UX**: Consistent AI experience across all extensions
+
+### Using the AI Providers Service
+
+To create an AI-powered extension:
+
+#### 1. Declare Dependency
+
+```js
+const extensionRoot = new Extension(
+  "my_ai_extension",
+  "1.0.0",
+  [],                   // No endpoints - ai_providers handles this
+  [],                   // No API keys - ai_providers handles this
+  "your_github",
+  "AI & ML",
+  "full",               // Or "line" depending on your needs
+  ["ai_providers"],     // Declare dependency
+  false
+);
+```
+
+#### 2. Check Service Availability
+
+```js
+my_command.execute = function(payload) {
+  // Always check if the service is available
+  if (typeof callAIProvider === 'undefined') {
+    return new ReturnObject(
+      "error",
+      "AI Providers service not available. Please ensure the ai_providers extension is installed and enabled."
+    );
+  }
+
+  // ... your code
+};
+```
+
+#### 3. Call the AI Service
+
+```js
+my_command.execute = function(payload) {
+  if (typeof callAIProvider === 'undefined') {
+    return new ReturnObject("error", "AI Providers service not available.");
+  }
+
+  const fullText = payload.fullText || "";
+
+  if (!fullText?.trim()) {
+    return new ReturnObject("error", "No text to process.");
+  }
+
+  // Call AI provider with text and optional configuration
+  const result = callAIProvider(fullText, {
+    systemPrompt: "Summarize the following text concisely.",
+    maxTokens: 200,
+    temperature: 0.7
+  });
+
+  return result;
+};
+```
+
+### AI Provider Options
+
+The `callAIProvider` function accepts these options (all optional):
+
+```js
+callAIProvider(prompt, {
+  provider: "openai",           // Override user's default provider
+  model: "gpt-4o",              // Override user's default model
+  systemPrompt: "You are...",   // Custom system prompt
+  maxTokens: 150,               // Maximum response tokens (0 = use default)
+  temperature: 0.7              // Creativity (0.0-2.0)
+})
+```
+
+### Complete AI Extension Example
+
+Here's a text polishing extension using the AI service:
+
+```js
+(function() {
+  const extensionName = "polish_text";
+
+  const extensionRoot = new Extension(
+    extensionName,
+    "1.0.0",
+    [],                   // No endpoints
+    [],                   // No API keys
+    "your_github",
+    "AI & ML",
+    "full",               // Needs full text
+    ["ai_providers"],     // Depends on AI service
+    false
+  );
+
+  const polish = new Command(
+    "polish",
+    [
+      new Parameter("int", "level", "Polish level (1=casual, 2=professional, 3=formal)", 2)
+    ],
+    "replaceAll",
+    "Polish text with AI",
+    [
+      new TutorialCommand("polish(1)", "Casual polish"),
+      new TutorialCommand("polish(2)", "Professional polish"),
+      new TutorialCommand("polish(3)", "Formal polish")
+    ],
+    extensionRoot
+  );
+
+  polish.execute = function(payload) {
+    // Check service availability
+    if (typeof callAIProvider === 'undefined') {
+      return new ReturnObject("error", "AI Providers service not available.");
+    }
+
+    const [level] = this.getParsedParams(payload);
+    const fullText = payload.fullText || "";
+
+    if (!fullText?.trim()) {
+      return new ReturnObject("error", "No text to polish.");
+    }
+
+    // Define prompts for each level
+    const prompts = {
+      1: "Polish this text to be clear and casual.",
+      2: "Polish this text to be professional and clear.",
+      3: "Polish this text to be highly formal and sophisticated."
+    };
+
+    // Call AI service
+    const result = callAIProvider(fullText, {
+      systemPrompt: prompts[level],
+      maxTokens: 500
+    });
+
+    return result;
+  };
+})();
+```
+
+---
+
+## 🔌 Service Extensions & Dependencies
+
+Service extensions provide reusable functionality for other extensions. The `ai_providers` extension is a perfect example.
+
+### Creating a Service Extension
+
+Set `isService: true` to mark your extension as a service:
+
+```js
+const extensionRoot = new Extension(
+  "my_service",
+  "1.0.0",
+  [],
+  [],
+  "your_github",
+  "Services",
+  "none",
+  [],                   // No dependencies
+  true                  // This is a service
+);
+```
+
+Service extensions:
+- Typically have **no commands** (just provide functions)
+- Export global functions for other extensions to use
+- Handle complex integrations (APIs, data processing, etc.)
+
+### Exporting Service Functions
+
+```js
+(function() {
+  const extensionName = "my_service";
+
+  const extensionRoot = new Extension(
+    extensionName,
+    "1.0.0",
+    [],
+    [],
+    "your_github",
+    "Services",
+    "none",
+    [],
+    true  // isService
+  );
+
+  // Define your service function
+  function myServiceFunction(input, options) {
+    // ... service logic
+    return new ReturnObject("success", "Processed", result);
+  }
+
+  // Export globally for other extensions
+  if (typeof window !== 'undefined') {
+    window.myServiceFunction = myServiceFunction;
+  } else if (typeof global !== 'undefined') {
+    global.myServiceFunction = myServiceFunction;
+  }
+})();
+```
+
+### Using Dependencies
+
+Declare dependencies in your extension:
+
+```js
+const extensionRoot = new Extension(
+  "my_extension",
+  "1.0.0",
+  [],
+  [],
+  "your_github",
+  "Utilities",
+  "none",
+  ["my_service"],  // Depends on my_service extension
+  false
+);
+```
+
+Then use the service functions:
+
+```js
+my_command.execute = function(payload) {
+  // Check if service is available
+  if (typeof myServiceFunction === 'undefined') {
+    return new ReturnObject("error", "Service not available.");
+  }
+
+  // Use the service
+  const result = myServiceFunction(input, options);
+  return result;
+};
+```
+
+### Dependency Best Practices
+
+1. **Always check availability** - Service might not be installed/enabled
+2. **Provide helpful errors** - Tell users which service is needed
+3. **Document dependencies** - List required services in your README
+4. **Keep services focused** - One clear purpose per service
+5. **Version carefully** - Breaking changes affect dependent extensions
 
 ---
 
@@ -488,22 +751,24 @@ To become an official extension (included with Antinote by default):
 
 ### Constructors
 
-#### `Extension(name, version, endpoints, requiredAPIKeys, author, category, dataScope)`
+#### `Extension(name, version, endpoints, requiredAPIKeys, author, category, dataScope, dependencies, isService)`
 Creates extension container.
+- **dependencies** (optional): Array of extension names this depends on
+- **isService** (optional): Boolean - true if providing services to other extensions
 
 #### `Command(name, parameters, type, helpText, tutorials, extension)`
 Registers a command (note: aliases parameter has been removed).
 
 #### `Parameter(type, name, helpText, defaultValue)`
 Defines command parameter.
-- Types: `"float"`, `"int"`, `"bool"`, `"string"`
+- Types: `"float"`, `"int"`, `"bool"`, `"string"`, `"paragraph"`
 
 #### `TutorialCommand(command, description)`
 Example usage for users.
 
 #### `Preference(key, label, type, defaultValue, options, helpText)`
 User-configurable preference.
-- Types: `"bool"`, `"string"`, `"selectOne"`, `"selectMultiple"`
+- Types: `"bool"`, `"string"`, `"paragraph"`, `"selectOne"`, `"selectMultiple"`
 
 #### `ReturnObject(status, message, payload)`
 Standard return value.
