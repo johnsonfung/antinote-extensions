@@ -19,10 +19,10 @@
 // This extension has no commands - it only provides a service
 
 (function () {
-    var extensionName = "ai_providers";
+    const extensionName = "ai_providers";
 
     // Provider configurations
-    var PROVIDERS = {
+    const PROVIDERS = {
         "openai": {
             name: "OpenAI",
             endpoint: "https://api.openai.com/v1/chat/completions",
@@ -72,17 +72,17 @@
     };
 
     // Create the extension root with all possible endpoints and API keys
-    var allEndpoints = [];
-    var allApiKeys = [];
-    for (var providerId in PROVIDERS) {
-        var provider = PROVIDERS[providerId];
+    const allEndpoints = [];
+    const allApiKeys = [];
+    for (const providerId in PROVIDERS) {
+        const provider = PROVIDERS[providerId];
         allEndpoints.push(provider.endpoint);
         if (provider.requiresApiKey && provider.apiKeyId) {
             allApiKeys.push(provider.apiKeyId);
         }
     }
 
-    var extensionRoot = new Extension(
+    const extensionRoot = new Extension(
         extensionName,
         "1.0.0",
         allEndpoints,
@@ -95,7 +95,7 @@
     );
 
     // Register shared preferences
-    var providerPref = new Preference(
+    const providerPref = new Preference(
         "provider",
         "AI Provider",
         "selectOne",
@@ -105,7 +105,7 @@
     );
     extensionRoot.register_preference(providerPref);
 
-    var modelPref = new Preference(
+    const modelPref = new Preference(
         "model",
         "Model",
         "string",
@@ -115,7 +115,7 @@
     );
     extensionRoot.register_preference(modelPref);
 
-    var systemPromptPref = new Preference(
+    const systemPromptPref = new Preference(
         "systemPrompt",
         "System Prompt",
         "string",
@@ -125,7 +125,7 @@
     );
     extensionRoot.register_preference(systemPromptPref);
 
-    var defaultMaxTokensPref = new Preference(
+    const defaultMaxTokensPref = new Preference(
         "defaultMaxTokens",
         "Default Max Tokens",
         "string",
@@ -136,17 +136,17 @@
     extensionRoot.register_preference(defaultMaxTokensPref);
 
     // Helper function to build request for different providers
-    function buildRequest(provider, model, systemPrompt, userPrompt, maxTokens, temperature) {
-        var providerId = provider.toLowerCase();
-        var config = PROVIDERS[providerId];
+    const buildRequest = (provider, model, systemPrompt, userPrompt, maxTokens, temperature) => {
+        const providerId = provider.toLowerCase();
+        const config = PROVIDERS[providerId];
 
         if (!config) {
             return null;
         }
 
-        var url = config.endpoint;
-        var headers = {};
-        var body = {};
+        let url = config.endpoint;
+        let headers = {};
+        let body = {};
 
         if (providerId === "openai" || providerId === "openrouter" || providerId === "ollama") {
             // OpenAI-compatible format (OpenAI, OpenRouter, Ollama)
@@ -164,19 +164,19 @@
             }
 
             body = {
-                "model": model,
-                "messages": [
+                model,
+                messages: [
                     {
-                        "role": "system",
-                        "content": systemPrompt
+                        role: "system",
+                        content: systemPrompt
                     },
                     {
-                        "role": "user",
-                        "content": userPrompt
+                        role: "user",
+                        content: userPrompt
                     }
                 ],
-                "max_tokens": maxTokens,
-                "temperature": temperature
+                max_tokens: maxTokens,
+                temperature
             };
         } else if (providerId === "anthropic") {
             // Anthropic format
@@ -187,65 +187,65 @@
             };
 
             body = {
-                "model": model,
-                "max_tokens": maxTokens,
-                "temperature": temperature,
-                "system": systemPrompt,
-                "messages": [
+                model,
+                max_tokens: maxTokens,
+                temperature,
+                system: systemPrompt,
+                messages: [
                     {
-                        "role": "user",
-                        "content": userPrompt
+                        role: "user",
+                        content: userPrompt
                     }
                 ]
             };
         } else if (providerId === "google") {
             // Google AI format
-            url = config.endpoint + model + ":generateContent?key={{API_KEY}}";
+            url = `${config.endpoint}${model}:generateContent?key={{API_KEY}}`;
             headers = {
                 "Content-Type": "application/json"
             };
 
             body = {
-                "contents": [
+                contents: [
                     {
-                        "parts": [
+                        parts: [
                             {
-                                "text": systemPrompt + "\n\n" + userPrompt
+                                text: `${systemPrompt}\n\n${userPrompt}`
                             }
                         ]
                     }
                 ],
-                "generationConfig": {
-                    "temperature": temperature,
-                    "maxOutputTokens": maxTokens
+                generationConfig: {
+                    temperature,
+                    maxOutputTokens: maxTokens
                 }
             };
         }
 
         return {
-            url: url,
+            url,
             headers: JSON.stringify(headers),
             body: JSON.stringify(body),
             apiKeyId: config.apiKeyId,
             provider: config
         };
-    }
+    };
 
     // Helper function to parse response from different providers
-    function parseResponse(providerId, responseData) {
+    const parseResponse = (providerId, responseData) => {
         try {
             if (providerId === "openai" || providerId === "openrouter" || providerId === "ollama") {
-                if (responseData.choices && responseData.choices.length > 0) {
+                if (responseData.choices?.length > 0) {
                     return responseData.choices[0].message.content.trim();
                 }
             } else if (providerId === "anthropic") {
-                if (responseData.content && responseData.content.length > 0) {
+                if (responseData.content?.length > 0) {
                     return responseData.content[0].text.trim();
                 }
             } else if (providerId === "google") {
-                if (responseData.candidates && responseData.candidates.length > 0) {
-                    var candidate = responseData.candidates[0];
-                    if (candidate.content && candidate.content.parts && candidate.content.parts.length > 0) {
+                if (responseData.candidates?.length > 0) {
+                    const candidate = responseData.candidates[0];
+                    if (candidate.content?.parts?.length > 0) {
                         return candidate.content.parts[0].text.trim();
                     }
                 }
@@ -255,7 +255,7 @@
             console.error("Error parsing response:", e);
             return null;
         }
-    }
+    };
 
     // Public API: Call AI provider
     // This function is exposed globally for other extensions to use
@@ -280,12 +280,12 @@
             }
 
             // Get preferences (use options to override)
-            var provider = options.provider || getExtensionPreference(extensionName, "provider") || "openai";
-            var model = options.model || getExtensionPreference(extensionName, "model") || PROVIDERS[provider].defaultModel;
-            var systemPrompt = options.systemPrompt || getExtensionPreference(extensionName, "systemPrompt") || "You are a helpful assistant integrated into a plaintext scratch notes app. Be concise and direct.";
-            var defaultMaxTokens = parseInt(getExtensionPreference(extensionName, "defaultMaxTokens") || "150", 10);
-            var maxTokens = options.maxTokens !== undefined ? options.maxTokens : defaultMaxTokens;
-            var temperature = options.temperature !== undefined ? options.temperature : 0.7;
+            const provider = options.provider || getExtensionPreference(extensionName, "provider") || "openai";
+            const model = options.model || getExtensionPreference(extensionName, "model") || PROVIDERS[provider].defaultModel;
+            const systemPrompt = options.systemPrompt || getExtensionPreference(extensionName, "systemPrompt") || "You are a helpful assistant integrated into a plaintext scratch notes app. Be concise and direct.";
+            const defaultMaxTokens = parseInt(getExtensionPreference(extensionName, "defaultMaxTokens") || "150", 10);
+            let maxTokens = options.maxTokens !== undefined ? options.maxTokens : defaultMaxTokens;
+            const temperature = options.temperature !== undefined ? options.temperature : 0.7;
 
             // Use default max_tokens if not specified (0 means use default)
             if (maxTokens === 0) {
@@ -305,14 +305,14 @@
             console.log("AI Provider Service - Using model:", model);
 
             // Build request for the selected provider
-            var request = buildRequest(provider, model, systemPrompt, prompt, maxTokens, temperature);
+            const request = buildRequest(provider, model, systemPrompt, prompt, maxTokens, temperature);
 
             if (!request) {
-                return new ReturnObject("error", "Invalid provider configuration: " + provider);
+                return new ReturnObject("error", `Invalid provider configuration: ${provider}`);
             }
 
             // Call the API
-            var result;
+            let result;
             if (provider === "ollama") {
                 // Ollama doesn't need an API key
                 result = callAPI(
@@ -337,32 +337,32 @@
             if (!result.success) {
                 return new ReturnObject(
                     "error",
-                    "API call failed: " + (result.error || "Unknown error")
+                    `API call failed: ${result.error || "Unknown error"}`
                 );
             }
 
             // Parse the response
-            var responseData = JSON.parse(result.data);
+            const responseData = JSON.parse(result.data);
 
             // Check for API errors
             if (responseData.error) {
-                var errorMessage = responseData.error.message || responseData.error;
+                let errorMessage = responseData.error.message || responseData.error;
                 if (typeof errorMessage === "object") {
                     errorMessage = JSON.stringify(errorMessage);
                 }
                 return new ReturnObject(
                     "error",
-                    "API error: " + errorMessage
+                    `API error: ${errorMessage}`
                 );
             }
 
             // Extract response text based on provider
-            var responseText = parseResponse(provider, responseData);
+            const responseText = parseResponse(provider, responseData);
 
             if (!responseText) {
                 return new ReturnObject(
                     "error",
-                    "Could not parse response from " + provider + ". Response: " + JSON.stringify(responseData)
+                    `Could not parse response from ${provider}. Response: ${JSON.stringify(responseData)}`
                 );
             }
 
@@ -372,7 +372,7 @@
             console.error("AI Provider Service error:", error);
             return new ReturnObject(
                 "error",
-                "AI Provider Service error: " + error.toString()
+                `AI Provider Service error: ${error.toString()}`
             );
         }
     }

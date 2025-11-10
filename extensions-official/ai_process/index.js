@@ -5,9 +5,9 @@
 
 (function() {
   // Wrap in IIFE to avoid variable conflicts
-  var extensionName = "ai_process";
+  const extensionName = "ai_process";
 
-  var extensionRoot = new Extension(
+  const extensionRoot = new Extension(
     extensionName,
     "1.0.0",
     [], // No endpoints - uses ai_providers
@@ -22,7 +22,7 @@
   // Register extension preferences
 
   // Polish command preferences - custom prompts for each professionalism level
-  var polishLevel1Pref = new Preference(
+  const polishLevel1Pref = new Preference(
     "polish_level1_prompt",
     "Polish Level 1 Prompt (Casual)",
     "string",
@@ -32,7 +32,7 @@
   );
   extensionRoot.register_preference(polishLevel1Pref);
 
-  var polishLevel2Pref = new Preference(
+  const polishLevel2Pref = new Preference(
     "polish_level2_prompt",
     "Polish Level 2 Prompt (Professional)",
     "string",
@@ -42,7 +42,7 @@
   );
   extensionRoot.register_preference(polishLevel2Pref);
 
-  var polishLevel3Pref = new Preference(
+  const polishLevel3Pref = new Preference(
     "polish_level3_prompt",
     "Polish Level 3 Prompt (Formal)",
     "string",
@@ -52,7 +52,7 @@
   );
   extensionRoot.register_preference(polishLevel3Pref);
 
-  var voicePrintPref = new Preference(
+  const voicePrintPref = new Preference(
     "voice_print",
     "Voice Print (Optional)",
     "string",
@@ -63,7 +63,7 @@
   extensionRoot.register_preference(voicePrintPref);
 
   // Translation preferences
-  var defaultLanguagePref = new Preference(
+  const defaultLanguagePref = new Preference(
     "default_language",
     "Default Translation Language",
     "string",
@@ -74,7 +74,7 @@
   extensionRoot.register_preference(defaultLanguagePref);
 
   // Max tokens override
-  var maxTokensPref = new Preference(
+  const maxTokensPref = new Preference(
     "max_tokens",
     "Max Tokens Override",
     "string",
@@ -88,7 +88,7 @@
   // POLISH COMMAND
   // ===========================
 
-  var polish = new Command(
+  const polish = new Command(
     "polish",
     [
       new Parameter("int", "level", "Professionalism level (1=casual, 2=professional, 3=formal)", 2)
@@ -109,9 +109,9 @@
       return new ReturnObject("error", "AI Providers service not available. The ai_process extension requires the ai_providers extension to be installed and enabled.");
     }
 
-    var params = this.getParsedParams(payload);
-    var level = params[0];
-    var fullText = payload.fullText || "";
+    const params = this.getParsedParams(payload);
+    const level = params[0];
+    const fullText = payload.fullText || "";
 
     // Validate level
     if (level < 1 || level > 3) {
@@ -123,27 +123,27 @@
     }
 
     // Get the appropriate prompt for the level
-    var promptKey = "polish_level" + level + "_prompt";
-    var systemPrompt = getExtensionPreference(extensionName, promptKey);
+    const promptKey = `polish_level${level}_prompt`;
+    let systemPrompt = getExtensionPreference(extensionName, promptKey);
 
     // Add voice print if configured
-    var voicePrint = getExtensionPreference(extensionName, "voice_print");
-    if (voicePrint && voicePrint.trim() !== "") {
-      systemPrompt += " Maintain this voice: " + voicePrint;
+    const voicePrint = getExtensionPreference(extensionName, "voice_print");
+    if (voicePrint?.trim()) {
+      systemPrompt += ` Maintain this voice: ${voicePrint}`;
     }
 
     // Get max tokens override if set
-    var maxTokensOverride = getExtensionPreference(extensionName, "max_tokens");
-    var options = {
-      systemPrompt: systemPrompt
+    const maxTokensOverride = getExtensionPreference(extensionName, "max_tokens");
+    const options = {
+      systemPrompt
     };
 
-    if (maxTokensOverride && maxTokensOverride.trim() !== "") {
+    if (maxTokensOverride?.trim()) {
       options.maxTokens = parseInt(maxTokensOverride, 10);
     }
 
     // Call AI provider
-    var result = callAIProvider(fullText, options);
+    const result = callAIProvider(fullText, options);
 
     return result;
   };
@@ -152,7 +152,7 @@
   // TRANSLATE COMMAND
   // ===========================
 
-  var translate = new Command(
+  const translate = new Command(
     "translate",
     [
       new Parameter("string", "language", "Target language for translation", "")
@@ -173,34 +173,34 @@
       return new ReturnObject("error", "AI Providers service not available. The ai_process extension requires the ai_providers extension to be installed and enabled.");
     }
 
-    var params = this.getParsedParams(payload);
-    var language = params[0] || "";
-    var fullText = payload.fullText || "";
+    const params = this.getParsedParams(payload);
+    let language = params[0] || "";
+    const fullText = payload.fullText || "";
 
     if (!fullText || fullText.trim() === "") {
       return new ReturnObject("error", "No text to translate. The note appears to be empty.");
     }
 
     // Use default language if not specified
-    if (!language || language.trim() === "") {
+    if (!language?.trim()) {
       language = getExtensionPreference(extensionName, "default_language") || "Spanish";
     }
 
     // Build system prompt
-    var systemPrompt = "Translate the following text to " + language + ". Only return the translated text, nothing else.";
+    const systemPrompt = `Translate the following text to ${language}. Only return the translated text, nothing else.`;
 
     // Get max tokens override if set
-    var maxTokensOverride = getExtensionPreference(extensionName, "max_tokens");
-    var options = {
-      systemPrompt: systemPrompt
+    const maxTokensOverride = getExtensionPreference(extensionName, "max_tokens");
+    const options = {
+      systemPrompt
     };
 
-    if (maxTokensOverride && maxTokensOverride.trim() !== "") {
+    if (maxTokensOverride?.trim()) {
       options.maxTokens = parseInt(maxTokensOverride, 10);
     }
 
     // Call AI provider
-    var result = callAIProvider(fullText, options);
+    const result = callAIProvider(fullText, options);
 
     return result;
   };
@@ -209,7 +209,7 @@
   // CREATE_LIST COMMAND
   // ===========================
 
-  var create_list = new Command(
+  const create_list = new Command(
     "create_list",
     [],
     "replaceAll",
@@ -226,14 +226,14 @@
       return new ReturnObject("error", "AI Providers service not available. The ai_process extension requires the ai_providers extension to be installed and enabled.");
     }
 
-    var fullText = payload.fullText || "";
+    const fullText = payload.fullText || "";
 
     if (!fullText || fullText.trim() === "") {
       return new ReturnObject("error", "No text to process. The note appears to be empty.");
     }
 
     // Build system prompt with specific formatting instructions
-    var systemPrompt = "Convert the following text into a structured list. " +
+    const systemPrompt = "Convert the following text into a structured list. " +
       "Format your response EXACTLY as follows:\n" +
       "- First line: 'list:' followed by a concise title for the list\n" +
       "- Following lines: Each list item on its own line with no bullets, dashes, or numbers\n" +
@@ -245,17 +245,17 @@
       "Eggs";
 
     // Get max tokens override if set
-    var maxTokensOverride = getExtensionPreference(extensionName, "max_tokens");
-    var options = {
-      systemPrompt: systemPrompt
+    const maxTokensOverride = getExtensionPreference(extensionName, "max_tokens");
+    const options = {
+      systemPrompt
     };
 
-    if (maxTokensOverride && maxTokensOverride.trim() !== "") {
+    if (maxTokensOverride?.trim()) {
       options.maxTokens = parseInt(maxTokensOverride, 10);
     }
 
     // Call AI provider
-    var result = callAIProvider(fullText, options);
+    const result = callAIProvider(fullText, options);
 
     return result;
   };

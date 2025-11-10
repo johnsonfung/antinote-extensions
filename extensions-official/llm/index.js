@@ -9,11 +9,11 @@
 // Then press Enter
 
 (function () {
-    var extensionName = "llm";
+    const extensionName = "llm";
 
     // This extension depends on ai_providers service
     // No endpoints or API keys needed - all handled by ai_providers
-    var extensionRoot = new Extension(
+    const extensionRoot = new Extension(
         extensionName,
         "3.0.0",
         [],  // No endpoints - uses ai_providers
@@ -26,7 +26,7 @@
     );
 
     // Create the ai command
-    var ai = new Command(
+    const ai = new Command(
         "ai",
         [
             new Parameter("string", "prompt", "The prompt to send to the AI", "Hello, how are you?"),
@@ -45,7 +45,7 @@
 
     ai.execute = function (payload) {
         try {
-            var [prompt, max_tokens, temperature] = this.getParsedParams(payload);
+            const [prompt, max_tokens, temperature] = this.getParsedParams(payload);
 
             // Validation
             if (!prompt || prompt.trim() === "") {
@@ -61,9 +61,9 @@
             }
 
             // Call the AI Providers service
-            var result = callAIProvider(prompt, {
+            const result = callAIProvider(prompt, {
                 maxTokens: max_tokens,
-                temperature: temperature
+                temperature
             });
 
             return result;
@@ -72,7 +72,7 @@
             console.error("LLM Extension error:", error);
             return new ReturnObject(
                 "error",
-                "Extension error: " + error.toString()
+                `Extension error: ${error.toString()}`
             );
         }
     };
