@@ -5,9 +5,9 @@
 
 (function() {
   // Wrap in IIFE to avoid variable conflicts
-  var extensionName = "date";
+  const extensionName = "date";
 
-  var extensionRoot = new Extension(
+  const extensionRoot = new Extension(
     extensionName,
     "1.0.0",
     [], // No external API endpoints
@@ -18,7 +18,7 @@
   );
 
   // Register extension preferences
-  var formatPref = new Preference(
+  const formatPref = new Preference(
     "format",
     "Date Format",
     "selectOne",
@@ -28,7 +28,7 @@
   );
   extensionRoot.register_preference(formatPref);
 
-  var localePref = new Preference(
+  const localePref = new Preference(
     "locale",
     "Locale",
     "string",
@@ -39,21 +39,21 @@
   extensionRoot.register_preference(localePref);
 
   // --- helpers ---
-  function pad2(n) { return String(n).padStart(2, "0"); }
+  const pad2 = (n) => String(n).padStart(2, "0");
 
-  function formatCustom(d, pattern) {
-    var Y = d.getFullYear();
-    var M = d.getMonth() + 1;
-    var D = d.getDate();
+  const formatCustom = (d, pattern) => {
+    const Y = d.getFullYear();
+    const M = d.getMonth() + 1;
+    const D = d.getDate();
     return pattern
       .replace(/YYYY/g, String(Y))
       .replace(/MM/g, pad2(M))
       .replace(/DD/g, pad2(D));
-  }
+  };
 
-  function formatDateOnly(d, preset, locale) {
-    var loc = (locale || "").trim() || undefined;
-    var p = (preset || "local_long_date").toLowerCase();
+  const formatDateOnly = (d, preset, locale) => {
+    const loc = (locale || "").trim() || undefined;
+    const p = (preset || "local_long_date").toLowerCase();
     switch (p) {
       case "local_long_date":
         return new Intl.DateTimeFormat(loc, { dateStyle: "long" }).format(d);
@@ -69,23 +69,23 @@
         // Fallback
         return new Intl.DateTimeFormat(loc, { dateStyle: "long" }).format(d);
     }
-  }
+  };
 
-  function getDateWithOffset(baseDate, daysOffset) {
-    var result = new Date(baseDate);
+  const getDateWithOffset = (baseDate, daysOffset) => {
+    const result = new Date(baseDate);
     result.setDate(result.getDate() + daysOffset);
     return result;
-  }
+  };
 
-  function getBusinessDayWithOffset(baseDate, businessDaysOffset) {
-    var result = new Date(baseDate);
-    var daysToAdd = businessDaysOffset;
-    var direction = daysToAdd >= 0 ? 1 : -1;
-    var daysAdded = 0;
+  const getBusinessDayWithOffset = (baseDate, businessDaysOffset) => {
+    const result = new Date(baseDate);
+    const daysToAdd = businessDaysOffset;
+    const direction = daysToAdd >= 0 ? 1 : -1;
+    let daysAdded = 0;
 
     while (daysAdded !== Math.abs(daysToAdd)) {
       result.setDate(result.getDate() + direction);
-      var dayOfWeek = result.getDay();
+      const dayOfWeek = result.getDay();
       // Skip weekends (0 = Sunday, 6 = Saturday)
       if (dayOfWeek !== 0 && dayOfWeek !== 6) {
         daysAdded++;
@@ -93,10 +93,10 @@
     }
 
     return result;
-  }
+  };
 
   // --- command: today ---
-  var today = new Command(
+  const today = new Command(
     "today",
     [
       // Optional days offset - can be positive or negative
@@ -113,16 +113,16 @@
   );
 
   today.execute = function (payload) {
-    var [daysOffset] = this.getParsedParams(payload);
-    var format = getExtensionPreference(extensionName, "format") || "local_long_date";
-    var locale = getExtensionPreference(extensionName, "locale") || "";
-    var targetDate = getDateWithOffset(new Date(), daysOffset);
-    var out = formatDateOnly(targetDate, format, locale);
+    const [daysOffset] = this.getParsedParams(payload);
+    const format = getExtensionPreference(extensionName, "format") || "local_long_date";
+    const locale = getExtensionPreference(extensionName, "locale") || "";
+    const targetDate = getDateWithOffset(new Date(), daysOffset);
+    const out = formatDateOnly(targetDate, format, locale);
     return new ReturnObject("success", "Inserted date.", out);
   };
 
   // --- command: tomorrow ---
-  var tomorrow = new Command(
+  const tomorrow = new Command(
     "tomorrow",
     [
       // Optional additional days offset (added to base +1)
@@ -139,16 +139,16 @@
   );
 
   tomorrow.execute = function (payload) {
-    var [daysOffset] = this.getParsedParams(payload);
-    var format = getExtensionPreference(extensionName, "format") || "local_long_date";
-    var locale = getExtensionPreference(extensionName, "locale") || "";
-    var targetDate = getDateWithOffset(new Date(), 1 + daysOffset);
-    var out = formatDateOnly(targetDate, format, locale);
+    const [daysOffset] = this.getParsedParams(payload);
+    const format = getExtensionPreference(extensionName, "format") || "local_long_date";
+    const locale = getExtensionPreference(extensionName, "locale") || "";
+    const targetDate = getDateWithOffset(new Date(), 1 + daysOffset);
+    const out = formatDateOnly(targetDate, format, locale);
     return new ReturnObject("success", "Inserted date.", out);
   };
 
   // --- command: yesterday ---
-  var yesterday = new Command(
+  const yesterday = new Command(
     "yesterday",
     [
       // Optional additional days offset (added to base -1)
@@ -165,16 +165,16 @@
   );
 
   yesterday.execute = function (payload) {
-    var [daysOffset] = this.getParsedParams(payload);
-    var format = getExtensionPreference(extensionName, "format") || "local_long_date";
-    var locale = getExtensionPreference(extensionName, "locale") || "";
-    var targetDate = getDateWithOffset(new Date(), -1 + daysOffset);
-    var out = formatDateOnly(targetDate, format, locale);
+    const [daysOffset] = this.getParsedParams(payload);
+    const format = getExtensionPreference(extensionName, "format") || "local_long_date";
+    const locale = getExtensionPreference(extensionName, "locale") || "";
+    const targetDate = getDateWithOffset(new Date(), -1 + daysOffset);
+    const out = formatDateOnly(targetDate, format, locale);
     return new ReturnObject("success", "Inserted date.", out);
   };
 
   // --- command: business_day ---
-  var business_day = new Command(
+  const business_day = new Command(
     "business_day",
     [
       // Business days offset (positive = future, negative = past, 0 = today if weekday or next Monday)
@@ -192,15 +192,15 @@
   );
 
   business_day.execute = function (payload) {
-    var [businessDaysOffset] = this.getParsedParams(payload);
-    var format = getExtensionPreference(extensionName, "format") || "local_long_date";
-    var locale = getExtensionPreference(extensionName, "locale") || "";
+    const [businessDaysOffset] = this.getParsedParams(payload);
+    const format = getExtensionPreference(extensionName, "format") || "local_long_date";
+    const locale = getExtensionPreference(extensionName, "locale") || "";
 
-    var targetDate;
+    let targetDate;
     if (businessDaysOffset === 0) {
       // If offset is 0, return today if it's a weekday, otherwise next Monday
       targetDate = new Date();
-      var dayOfWeek = targetDate.getDay();
+      const dayOfWeek = targetDate.getDay();
       if (dayOfWeek === 0) {
         // Sunday -> Monday
         targetDate.setDate(targetDate.getDate() + 1);
@@ -212,7 +212,7 @@
       targetDate = getBusinessDayWithOffset(new Date(), businessDaysOffset);
     }
 
-    var out = formatDateOnly(targetDate, format, locale);
+    const out = formatDateOnly(targetDate, format, locale);
     return new ReturnObject("success", "Inserted business day.", out);
   };
 })();

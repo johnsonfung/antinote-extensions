@@ -1,9 +1,9 @@
 (function () {
   // 1. Name your extension (wrapped in IIFE to avoid variable conflicts)
-  var extensionName = "random";
+  const extensionName = "random";
 
   // 2. Create the extension root with endpoints and required API keys
-  var extensionRoot = new Extension(
+  const extensionRoot = new Extension(
     extensionName,
     "1.0.0",
     [], // No external API endpoints
@@ -14,7 +14,7 @@
   );
 
   // 3. Create a command for your extension
-  var random_number = new Command(
+  const random_number = new Command(
     "random_number", // This is the name of the command and what the user will type in the note to trigger it. Please use snake_case.
 
     // 4. Create the parameters for the command. Every parameter must have a type, name, and helpText.
@@ -42,7 +42,7 @@
   // 5. Write your function
   random_number.execute = function (payload) {
     // This will automatically replace empty parameters with the default values and parse them based on the parameter type
-    var [from, to, int] = this.getParsedParams(payload);
+    const [from, to, int] = this.getParsedParams(payload);
 
     // Error handling
     if (from > to) {
@@ -55,17 +55,16 @@
 
     console.log(from, to, int); // Console logs will appear in Terminal if you launch Antinote from the command line. Starts with 'JS console.log'
 
-    var result = Math.random() * (to - from) + from;
+    let result = Math.random() * (to - from) + from;
     if (int) {
       result = Math.floor(result);
     }
 
-    var success = new ReturnObject("success", "Random number generated.", result);
-    return success;
+    return new ReturnObject("success", "Random number generated.", result);
   };
 
   // Another example command that generates a series of random letters
-  var random_letters = new Command(
+  const random_letters = new Command(
     "random_letters",
     [
       new Parameter("int", "numberOfLetters", "Number of letters to generate", 1),
@@ -80,7 +79,7 @@
   );
 
   random_letters.execute = function (payload) {
-    var [numberOfLetters] = this.getParsedParams(payload);
+    const [numberOfLetters] = this.getParsedParams(payload);
 
     // Error handling
     if (numberOfLetters < 1) {
@@ -91,17 +90,16 @@
       return new ReturnObject("error", "Cannot generate more than 1000 letters at once.");
     }
 
-    var result = "";
-    for (var i = 0; i < numberOfLetters; i++) {
+    let result = "";
+    for (let i = 0; i < numberOfLetters; i++) {
       result += String.fromCharCode(65 + Math.floor(Math.random() * 26));
     }
 
-    var success = new ReturnObject("success", "Random letters generated.", result);
-    return success;
+    return new ReturnObject("success", "Random letters generated.", result);
   };
 
   // Another example command that replaces the whole text with a random quote
-  var random_quote = new Command(
+  const random_quote = new Command(
     "random_quote",
     [],
     "insert",
@@ -113,7 +111,7 @@
   );
 
   random_quote.execute = function (payload) {
-    var quotes = [
+    const quotes = [
       "Letting go gives us freedom, and freedom is the only condition for happiness.",
       "You can only lose what you cling to.",
       "The foot feels the foot when it feels the ground.",
@@ -124,16 +122,15 @@
       "To let go is to be free."
     ];
 
-    var result = quotes[Math.floor(Math.random() * quotes.length)];
+    const result = quotes[Math.floor(Math.random() * quotes.length)];
 
-    var success = new ReturnObject("success", "Random quote inserted.", result);
-    return success;
+    return new ReturnObject("success", "Random quote inserted.", result);
   };
 
   // Another example that opens a URL.
   // If the user's note contains the word "cat", it will open the wikipedia page for cats.
   // Otherwise it will open a random wikipedia page.
-  var random_wiki = new Command(
+  const random_wiki = new Command(
     "random_wiki",
     [],
     "openURL",
@@ -145,13 +142,8 @@
   );
 
   random_wiki.execute = function (payload) {
-    var url = "https://en.wikipedia.org/wiki/Special:Random";
+    const url = "https://en.wikipedia.org/wiki/Special:Random";
 
-    var success = new ReturnObject("success", "Opening random Wikipedia page.", url);
-    return success;
+    return new ReturnObject("success", "Opening random Wikipedia page.", url);
   };
 })();
-
-
-
-

@@ -4,9 +4,9 @@
 // ===============================
 
 (function () {
-  var extensionName = "json_tools";
+  const extensionName = "json_tools";
 
-  var extensionRoot = new Extension(
+  const extensionRoot = new Extension(
     extensionName,
     "1.0.0",
     [],
@@ -19,40 +19,38 @@
   // --- Helper Functions ---
 
   // Convert string to different casing styles
-  function convertCasing(str, casing) {
+  const convertCasing = (str, casing) => {
     // First normalize the string - split on spaces, underscores, hyphens, and camelCase
-    var words = str
+    const words = str
       .replace(/([a-z])([A-Z])/g, '$1 $2') // Split camelCase
       .replace(/[_-]/g, ' ') // Replace underscores and hyphens with spaces
       .split(/\s+/) // Split on whitespace
-      .filter(function(w) { return w.length > 0; });
+      .filter(w => w.length > 0);
 
     switch (casing) {
       case 'snake_case':
-        return words.map(function(w) { return w.toLowerCase(); }).join('_');
+        return words.map(w => w.toLowerCase()).join('_');
       case 'camelCase':
-        return words.map(function(w, i) {
-          return i === 0 ? w.toLowerCase() : w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
-        }).join('');
+        return words.map((w, i) =>
+          i === 0 ? w.toLowerCase() : w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()
+        ).join('');
       case 'PascalCase':
-        return words.map(function(w) {
-          return w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
-        }).join('');
+        return words.map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join('');
       case 'kebab-case':
-        return words.map(function(w) { return w.toLowerCase(); }).join('-');
+        return words.map(w => w.toLowerCase()).join('-');
       case 'UPPER_CASE':
-        return words.map(function(w) { return w.toUpperCase(); }).join('_');
+        return words.map(w => w.toUpperCase()).join('_');
       case 'lowercase':
-        return words.map(function(w) { return w.toLowerCase(); }).join('');
+        return words.map(w => w.toLowerCase()).join('');
       default:
         return str;
     }
-  }
+  };
 
   // Parse loose JSON/JS - supports single quotes, trailing commas, comments, unquoted keys
-  function parseLooseJSON(text) {
+  const parseLooseJSON = (text) => {
     // Remove comments
-    var cleaned = text
+    const cleaned = text
       .replace(/\/\*[\s\S]*?\*\//g, '') // Remove /* */ comments
       .replace(/\/\/.*/g, ''); // Remove // comments
 
@@ -62,28 +60,28 @@
     } catch (e) {
       // Try to fix common issues
       try {
-        var fixed = cleaned
+        const fixed = cleaned
           .replace(/,(\s*[}\]])/g, '$1') // Remove trailing commas
           .replace(/(['"])?([a-zA-Z0-9_]+)(['"])?\s*:/g, '"$2":') // Quote unquoted keys
           .replace(/'/g, '"'); // Replace single quotes with double quotes
 
         return JSON.parse(fixed);
       } catch (e2) {
-        throw new Error("Invalid JSON: " + e2.message);
+        throw new Error(`Invalid JSON: ${e2.message}`);
       }
     }
-  }
+  };
 
   // Find array of objects in parsed data
-  function findArrayOfObjects(data, parentKey) {
+  const findArrayOfObjects = (data, parentKey) => {
     if (parentKey) {
       // Look for specific key
-      if (data && typeof data === 'object' && data[parentKey]) {
+      if (data?.[parentKey]) {
         if (Array.isArray(data[parentKey]) && data[parentKey].length > 0 && typeof data[parentKey][0] === 'object') {
-          return { array: data[parentKey], isRoot: false, parentKey: parentKey };
+          return { array: data[parentKey], isRoot: false, parentKey };
         }
       }
-      throw new Error("Could not find array of objects at key '" + parentKey + "'");
+      throw new Error(`Could not find array of objects at key '${parentKey}'`);
     }
 
     // If root is array of objects, use it
@@ -93,9 +91,9 @@
 
     // Search for first array of objects
     if (data && typeof data === 'object') {
-      for (var key in data) {
+      for (const key in data) {
         if (data.hasOwnProperty(key)) {
-          var value = data[key];
+          const value = data[key];
           if (Array.isArray(value) && value.length > 0 && typeof value[0] === 'object') {
             return { array: value, isRoot: false, parentKey: key };
           }
@@ -104,19 +102,19 @@
     }
 
     throw new Error("Could not find an array of objects in the document");
-  }
+  };
 
   // Parse CSV with proper escaping and quote handling
-  function parseCSV(text) {
-    var lines = [];
-    var currentLine = [];
-    var currentField = '';
-    var inQuotes = false;
-    var i = 0;
+  const parseCSV = (text) => {
+    const lines = [];
+    let currentLine = [];
+    let currentField = '';
+    let inQuotes = false;
+    let i = 0;
 
     while (i < text.length) {
-      var char = text[i];
-      var nextChar = text[i + 1];
+      const char = text[i];
+      const nextChar = text[i + 1];
 
       if (inQuotes) {
         if (char === '"') {
@@ -169,10 +167,10 @@
     }
 
     return lines;
-  }
+  };
 
   // Escape string for JSON
-  function escapeForJSON(str) {
+  const escapeForJSON = (str) => {
     if (typeof str !== 'string') return str;
     return str
       .replace(/\\/g, '\\\\')
@@ -180,10 +178,10 @@
       .replace(/\n/g, '\\n')
       .replace(/\r/g, '\\r')
       .replace(/\t/g, '\\t');
-  }
+  };
 
   // Compare operator
-  function compareValues(a, b, operator) {
+  const compareValues = (a, b, operator) => {
     switch (operator) {
       case '=':
       case '==':
@@ -199,40 +197,37 @@
       case '<=':
         return parseFloat(a) <= parseFloat(b);
       case 'contains':
-        return String(a).indexOf(String(b)) !== -1;
+        return String(a).includes(String(b));
       case 'startsWith':
-        return String(a).indexOf(String(b)) === 0;
+        return String(a).startsWith(String(b));
       case 'endsWith':
-        var str = String(a);
-        var search = String(b);
-        return str.lastIndexOf(search) === str.length - search.length;
+        return String(a).endsWith(String(b));
       default:
-        throw new Error("Unknown operator: " + operator);
+        throw new Error(`Unknown operator: ${operator}`);
     }
-  }
+  };
 
   // Deep equality check for objects
-  function deepEqual(obj1, obj2) {
+  const deepEqual = (obj1, obj2) => {
     if (obj1 === obj2) return true;
     if (obj1 == null || obj2 == null) return false;
     if (typeof obj1 !== 'object' || typeof obj2 !== 'object') return false;
 
-    var keys1 = Object.keys(obj1);
-    var keys2 = Object.keys(obj2);
+    const keys1 = Object.keys(obj1);
+    const keys2 = Object.keys(obj2);
 
     if (keys1.length !== keys2.length) return false;
 
-    for (var i = 0; i < keys1.length; i++) {
-      var key = keys1[i];
-      if (!keys2.includes || keys2.indexOf(key) === -1) return false;
+    for (const key of keys1) {
+      if (!keys2.includes(key)) return false;
       if (!deepEqual(obj1[key], obj2[key])) return false;
     }
 
     return true;
-  }
+  };
 
   // Reconstruct JSON maintaining original formatting where possible
-  function reconstructJSON(originalText, data, result, isRoot, parentKey) {
+  const reconstructJSON = (originalText, data, result, isRoot, parentKey) => {
     if (isRoot) {
       // Root is the array, just return the result
       return JSON.stringify(result, null, 2);
@@ -241,10 +236,10 @@
       data[parentKey] = result;
       return JSON.stringify(data, null, 2);
     }
-  }
+  };
 
   // --- Command: csv_to_json ---
-  var csv_to_json = new Command(
+  const csv_to_json = new Command(
     "csv_to_json",
     [],
     "replaceAll",
@@ -256,46 +251,44 @@
   );
 
   csv_to_json.execute = function (payload) {
-    var casing = getExtensionPreference(extensionName, "key_casing") || "snake_case";
+    const casing = getExtensionPreference(extensionName, "key_casing") || "snake_case";
 
     try {
-      var lines = parseCSV(payload.fullText);
+      const lines = parseCSV(payload.fullText);
 
       if (lines.length < 2) {
         return new ReturnObject("error", "CSV must have at least a header row and one data row.", "");
       }
 
-      var headers = lines[0].map(function(header) {
-        return convertCasing(header.trim(), casing);
-      });
+      const headers = lines[0].map(header => convertCasing(header.trim(), casing));
 
-      var result = [];
-      for (var i = 1; i < lines.length; i++) {
-        var row = lines[i];
+      const result = [];
+      for (let i = 1; i < lines.length; i++) {
+        const row = lines[i];
         if (row.length === 0 || (row.length === 1 && row[0] === '')) {
           continue; // Skip empty lines
         }
 
-        var obj = {};
-        for (var j = 0; j < headers.length; j++) {
-          var value = row[j] || '';
+        const obj = {};
+        for (let j = 0; j < headers.length; j++) {
+          const value = row[j] || '';
           // Try to parse as number - only if the entire string is a valid number
-          var numValue = parseFloat(value);
-          var isNumber = !isNaN(numValue) && value !== '' && String(numValue) === value.trim();
+          const numValue = parseFloat(value);
+          const isNumber = !isNaN(numValue) && value !== '' && String(numValue) === value.trim();
           obj[headers[j]] = isNumber ? numValue : value;
         }
         result.push(obj);
       }
 
-      var output = JSON.stringify(result, null, 2);
-      return new ReturnObject("success", "Converted CSV to JSON (" + result.length + " objects).", output);
+      const output = JSON.stringify(result, null, 2);
+      return new ReturnObject("success", `Converted CSV to JSON (${result.length} objects).`, output);
     } catch (e) {
-      return new ReturnObject("error", "Invalid CSV: " + e.message, "");
+      return new ReturnObject("error", `Invalid CSV: ${e.message}`, "");
     }
   };
 
   // --- Command: json_sort ---
-  var json_sort = new Command(
+  const json_sort = new Command(
     "json_sort",
     [
       new Parameter("string", "key", "Key to sort by", ""),
@@ -313,37 +306,31 @@
   );
 
   json_sort.execute = function (payload) {
-    var params = this.getParsedParams(payload);
-    var key = params[0];
-    var reverse = params[1];
-    var parentKey = params[2] || "";
+    const params = this.getParsedParams(payload);
+    const key = params[0];
+    const reverse = params[1];
+    const parentKey = params[2] || "";
 
     if (!key) {
       return new ReturnObject("error", "Key parameter is required.", "");
     }
 
     try {
-      var data = parseLooseJSON(payload.fullText);
-      var found = findArrayOfObjects(data, parentKey);
-      var array = found.array;
+      const data = parseLooseJSON(payload.fullText);
+      const found = findArrayOfObjects(data, parentKey);
+      const array = found.array;
 
       // Check if key exists in objects
-      var hasKey = false;
-      for (var i = 0; i < array.length; i++) {
-        if (array[i].hasOwnProperty(key)) {
-          hasKey = true;
-          break;
-        }
-      }
+      const hasKey = array.some(obj => obj.hasOwnProperty(key));
 
       if (!hasKey) {
-        return new ReturnObject("error", "Key '" + key + "' not found in array objects.", "");
+        return new ReturnObject("error", `Key '${key}' not found in array objects.`, "");
       }
 
       // Sort the array
-      array.sort(function(a, b) {
-        var aVal = a[key];
-        var bVal = b[key];
+      array.sort((a, b) => {
+        const aVal = a[key];
+        const bVal = b[key];
 
         // Handle null/undefined
         if (aVal == null && bVal == null) return 0;
@@ -356,22 +343,22 @@
         }
 
         // String comparison
-        var aStr = String(aVal);
-        var bStr = String(bVal);
+        const aStr = String(aVal);
+        const bStr = String(bVal);
         if (aStr < bStr) return reverse ? 1 : -1;
         if (aStr > bStr) return reverse ? -1 : 1;
         return 0;
       });
 
-      var output = reconstructJSON(payload.fullText, data, array, found.isRoot, found.parentKey);
-      return new ReturnObject("success", "Sorted array by '" + key + "'.", output);
+      const output = reconstructJSON(payload.fullText, data, array, found.isRoot, found.parentKey);
+      return new ReturnObject("success", `Sorted array by '${key}'.`, output);
     } catch (e) {
       return new ReturnObject("error", e.message, "");
     }
   };
 
   // --- Command: json_filter ---
-  var json_filter = new Command(
+  const json_filter = new Command(
     "json_filter",
     [
       new Parameter("string", "key", "Key to filter by", ""),
@@ -390,40 +377,34 @@
   );
 
   json_filter.execute = function (payload) {
-    var params = this.getParsedParams(payload);
-    var key = params[0];
-    var operator = params[1] || "=";
-    var value = params[2];
-    var parentKey = params[3] || "";
+    const params = this.getParsedParams(payload);
+    const key = params[0];
+    const operator = params[1] || "=";
+    const value = params[2];
+    const parentKey = params[3] || "";
 
     if (!key) {
       return new ReturnObject("error", "Key parameter is required.", "");
     }
 
     try {
-      var data = parseLooseJSON(payload.fullText);
-      var found = findArrayOfObjects(data, parentKey);
-      var array = found.array;
+      const data = parseLooseJSON(payload.fullText);
+      const found = findArrayOfObjects(data, parentKey);
+      const array = found.array;
 
-      var filtered = [];
-      for (var i = 0; i < array.length; i++) {
-        var obj = array[i];
-        if (obj.hasOwnProperty(key)) {
-          if (compareValues(obj[key], value, operator)) {
-            filtered.push(obj);
-          }
-        }
-      }
+      const filtered = array.filter(obj =>
+        obj.hasOwnProperty(key) && compareValues(obj[key], value, operator)
+      );
 
-      var output = reconstructJSON(payload.fullText, data, filtered, found.isRoot, found.parentKey);
-      return new ReturnObject("success", "Filtered to " + filtered.length + " items (from " + array.length + ").", output);
+      const output = reconstructJSON(payload.fullText, data, filtered, found.isRoot, found.parentKey);
+      return new ReturnObject("success", `Filtered to ${filtered.length} items (from ${array.length}).`, output);
     } catch (e) {
       return new ReturnObject("error", e.message, "");
     }
   };
 
   // --- Command: json_filter_out ---
-  var json_filter_out = new Command(
+  const json_filter_out = new Command(
     "json_filter_out",
     [
       new Parameter("string", "key", "Key to filter by", ""),
@@ -441,42 +422,34 @@
   );
 
   json_filter_out.execute = function (payload) {
-    var params = this.getParsedParams(payload);
-    var key = params[0];
-    var operator = params[1] || "=";
-    var value = params[2];
-    var parentKey = params[3] || "";
+    const params = this.getParsedParams(payload);
+    const key = params[0];
+    const operator = params[1] || "=";
+    const value = params[2];
+    const parentKey = params[3] || "";
 
     if (!key) {
       return new ReturnObject("error", "Key parameter is required.", "");
     }
 
     try {
-      var data = parseLooseJSON(payload.fullText);
-      var found = findArrayOfObjects(data, parentKey);
-      var array = found.array;
+      const data = parseLooseJSON(payload.fullText);
+      const found = findArrayOfObjects(data, parentKey);
+      const array = found.array;
 
-      var filtered = [];
-      for (var i = 0; i < array.length; i++) {
-        var obj = array[i];
-        if (obj.hasOwnProperty(key)) {
-          if (!compareValues(obj[key], value, operator)) {
-            filtered.push(obj);
-          }
-        } else {
-          filtered.push(obj); // Keep objects that don't have the key
-        }
-      }
+      const filtered = array.filter(obj =>
+        !obj.hasOwnProperty(key) || !compareValues(obj[key], value, operator)
+      );
 
-      var output = reconstructJSON(payload.fullText, data, filtered, found.isRoot, found.parentKey);
-      return new ReturnObject("success", "Removed " + (array.length - filtered.length) + " items, kept " + filtered.length + ".", output);
+      const output = reconstructJSON(payload.fullText, data, filtered, found.isRoot, found.parentKey);
+      return new ReturnObject("success", `Removed ${array.length - filtered.length} items, kept ${filtered.length}.`, output);
     } catch (e) {
       return new ReturnObject("error", e.message, "");
     }
   };
 
   // --- Command: json_add_key ---
-  var json_add_key = new Command(
+  const json_add_key = new Command(
     "json_add_key",
     [
       new Parameter("string", "key", "Key to add", ""),
@@ -493,22 +466,22 @@
   );
 
   json_add_key.execute = function (payload) {
-    var params = this.getParsedParams(payload);
-    var key = params[0];
-    var value = params[1];
-    var parentKey = params[2] || "";
+    const params = this.getParsedParams(payload);
+    const key = params[0];
+    const value = params[1];
+    const parentKey = params[2] || "";
 
     if (!key) {
       return new ReturnObject("error", "Key parameter is required.", "");
     }
 
     try {
-      var data = parseLooseJSON(payload.fullText);
-      var found = findArrayOfObjects(data, parentKey);
-      var array = found.array;
+      const data = parseLooseJSON(payload.fullText);
+      const found = findArrayOfObjects(data, parentKey);
+      const array = found.array;
 
       // Parse value - try as number, then boolean, then string
-      var parsedValue = value;
+      let parsedValue = value;
       if (value === '') {
         parsedValue = null;
       } else if (!isNaN(parseFloat(value)) && isFinite(value)) {
@@ -519,19 +492,19 @@
         parsedValue = false;
       }
 
-      for (var i = 0; i < array.length; i++) {
-        array[i][key] = parsedValue;
+      for (const obj of array) {
+        obj[key] = parsedValue;
       }
 
-      var output = reconstructJSON(payload.fullText, data, array, found.isRoot, found.parentKey);
-      return new ReturnObject("success", "Added '" + key + "' to " + array.length + " objects.", output);
+      const output = reconstructJSON(payload.fullText, data, array, found.isRoot, found.parentKey);
+      return new ReturnObject("success", `Added '${key}' to ${array.length} objects.`, output);
     } catch (e) {
       return new ReturnObject("error", e.message, "");
     }
   };
 
   // --- Command: json_remove_key ---
-  var json_remove_key = new Command(
+  const json_remove_key = new Command(
     "json_remove_key",
     [
       new Parameter("string", "key", "Key to remove", ""),
@@ -546,36 +519,36 @@
   );
 
   json_remove_key.execute = function (payload) {
-    var params = this.getParsedParams(payload);
-    var key = params[0];
-    var parentKey = params[1] || "";
+    const params = this.getParsedParams(payload);
+    const key = params[0];
+    const parentKey = params[1] || "";
 
     if (!key) {
       return new ReturnObject("error", "Key parameter is required.", "");
     }
 
     try {
-      var data = parseLooseJSON(payload.fullText);
-      var found = findArrayOfObjects(data, parentKey);
-      var array = found.array;
+      const data = parseLooseJSON(payload.fullText);
+      const found = findArrayOfObjects(data, parentKey);
+      const array = found.array;
 
-      var count = 0;
-      for (var i = 0; i < array.length; i++) {
-        if (array[i].hasOwnProperty(key)) {
-          delete array[i][key];
+      let count = 0;
+      for (const obj of array) {
+        if (obj.hasOwnProperty(key)) {
+          delete obj[key];
           count++;
         }
       }
 
-      var output = reconstructJSON(payload.fullText, data, array, found.isRoot, found.parentKey);
-      return new ReturnObject("success", "Removed '" + key + "' from " + count + " objects.", output);
+      const output = reconstructJSON(payload.fullText, data, array, found.isRoot, found.parentKey);
+      return new ReturnObject("success", `Removed '${key}' from ${count} objects.`, output);
     } catch (e) {
       return new ReturnObject("error", e.message, "");
     }
   };
 
   // --- Command: json_set_key ---
-  var json_set_key = new Command(
+  const json_set_key = new Command(
     "json_set_key",
     [
       new Parameter("string", "key", "Key to set", ""),
@@ -592,22 +565,22 @@
   );
 
   json_set_key.execute = function (payload) {
-    var params = this.getParsedParams(payload);
-    var key = params[0];
-    var value = params[1];
-    var parentKey = params[2] || "";
+    const params = this.getParsedParams(payload);
+    const key = params[0];
+    const value = params[1];
+    const parentKey = params[2] || "";
 
     if (!key) {
       return new ReturnObject("error", "Key parameter is required.", "");
     }
 
     try {
-      var data = parseLooseJSON(payload.fullText);
-      var found = findArrayOfObjects(data, parentKey);
-      var array = found.array;
+      const data = parseLooseJSON(payload.fullText);
+      const found = findArrayOfObjects(data, parentKey);
+      const array = found.array;
 
       // Parse value
-      var parsedValue = value;
+      let parsedValue = value;
       if (value === '') {
         parsedValue = null;
       } else if (!isNaN(parseFloat(value)) && isFinite(value)) {
@@ -618,19 +591,19 @@
         parsedValue = false;
       }
 
-      for (var i = 0; i < array.length; i++) {
-        array[i][key] = parsedValue;
+      for (const obj of array) {
+        obj[key] = parsedValue;
       }
 
-      var output = reconstructJSON(payload.fullText, data, array, found.isRoot, found.parentKey);
-      return new ReturnObject("success", "Set '" + key + "' to '" + value + "' in " + array.length + " objects.", output);
+      const output = reconstructJSON(payload.fullText, data, array, found.isRoot, found.parentKey);
+      return new ReturnObject("success", `Set '${key}' to '${value}' in ${array.length} objects.`, output);
     } catch (e) {
       return new ReturnObject("error", e.message, "");
     }
   };
 
   // --- Command: json_append_key ---
-  var json_append_key = new Command(
+  const json_append_key = new Command(
     "json_append_key",
     [
       new Parameter("string", "key", "Key to append to", ""),
@@ -647,37 +620,37 @@
   );
 
   json_append_key.execute = function (payload) {
-    var params = this.getParsedParams(payload);
-    var key = params[0];
-    var value = params[1];
-    var parentKey = params[2] || "";
+    const params = this.getParsedParams(payload);
+    const key = params[0];
+    const value = params[1];
+    const parentKey = params[2] || "";
 
     if (!key) {
       return new ReturnObject("error", "Key parameter is required.", "");
     }
 
     try {
-      var data = parseLooseJSON(payload.fullText);
-      var found = findArrayOfObjects(data, parentKey);
-      var array = found.array;
+      const data = parseLooseJSON(payload.fullText);
+      const found = findArrayOfObjects(data, parentKey);
+      const array = found.array;
 
-      var count = 0;
-      for (var i = 0; i < array.length; i++) {
-        if (array[i].hasOwnProperty(key)) {
-          array[i][key] = String(array[i][key]) + value;
+      let count = 0;
+      for (const obj of array) {
+        if (obj.hasOwnProperty(key)) {
+          obj[key] = String(obj[key]) + value;
           count++;
         }
       }
 
-      var output = reconstructJSON(payload.fullText, data, array, found.isRoot, found.parentKey);
-      return new ReturnObject("success", "Appended to '" + key + "' in " + count + " objects.", output);
+      const output = reconstructJSON(payload.fullText, data, array, found.isRoot, found.parentKey);
+      return new ReturnObject("success", `Appended to '${key}' in ${count} objects.`, output);
     } catch (e) {
       return new ReturnObject("error", e.message, "");
     }
   };
 
   // --- Command: json_prepend_key ---
-  var json_prepend_key = new Command(
+  const json_prepend_key = new Command(
     "json_prepend_key",
     [
       new Parameter("string", "key", "Key to prepend to", ""),
@@ -694,37 +667,37 @@
   );
 
   json_prepend_key.execute = function (payload) {
-    var params = this.getParsedParams(payload);
-    var key = params[0];
-    var value = params[1];
-    var parentKey = params[2] || "";
+    const params = this.getParsedParams(payload);
+    const key = params[0];
+    const value = params[1];
+    const parentKey = params[2] || "";
 
     if (!key) {
       return new ReturnObject("error", "Key parameter is required.", "");
     }
 
     try {
-      var data = parseLooseJSON(payload.fullText);
-      var found = findArrayOfObjects(data, parentKey);
-      var array = found.array;
+      const data = parseLooseJSON(payload.fullText);
+      const found = findArrayOfObjects(data, parentKey);
+      const array = found.array;
 
-      var count = 0;
-      for (var i = 0; i < array.length; i++) {
-        if (array[i].hasOwnProperty(key)) {
-          array[i][key] = value + String(array[i][key]);
+      let count = 0;
+      for (const obj of array) {
+        if (obj.hasOwnProperty(key)) {
+          obj[key] = value + String(obj[key]);
           count++;
         }
       }
 
-      var output = reconstructJSON(payload.fullText, data, array, found.isRoot, found.parentKey);
-      return new ReturnObject("success", "Prepended to '" + key + "' in " + count + " objects.", output);
+      const output = reconstructJSON(payload.fullText, data, array, found.isRoot, found.parentKey);
+      return new ReturnObject("success", `Prepended to '${key}' in ${count} objects.`, output);
     } catch (e) {
       return new ReturnObject("error", e.message, "");
     }
   };
 
   // --- Command: json_get_dupes ---
-  var json_get_dupes = new Command(
+  const json_get_dupes = new Command(
     "json_get_dupes",
     [
       new Parameter("string", "key", "Key to check for duplicates (leave empty for primitive arrays)", ""),
@@ -741,26 +714,26 @@
   );
 
   json_get_dupes.execute = function (payload) {
-    var params = this.getParsedParams(payload);
-    var key = params[0];
-    var parentKey = params[1] || "";
+    const params = this.getParsedParams(payload);
+    const key = params[0];
+    let parentKey = params[1] || "";
 
     try {
-      var data = parseLooseJSON(payload.fullText);
-      var array;
-      var isRoot = false;
-      var isPrimitiveArray = false;
+      const data = parseLooseJSON(payload.fullText);
+      let array;
+      let isRoot = false;
+      let isPrimitiveArray = false;
 
       // Find array - try parentKey first, then look for array
       if (parentKey) {
-        if (data && typeof data === 'object' && data[parentKey]) {
+        if (data?.[parentKey]) {
           if (Array.isArray(data[parentKey])) {
             array = data[parentKey];
           } else {
-            return new ReturnObject("error", "Key '" + parentKey + "' does not contain an array.", "");
+            return new ReturnObject("error", `Key '${parentKey}' does not contain an array.`, "");
           }
         } else {
-          return new ReturnObject("error", "Could not find key '" + parentKey + "'.", "");
+          return new ReturnObject("error", `Could not find key '${parentKey}'.`, "");
         }
       } else {
         if (Array.isArray(data)) {
@@ -768,8 +741,8 @@
           isRoot = true;
         } else {
           // Try to find first array
-          var foundArray = false;
-          for (var k in data) {
+          let foundArray = false;
+          for (const k in data) {
             if (data.hasOwnProperty(k) && Array.isArray(data[k])) {
               array = data[k];
               parentKey = k;
@@ -791,18 +764,18 @@
       // Handle primitive arrays
       if (isPrimitiveArray || (!key && array.length > 0)) {
         // Group primitive values
-        var groups = {};
-        for (var i = 0; i < array.length; i++) {
-          var val = String(array[i]);
-          if (!groups[val]) {
-            groups[val] = [];
+        const groups = {};
+        for (const val of array) {
+          const valStr = String(val);
+          if (!groups[valStr]) {
+            groups[valStr] = [];
           }
-          groups[val].push(array[i]);
+          groups[valStr].push(val);
         }
 
         // Find groups with more than one item
-        var dupeGroups = [];
-        for (var val in groups) {
+        const dupeGroups = [];
+        for (const val in groups) {
           if (groups.hasOwnProperty(val) && groups[val].length > 1) {
             dupeGroups.push({ value: val, count: groups[val].length });
           }
@@ -813,14 +786,14 @@
         }
 
         // Build output for primitives
-        var output = "# Duplicates Found\n\n";
-        for (var i = 0; i < dupeGroups.length; i++) {
-          var group = dupeGroups[i];
-          output += "# Duplicate group " + (i + 1) + " (" + group.count + " occurrences)\n";
-          output += group.value + "\n\n";
+        let output = "# Duplicates Found\n\n";
+        for (let i = 0; i < dupeGroups.length; i++) {
+          const group = dupeGroups[i];
+          output += `# Duplicate group ${i + 1} (${group.count} occurrences)\n`;
+          output += `${group.value}\n\n`;
         }
 
-        return new ReturnObject("success", "Found " + dupeGroups.length + " duplicate value groups.", output);
+        return new ReturnObject("success", `Found ${dupeGroups.length} duplicate value groups.`, output);
       }
 
       // Handle array of objects with key
@@ -829,11 +802,10 @@
       }
 
       // Group by key value
-      var groups = {};
-      for (var i = 0; i < array.length; i++) {
-        var obj = array[i];
+      const groups = {};
+      for (const obj of array) {
         if (obj.hasOwnProperty(key)) {
-          var keyVal = String(obj[key]);
+          const keyVal = String(obj[key]);
           if (!groups[keyVal]) {
             groups[keyVal] = [];
           }
@@ -842,36 +814,36 @@
       }
 
       // Find groups with more than one item
-      var dupeGroups = [];
-      for (var keyVal in groups) {
+      const dupeGroups = [];
+      for (const keyVal in groups) {
         if (groups.hasOwnProperty(keyVal) && groups[keyVal].length > 1) {
           dupeGroups.push({ key: keyVal, objects: groups[keyVal] });
         }
       }
 
       if (dupeGroups.length === 0) {
-        return new ReturnObject("success", "No duplicates found for key '" + key + "'.", "# No Duplicates Found");
+        return new ReturnObject("success", `No duplicates found for key '${key}'.`, "# No Duplicates Found");
       }
 
       // Build output for objects
-      var output = "# Duplicates Found\n\n";
-      for (var i = 0; i < dupeGroups.length; i++) {
-        var group = dupeGroups[i];
-        output += "# Duplicate group " + (i + 1) + " (" + key + "=\"" + group.key + "\")\n";
-        for (var j = 0; j < group.objects.length; j++) {
-          output += JSON.stringify(group.objects[j], null, 2) + "\n";
+      let output = "# Duplicates Found\n\n";
+      for (let i = 0; i < dupeGroups.length; i++) {
+        const group = dupeGroups[i];
+        output += `# Duplicate group ${i + 1} (${key}="${group.key}")\n`;
+        for (const obj of group.objects) {
+          output += JSON.stringify(obj, null, 2) + "\n";
         }
         output += "\n";
       }
 
-      return new ReturnObject("success", "Found " + dupeGroups.length + " duplicate groups.", output);
+      return new ReturnObject("success", `Found ${dupeGroups.length} duplicate groups.`, output);
     } catch (e) {
       return new ReturnObject("error", e.message, "");
     }
   };
 
   // --- Command: json_dedupe ---
-  var json_dedupe = new Command(
+  const json_dedupe = new Command(
     "json_dedupe",
     [
       new Parameter("bool", "keepFirst", "Keep first occurrence (true) or last (false)", true),
@@ -887,58 +859,47 @@
   );
 
   json_dedupe.execute = function (payload) {
-    var params = this.getParsedParams(payload);
-    var keepFirst = params[0];
-    var parentKey = params[1] || "";
+    const params = this.getParsedParams(payload);
+    const keepFirst = params[0];
+    const parentKey = params[1] || "";
 
     try {
-      var data = parseLooseJSON(payload.fullText);
-      var found = findArrayOfObjects(data, parentKey);
-      var array = found.array;
+      const data = parseLooseJSON(payload.fullText);
+      const found = findArrayOfObjects(data, parentKey);
+      const array = found.array;
 
-      var seen = [];
-      var unique = [];
+      const seen = [];
+      const unique = [];
 
       if (keepFirst) {
-        for (var i = 0; i < array.length; i++) {
-          var isDupe = false;
-          for (var j = 0; j < seen.length; j++) {
-            if (deepEqual(array[i], seen[j])) {
-              isDupe = true;
-              break;
-            }
-          }
+        for (const item of array) {
+          const isDupe = seen.some(s => deepEqual(item, s));
           if (!isDupe) {
-            seen.push(array[i]);
-            unique.push(array[i]);
+            seen.push(item);
+            unique.push(item);
           }
         }
       } else {
         // Keep last - process in reverse
-        for (var i = array.length - 1; i >= 0; i--) {
-          var isDupe = false;
-          for (var j = 0; j < seen.length; j++) {
-            if (deepEqual(array[i], seen[j])) {
-              isDupe = true;
-              break;
-            }
-          }
+        for (let i = array.length - 1; i >= 0; i--) {
+          const item = array[i];
+          const isDupe = seen.some(s => deepEqual(item, s));
           if (!isDupe) {
-            seen.push(array[i]);
-            unique.unshift(array[i]); // Add to beginning to maintain order
+            seen.push(item);
+            unique.unshift(item); // Add to beginning to maintain order
           }
         }
       }
 
-      var output = reconstructJSON(payload.fullText, data, unique, found.isRoot, found.parentKey);
-      return new ReturnObject("success", "Removed " + (array.length - unique.length) + " duplicates, kept " + unique.length + " unique objects.", output);
+      const output = reconstructJSON(payload.fullText, data, unique, found.isRoot, found.parentKey);
+      return new ReturnObject("success", `Removed ${array.length - unique.length} duplicates, kept ${unique.length} unique objects.`, output);
     } catch (e) {
       return new ReturnObject("error", e.message, "");
     }
   };
 
   // --- Command: json_sort_array ---
-  var json_sort_array = new Command(
+  const json_sort_array = new Command(
     "json_sort_array",
     [
       new Parameter("bool", "reverse", "Sort in reverse order", false),
@@ -955,24 +916,24 @@
   );
 
   json_sort_array.execute = function (payload) {
-    var params = this.getParsedParams(payload);
-    var reverse = params[0];
-    var parentKey = params[1] || "";
+    const params = this.getParsedParams(payload);
+    const reverse = params[0];
+    let parentKey = params[1] || "";
 
     try {
-      var data = parseLooseJSON(payload.fullText);
-      var array;
-      var isRoot = false;
+      const data = parseLooseJSON(payload.fullText);
+      let array;
+      let isRoot = false;
 
       if (parentKey) {
-        if (data && typeof data === 'object' && data[parentKey]) {
+        if (data?.[parentKey]) {
           if (Array.isArray(data[parentKey])) {
             array = data[parentKey];
           } else {
-            return new ReturnObject("error", "Key '" + parentKey + "' does not contain an array.", "");
+            return new ReturnObject("error", `Key '${parentKey}' does not contain an array.`, "");
           }
         } else {
-          return new ReturnObject("error", "Could not find key '" + parentKey + "'.", "");
+          return new ReturnObject("error", `Could not find key '${parentKey}'.`, "");
         }
       } else {
         if (Array.isArray(data)) {
@@ -980,8 +941,8 @@
           isRoot = true;
         } else {
           // Try to find first array
-          var foundArray = false;
-          for (var key in data) {
+          let foundArray = false;
+          for (const key in data) {
             if (data.hasOwnProperty(key) && Array.isArray(data[key])) {
               array = data[key];
               parentKey = key;
@@ -996,29 +957,29 @@
       }
 
       // Check if array contains primitives
-      for (var i = 0; i < array.length; i++) {
-        if (typeof array[i] === 'object' && array[i] !== null) {
+      for (const item of array) {
+        if (typeof item === 'object' && item !== null) {
           return new ReturnObject("error", "Array contains objects. Use json_sort for arrays of objects.", "");
         }
       }
 
       // Sort the array
-      array.sort(function(a, b) {
+      array.sort((a, b) => {
         // Numeric comparison if both are numbers
         if (typeof a === 'number' && typeof b === 'number') {
           return reverse ? b - a : a - b;
         }
 
         // String comparison
-        var aStr = String(a);
-        var bStr = String(b);
+        const aStr = String(a);
+        const bStr = String(b);
         if (aStr < bStr) return reverse ? 1 : -1;
         if (aStr > bStr) return reverse ? -1 : 1;
         return 0;
       });
 
-      var output = isRoot ? JSON.stringify(array, null, 2) : JSON.stringify(data, null, 2);
-      return new ReturnObject("success", "Sorted array of " + array.length + " items.", output);
+      const output = isRoot ? JSON.stringify(array, null, 2) : JSON.stringify(data, null, 2);
+      return new ReturnObject("success", `Sorted array of ${array.length} items.`, output);
     } catch (e) {
       return new ReturnObject("error", e.message, "");
     }

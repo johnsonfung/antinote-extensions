@@ -4,9 +4,9 @@
 // ===============================
 
 (function () {
-  var extensionName = "text_format";
+  const extensionName = "text_format";
 
-  var extensionRoot = new Extension(
+  const extensionRoot = new Extension(
     extensionName,
     "1.0.0",
     [],
@@ -18,20 +18,20 @@
 
   // --- Helper Functions ---
 
-  function sentenceCase(text) {
+  const sentenceCase = (text) => {
     // Capitalize first letter, lowercase the rest
     if (!text || text.length === 0) return text;
     return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
-  }
+  };
 
-  function titleCase(text) {
+  const titleCase = (text) => {
     // Capitalize first letter of each word
-    var smallWords = ["a", "an", "and", "as", "at", "but", "by", "for", "in", "nor", "of", "on", "or", "so", "the", "to", "up", "yet"];
-    var words = text.toLowerCase().split(" ");
+    const smallWords = ["a", "an", "and", "as", "at", "but", "by", "for", "in", "nor", "of", "on", "or", "so", "the", "to", "up", "yet"];
+    const words = text.toLowerCase().split(" ");
 
-    for (var i = 0; i < words.length; i++) {
+    for (let i = 0; i < words.length; i++) {
       // Always capitalize first and last word, or if not a small word
-      if (i === 0 || i === words.length - 1 || smallWords.indexOf(words[i]) === -1) {
+      if (i === 0 || i === words.length - 1 || !smallWords.includes(words[i])) {
         if (words[i].length > 0) {
           words[i] = words[i].charAt(0).toUpperCase() + words[i].slice(1);
         }
@@ -39,31 +39,31 @@
     }
 
     return words.join(" ");
-  }
+  };
 
-  function removeQuotes(text) {
+  const removeQuotes = (text) => {
     console.log("removeQuotes INPUT:", JSON.stringify(text));
-    var result = text;
-    var changed = true;
-    var iteration = 0;
+    let result = text;
+    let changed = true;
+    let iteration = 0;
 
     // Keep removing pairs until no more found
     while (changed && iteration < 100) {
       changed = false;
       iteration++;
-      console.log("Iteration " + iteration + ":", JSON.stringify(result));
+      console.log(`Iteration ${iteration}:`, JSON.stringify(result));
 
       // Find all valid quote positions (not apostrophes between letters/numbers)
-      var quoteChars = ['"', "'", "\u201C", "\u201D", "\u2018", "\u2019"];
-      var validQuotes = [];
+      const quoteChars = ['"', "'", "\u201C", "\u201D", "\u2018", "\u2019"];
+      const validQuotes = [];
 
-      for (var i = 0; i < result.length; i++) {
-        if (quoteChars.indexOf(result[i]) !== -1) {
+      for (let i = 0; i < result.length; i++) {
+        if (quoteChars.includes(result[i])) {
           // Check if between alphanumerics (apostrophe case)
-          var before = i > 0 ? result[i - 1] : '';
-          var after = i < result.length - 1 ? result[i + 1] : '';
-          var isAlphanumBefore = /[a-zA-Z0-9]/.test(before);
-          var isAlphanumAfter = /[a-zA-Z0-9]/.test(after);
+          const before = i > 0 ? result[i - 1] : '';
+          const after = i < result.length - 1 ? result[i + 1] : '';
+          const isAlphanumBefore = /[a-zA-Z0-9]/.test(before);
+          const isAlphanumAfter = /[a-zA-Z0-9]/.test(after);
 
           // Only valid if NOT between two alphanumerics
           if (!(isAlphanumBefore && isAlphanumAfter)) {
@@ -76,16 +76,16 @@
 
       // Find first pair
       if (validQuotes.length >= 2) {
-        var firstQuote = validQuotes[0];
-        var matchingQuote = null;
+        const firstQuote = validQuotes[0];
+        let matchingQuote = null;
 
         // Find next matching quote of same type (handle smart quotes pairing)
-        for (var j = 1; j < validQuotes.length; j++) {
-          var currentChar = validQuotes[j].char;
-          var firstChar = firstQuote.char;
+        for (let j = 1; j < validQuotes.length; j++) {
+          const currentChar = validQuotes[j].char;
+          const firstChar = firstQuote.char;
 
           // Check if same type (handle straight quotes and smart quote pairs)
-          var isMatch = currentChar === firstChar ||
+          const isMatch = currentChar === firstChar ||
             (firstChar === "\u201C" && currentChar === "\u201D") ||
             (firstChar === "\u201D" && currentChar === "\u201C") ||
             (firstChar === "\u2018" && currentChar === "\u2019");
@@ -109,10 +109,10 @@
 
     console.log("removeQuotes OUTPUT:", JSON.stringify(result));
     return result;
-  }
+  };
 
   // --- Command: replace ---
-  var replace = new Command(
+  const replace = new Command(
     "replace",
     [
       new Parameter("string", "find", "Text to find", ""),
@@ -128,20 +128,20 @@
   );
 
   replace.execute = function (payload) {
-    var params = this.getParsedParams(payload);
-    var find = params[0];
-    var replaceWith = params[1];
+    const params = this.getParsedParams(payload);
+    const find = params[0];
+    const replaceWith = params[1];
 
     if (!find) {
       return new ReturnObject("error", "Please provide text to find.");
     }
 
-    var result = payload.fullText.split(find).join(replaceWith);
+    const result = payload.fullText.split(find).join(replaceWith);
     return new ReturnObject("success", "Text replaced.", result);
   };
 
   // --- Command: append ---
-  var append = new Command(
+  const append = new Command(
     "append",
     [
       new Parameter("string", "text", "Text to append to each line", "")
@@ -156,25 +156,20 @@
   );
 
   append.execute = function (payload) {
-    var params = this.getParsedParams(payload);
-    var text = params[0];
+    const params = this.getParsedParams(payload);
+    const text = params[0];
 
-    var lines = payload.fullText.split("\n");
-    var result = [];
-    for (var i = 0; i < lines.length; i++) {
+    const lines = payload.fullText.split("\n");
+    const result = lines.map(line =>
       // Only append to non-empty lines
-      if (lines[i].trim().length > 0) {
-        result.push(lines[i] + text);
-      } else {
-        result.push(lines[i]);
-      }
-    }
+      line.trim().length > 0 ? line + text : line
+    );
 
     return new ReturnObject("success", "Text appended to all lines.", result.join("\n"));
   };
 
   // --- Command: prepend ---
-  var prepend = new Command(
+  const prepend = new Command(
     "prepend",
     [
       new Parameter("string", "text", "Text to prepend to each line", "")
@@ -189,25 +184,20 @@
   );
 
   prepend.execute = function (payload) {
-    var params = this.getParsedParams(payload);
-    var text = params[0];
+    const params = this.getParsedParams(payload);
+    const text = params[0];
 
-    var lines = payload.fullText.split("\n");
-    var result = [];
-    for (var i = 0; i < lines.length; i++) {
+    const lines = payload.fullText.split("\n");
+    const result = lines.map(line =>
       // Only prepend to non-empty lines
-      if (lines[i].trim().length > 0) {
-        result.push(text + lines[i]);
-      } else {
-        result.push(lines[i]);
-      }
-    }
+      line.trim().length > 0 ? text + line : line
+    );
 
     return new ReturnObject("success", "Text prepended to all lines.", result.join("\n"));
   };
 
   // --- Command: uppercase ---
-  var uppercase = new Command(
+  const uppercase = new Command(
     "uppercase",
     [],
     "replaceAll",
@@ -219,12 +209,12 @@
   );
 
   uppercase.execute = function (payload) {
-    var result = payload.fullText.toUpperCase();
+    const result = payload.fullText.toUpperCase();
     return new ReturnObject("success", "Document converted to uppercase.", result);
   };
 
   // --- Command: lowercase ---
-  var lowercase = new Command(
+  const lowercase = new Command(
     "lowercase",
     [],
     "replaceAll",
@@ -236,12 +226,12 @@
   );
 
   lowercase.execute = function (payload) {
-    var result = payload.fullText.toLowerCase();
+    const result = payload.fullText.toLowerCase();
     return new ReturnObject("success", "Document converted to lowercase.", result);
   };
 
   // --- Command: sentence_case ---
-  var sentence_case = new Command(
+  const sentence_case = new Command(
     "sentence_case",
     [],
     "replaceAll",
@@ -253,16 +243,13 @@
   );
 
   sentence_case.execute = function (payload) {
-    var lines = payload.fullText.split("\n");
-    var result = [];
-    for (var i = 0; i < lines.length; i++) {
-      result.push(sentenceCase(lines[i]));
-    }
+    const lines = payload.fullText.split("\n");
+    const result = lines.map(line => sentenceCase(line));
     return new ReturnObject("success", "Document converted to sentence case.", result.join("\n"));
   };
 
   // --- Command: title_case ---
-  var title_case = new Command(
+  const title_case = new Command(
     "title_case",
     [],
     "replaceAll",
@@ -274,16 +261,13 @@
   );
 
   title_case.execute = function (payload) {
-    var lines = payload.fullText.split("\n");
-    var result = [];
-    for (var i = 0; i < lines.length; i++) {
-      result.push(titleCase(lines[i]));
-    }
+    const lines = payload.fullText.split("\n");
+    const result = lines.map(line => titleCase(line));
     return new ReturnObject("success", "Document converted to title case.", result.join("\n"));
   };
 
   // --- Command: capitalize_first ---
-  var capitalize_first = new Command(
+  const capitalize_first = new Command(
     "capitalize_first",
     [],
     "replaceAll",
@@ -295,21 +279,15 @@
   );
 
   capitalize_first.execute = function (payload) {
-    var lines = payload.fullText.split("\n");
-    var result = [];
-    for (var i = 0; i < lines.length; i++) {
-      var line = lines[i];
-      if (line.length > 0) {
-        result.push(line.charAt(0).toUpperCase() + line.slice(1));
-      } else {
-        result.push(line);
-      }
-    }
+    const lines = payload.fullText.split("\n");
+    const result = lines.map(line =>
+      line.length > 0 ? line.charAt(0).toUpperCase() + line.slice(1) : line
+    );
     return new ReturnObject("success", "First letter of each line capitalized.", result.join("\n"));
   };
 
   // --- Command: remove_quotes ---
-  var remove_quotes = new Command(
+  const remove_quotes = new Command(
     "remove_quotes",
     [],
     "replaceAll",
@@ -321,11 +299,8 @@
   );
 
   remove_quotes.execute = function (payload) {
-    var lines = payload.fullText.split("\n");
-    var result = [];
-    for (var i = 0; i < lines.length; i++) {
-      result.push(removeQuotes(lines[i]));
-    }
+    const lines = payload.fullText.split("\n");
+    const result = lines.map(line => removeQuotes(line));
     return new ReturnObject("success", "Quotes removed from document.", result.join("\n"));
   };
 })();

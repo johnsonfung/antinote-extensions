@@ -1,9 +1,9 @@
 (function () {
   // Dice Rolling Extension (wrapped in IIFE to avoid variable conflicts)
-  var extensionName = "dice";
+  const extensionName = "dice";
 
   // Create the extension root with metadata
-  var extensionRoot = new Extension(
+  const extensionRoot = new Extension(
     extensionName,
     "1.0.0",
     [], // No external API endpoints
@@ -13,7 +13,7 @@
     "none" // Data scope: doesn't need note content
   );
 
-  var roll = new Command(
+  const roll = new Command(
     "roll",
     [
       new Parameter("string", "dieType", "Type of die to roll (e.g., D6, D20)", "D6"),
@@ -31,53 +31,48 @@
     extensionRoot
   );
 
-roll.execute = function(payload) {
-  var [dieType, numberOfDice] = this.getParsedParams(payload);
+  roll.execute = function(payload) {
+    const [dieType, numberOfDice] = this.getParsedParams(payload);
 
-  // Parse die type (e.g., "D6", "d20", "6")
-  var dieTypeUpper = dieType.toString().toUpperCase();
-  var sides;
+    // Parse die type (e.g., "D6", "d20", "6")
+    const dieTypeUpper = dieType.toString().toUpperCase();
+    let sides;
 
-  // Extract number from die type string
-  if (dieTypeUpper.indexOf('D') === 0) {
-    sides = parseInt(dieTypeUpper.substring(1));
-  } else {
-    sides = parseInt(dieTypeUpper);
-  }
+    // Extract number from die type string
+    if (dieTypeUpper.startsWith('D')) {
+      sides = parseInt(dieTypeUpper.substring(1));
+    } else {
+      sides = parseInt(dieTypeUpper);
+    }
 
-  // Validation
-  if (isNaN(sides) || sides < 2) {
-    return new ReturnObject("error", "Die type must be at least D2 (e.g., D6, D20).");
-  }
+    // Validation
+    if (isNaN(sides) || sides < 2) {
+      return new ReturnObject("error", "Die type must be at least D2 (e.g., D6, D20).");
+    }
 
-  if (sides > 1000) {
-    return new ReturnObject("error", "Die type cannot exceed D1000.");
-  }
+    if (sides > 1000) {
+      return new ReturnObject("error", "Die type cannot exceed D1000.");
+    }
 
-  if (numberOfDice < 1) {
-    return new ReturnObject("error", "Number of dice must be at least 1.");
-  }
+    if (numberOfDice < 1) {
+      return new ReturnObject("error", "Number of dice must be at least 1.");
+    }
 
-  if (numberOfDice > 100) {
-    return new ReturnObject("error", "Cannot roll more than 100 dice at once.");
-  }
+    if (numberOfDice > 100) {
+      return new ReturnObject("error", "Cannot roll more than 100 dice at once.");
+    }
 
-  // Roll the dice
-  var results = [];
-  for (var i = 0; i < numberOfDice; i++) {
-    var roll = Math.floor(Math.random() * sides) + 1;
-    results.push(roll);
-  }
+    // Roll the dice
+    const results = [];
+    for (let i = 0; i < numberOfDice; i++) {
+      const roll = Math.floor(Math.random() * sides) + 1;
+      results.push(roll);
+    }
 
-  // Format output
-  var output;
-  if (results.length === 1) {
-    output = results[0].toString();
-  } else {
-    output = results.join(", ");
-  }
+    // Format output
+    const output = results.length === 1 ? results[0].toString() : results.join(", ");
 
-  var message = "Rolled " + numberOfDice + " D" + sides + (numberOfDice > 1 ? " dice" : " die") + ".";
-  return new ReturnObject("success", message, output);
-};
+    const message = `Rolled ${numberOfDice} D${sides}${numberOfDice > 1 ? " dice" : " die"}.`;
+    return new ReturnObject("success", message, output);
+  };
 })();
