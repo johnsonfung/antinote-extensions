@@ -152,7 +152,21 @@ function commitTestExtension(extensionName = 'test_bump_script') {
     // Small delay to ensure git commits are finalized
     execSync('sleep 0.1', { cwd: ROOT_DIR, stdio: 'pipe' });
   } catch (error) {
-    // Ignore errors (might already be committed)
+    // Check if it's because there's nothing to commit (already committed)
+    try {
+      const status = execSync(`git status --porcelain extensions-official/${extensionName}`, {
+        cwd: ROOT_DIR,
+        encoding: 'utf8'
+      }).trim();
+      if (status) {
+        // There are uncommitted changes, this is an actual error
+        throw error;
+      }
+      // No changes, already committed - this is fine
+    } catch (statusError) {
+      // Could not check status, throw original error
+      throw error;
+    }
   }
 }
 
