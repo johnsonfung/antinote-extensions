@@ -745,7 +745,133 @@ Run `npm run validate` to check your extension.
 
 ### Example: json_tools
 
-See `/extensions-official/json_tools/` for a complete multi-file example once it's migrated.
+The `json_tools` extension demonstrates a complete multi-file implementation with smart JSON extraction and flexible data processing.
+
+**Structure:**
+```
+json_tools/
+  index.js                        # Entry point, preferences
+  helpers/
+    smart-extractor.js            # Smart extraction with dot notation
+    formatters.js                 # Formatting utilities
+  commands/
+    csv.js                        # CSV conversion
+    sort.js                       # Sorting commands
+    filter.js                     # Filter commands
+    keys.js                       # Key manipulation
+    dupes.js                      # Duplicate detection
+    utils.js                      # Utility commands
+  extension.json                  # Metadata (15 commands)
+```
+
+**Smart Extraction Features:**
+
+The extension uses a shared `SmartExtractor` helper that provides:
+
+1. **Automatic JSON/object detection** - Finds first `{` or `[` in text
+2. **Dot notation support** - Access nested properties like `"user.profile.name"`
+3. **Multiple object processing** - Optional `parent_key` parameter processes ALL matching objects
+4. **Format preferences** - User-configurable output (pretty/compact/minified)
+
+**Example Usage:**
+
+**Basic extraction (finds first object/array):**
+```
+Input text:
+The response is: [{"id": 1, "name": "Alice"}, {"id": 2, "name": "Bob"}]
+
+Command: ::json_sort("name")
+Result: [{"id": 1, "name": "Alice"}, {"id": 2, "name": "Bob"}]
+```
+
+**Dot notation (access nested data):**
+```
+Input text:
+{
+  "user": {
+    "profile": {
+      "contacts": [
+        {"name": "Alice", "age": 30},
+        {"name": "Bob", "age": 25}
+      ]
+    }
+  }
+}
+
+Command: ::json_sort("age", "", "user.profile.contacts")
+Result: Sorts the contacts array by age (finds it via dot notation path)
+```
+
+**Processing multiple objects (parent_key parameter):**
+```
+Input text:
+{
+  "users": [{"name": "Zack", "age": 30}, {"name": "Alice", "age": 25}],
+  "admins": [{"name": "Bob", "age": 35}],
+  "guests": [{"name": "Carol", "age": 28}]
+}
+
+Command: ::json_sort("name", "", "users")
+Result: Sorts ONLY the "users" array (processes all arrays matching "users")
+
+Command: ::json_add_key("status", "active")
+Result: Adds "status": "active" to ALL objects in ALL arrays
+```
+
+**Key Commands:**
+
+All commands accept an optional final `parent_key` parameter:
+
+- `::csv_to_json(parent_key?)` - Convert CSV to JSON array
+- `::json_sort(key, reverse?, parent_key?)` - Sort array by key
+- `::json_filter(key, operator, value, parent_key?)` - Filter matching items
+- `::json_add_key(key, value, parent_key?)` - Add key to all objects
+- `::json_get(path)` - Extract value at path
+- `::json_set(path, value)` - Set value at path
+- `::json_format(style?)` - Format JSON (pretty/compact/minified)
+
+**Shared Namespace Pattern:**
+
+```js
+// index.js - Create shared namespace
+const globalScope = (typeof global !== 'undefined') ? global :
+                    (typeof window !== 'undefined') ? window : this;
+if (typeof globalScope.__EXTENSION_SHARED__ === 'undefined') {
+  globalScope.__EXTENSION_SHARED__ = {};
+}
+globalScope.__EXTENSION_SHARED__["json_tools"] = {
+  root: extensionRoot,
+  shared: Shared
+};
+
+// helpers/smart-extractor.js - Export utilities
+const ctx = globalScope.__EXTENSION_SHARED__["json_tools"];
+ctx.shared.SmartExtractor = {
+  extract, extractAll, getNestedValue, setNestedValue, format, reconstruct
+};
+
+// commands/sort.js - Use shared utilities
+const ctx = globalScope.__EXTENSION_SHARED__["json_tools"];
+const SmartExtractor = ctx.shared.SmartExtractor;
+const extensionRoot = ctx.root;
+
+json_sort.execute = function(payload) {
+  const [key, reverse, parent_key] = this.getParsedParams(payload);
+
+  // Extract all matching objects/arrays
+  const extractions = SmartExtractor.extractAll(payload.fullText, parent_key);
+
+  // Process each one
+  const newValues = extractions.map(ext => {
+    return ext.processed.sort((a, b) => /* sort logic */);
+  });
+
+  // Reconstruct text with all updates
+  return SmartExtractor.reconstructAll(payload.fullText, extractions, newValues, formatPref);
+};
+```
+
+See `/extensions-official/json_tools/` for the complete implementation.
 
 ---
 
