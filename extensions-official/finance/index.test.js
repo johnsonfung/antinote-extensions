@@ -252,8 +252,8 @@ describe("Finance Extension - Command Execution Tests", function() {
   describe("npv command (Excel-compatible)", function() {
     it("should calculate NPV from cash flows", function() {
       var result = npv.execute({
-        parameters: [],
-        fullText: "0.1, -10000, 3000, 4200, 6800",
+        parameters: ["0.1"],
+        fullText: "-10000, 3000, 4200, 6800",
         userSettings: {},
         preferences: {}
       });

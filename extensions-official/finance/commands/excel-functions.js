@@ -143,27 +143,27 @@
   const npv = new Command({
     name: "npv",
     parameters: [
-      new Parameter({type: "number", name: "rate", helpText: "Discount rate per period", default: 0})
+      new Parameter({type: "number", name: "rate", helpText: "Discount rate per period (e.g., 0.1 for 10%)", default: 0})
     ],
     type: "replaceLine",
-    helpText: "Calculate net present value from comma-separated cash flows. Place on line with: rate, value1, value2, ...",
+    helpText: "Calculate net present value from comma-separated cash flows on current line. NPV(rate) on line: value1, value2, ...",
     tutorials: [
-      new TutorialCommand({command: "npv", description: "On line: 0.1, -10000, 3000, 4200, 6800 (NPV of investment)"}),
-      new TutorialCommand({command: "npv", description: "Calculates NPV from cash flows on current line"})
+      new TutorialCommand({command: "npv(0.1)", description: "On line: -10000, 3000, 4200, 6800"}),
+      new TutorialCommand({command: "npv(0.08)", description: "Calculate NPV at 8% discount rate"})
     ],
     extension: extensionRoot
   });
 
   npv.execute = function(payload) {
+    const params = this.getParsedParams(payload);
+    const rate = parseFloat(params[0]) || 0;
+
     const text = payload.fullText.trim();
-    const values = text.split(',').map(v => parseFloat(v.trim())).filter(v => !isNaN(v));
+    const cashFlows = text.split(',').map(v => parseFloat(v.trim())).filter(v => !isNaN(v));
 
-    if (values.length < 2) {
-      return new ReturnObject({status: "error", message: "Need at least rate and one cash flow. Format: rate, value1, value2, ..."});
+    if (cashFlows.length < 1) {
+      return new ReturnObject({status: "error", message: "Need at least one cash flow on the line. Format: value1, value2, ..."});
     }
-
-    const rate = values[0];
-    const cashFlows = values.slice(1);
 
     // Excel NPV formula: Sum of (cashFlow / (1 + rate)^period) for period 1 to n
     let npvValue = 0;
