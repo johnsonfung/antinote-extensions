@@ -1,6 +1,6 @@
 {
   "name": "line_sort",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "author": "johnsonfung",
   "description": "Sort lines in your notes alphabetically, numerically, or reverse order",
   "license": "MIT",

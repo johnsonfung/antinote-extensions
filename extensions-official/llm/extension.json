@@ -1,6 +1,6 @@
 {
   "name": "llm",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "author": "johnsonfung",
   "description": "General-purpose AI command for getting AI-generated responses using the ai_providers service",
   "license": "MIT",
@@ -8,7 +8,9 @@
   "dataScope": "none",
   "endpoints": [],
   "requiredAPIKeys": [],
-  "dependencies": ["ai_providers"],
+  "dependencies": [
+    "ai_providers"
+  ],
   "commands": [
     {
       "name": "ai",

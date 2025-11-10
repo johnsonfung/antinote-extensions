@@ -1,12 +1,14 @@
 {
   "name": "ai_process",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": "johnsonfung",
   "description": "AI-powered text processing: polish text, translate languages, and create structured lists",
   "license": "MIT",
   "category": "AI & ML",
   "dataScope": "full",
-  "dependencies": ["ai_providers"],
+  "dependencies": [
+    "ai_providers"
+  ],
   "endpoints": [],
   "requiredAPIKeys": [],
   "commands": [
