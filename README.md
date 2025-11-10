@@ -1,6 +1,6 @@
 # ✨ Antinote Extensions
 
-Antinote supports custom JavaScript (ES5) extensions that let you add text to your note, modify your note, or open a URL/URI. Extensions can work locally or make network requests to external APIs. This guide walks you through creating an extension from scratch.
+Antinote supports custom JavaScript (ES6) extensions that let you add text to your note, modify your note, or open a URL/URI. Extensions can work locally or make network requests to external APIs. This guide walks you through creating an extension from scratch.
 
 ---
 

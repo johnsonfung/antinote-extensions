@@ -1,7 +1,7 @@
 {
   "name": "antinote-extensions",
   "version": "1.0.0",
-  "description": "Antinote supports custom JavaScript (ES5) extensions that let you add text to your note, modify your note, or open a URL/URI. Extensions can work locally or make network requests to external APIs. This guide walks you through creating an extension from scratch.",
+  "description": "Antinote supports custom JavaScript (ES6) extensions that let you add text to your note, modify your note, or open a URL/URI. Extensions can work locally or make network requests to external APIs. This guide walks you through creating an extension from scratch.",
   "main": "antinote-extensions-base-v0.0.1.js",
   "scripts": {
     "build": "node scripts/build.js",
