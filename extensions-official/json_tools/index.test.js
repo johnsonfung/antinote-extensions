@@ -91,16 +91,10 @@ describe("JSON Tools Extension - Metadata Validation", function() {
     expect(metadata.dataScope).toBe("full");
   });
 
-  it("should have 12 commands", function() {
+  it("should have 15 commands", function() {
     expect(metadata.commands).toBeDefined();
     expect(metadata.commands).toBeArray();
-    expect(metadata.commands.length).toBe(12);
-  });
-
-  it("should have preferences for key casing", function() {
-    expect(metadata.preferences).toBeDefined();
-    expect(metadata.preferences).toBeArray();
-    expect(metadata.preferences.length).toBeGreaterThanOrEqual(1);
+    expect(metadata.commands.length).toBe(15);
   });
 });
 

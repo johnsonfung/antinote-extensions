@@ -1,47 +1,23 @@
 {
   "name": "json_tools",
-  "version": "1.0.5",
+  "version": "2.0.0",
   "author": "johnsonfung",
-  "description": "Transform, filter, and manipulate JSON and CSV data with powerful tools",
+  "description": "Transform, filter, and manipulate JSON and CSV data with smart extraction and dot notation support",
   "license": "MIT",
   "category": "Data Tools",
   "dataScope": "full",
   "endpoints": [],
   "requiredAPIKeys": [],
-  "preferences": [
-    {
-      "key": "key_casing",
-      "label": "Preferred Key Casing",
-      "type": "select",
-      "default": "snake_case",
-      "options": [
-        {
-          "label": "snake_case",
-          "value": "snake_case"
-        },
-        {
-          "label": "camelCase",
-          "value": "camelCase"
-        },
-        {
-          "label": "PascalCase",
-          "value": "PascalCase"
-        },
-        {
-          "label": "kebab-case",
-          "value": "kebab-case"
-        },
-        {
-          "label": "UPPER_CASE",
-          "value": "UPPER_CASE"
-        },
-        {
-          "label": "lowercase",
-          "value": "lowercase"
-        }
-      ],
-      "description": "Default casing style for JSON keys when converting from CSV"
-    }
+  "files": [
+    "index.js",
+    "helpers/smart-extractor.js",
+    "helpers/formatters.js",
+    "commands/csv.js",
+    "commands/sort.js",
+    "commands/filter.js",
+    "commands/keys.js",
+    "commands/dupes.js",
+    "commands/utils.js"
   ],
   "commands": [
     {
@@ -52,6 +28,11 @@
     {
       "name": "json_sort",
       "description": "Sort array of objects by a key value",
+      "type": "replaceAll"
+    },
+    {
+      "name": "json_sort_array",
+      "description": "Sort an array of primitive values (strings/numbers)",
       "type": "replaceAll"
     },
     {
@@ -100,15 +81,25 @@
       "type": "replaceAll"
     },
     {
-      "name": "json_sort_array",
-      "description": "Sort an array of primitive values (strings/numbers)",
+      "name": "json_get",
+      "description": "Get value at dot notation path (e.g., user.name)",
+      "type": "insert"
+    },
+    {
+      "name": "json_set",
+      "description": "Set value at dot notation path",
+      "type": "replaceAll"
+    },
+    {
+      "name": "json_format",
+      "description": "Reformat JSON according to preference (pretty/compact/minified)",
       "type": "replaceAll"
     }
   ],
   "official": true,
   "includedByDefault": true,
   "size": {
-    "total": 36005,
-    "totalKB": 35.2
+    "total": 67970,
+    "totalKB": 66.4
   }
 }

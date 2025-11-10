@@ -68,18 +68,46 @@ async function runExtensionTests(extension) {
       }
     }
 
+    // Helper: Load extension code (multi-file or single-file)
+    const loadExtensionCode = (extDir, extName) => {
+      const metaPath = path.join(extDir, extName, 'extension.json');
+      let code = '';
+
+      if (fs.existsSync(metaPath)) {
+        const meta = JSON.parse(fs.readFileSync(metaPath, 'utf8'));
+        if (meta.files && Array.isArray(meta.files)) {
+          // Multi-file extension
+          for (const file of meta.files) {
+            const filePath = path.join(extDir, extName, file);
+            if (fs.existsSync(filePath)) {
+              code += fs.readFileSync(filePath, 'utf8') + '\n';
+            }
+          }
+          return code;
+        }
+      }
+
+      // Single-file extension (fallback)
+      const indexPath = path.join(extDir, extName, 'index.js');
+      if (fs.existsSync(indexPath)) {
+        return fs.readFileSync(indexPath, 'utf8');
+      }
+
+      return '';
+    };
+
     // Load dependency extensions
     let dependencyCode = '';
     for (const depName of dependencies) {
-      // Try to find dependency in official extensions first, then unofficial
-      let depPath = path.join(EXTENSIONS_OFFICIAL_DIR, depName, 'index.js');
-      if (!fs.existsSync(depPath)) {
-        depPath = path.join(EXTENSIONS_UNOFFICIAL_DIR, depName, 'index.js');
+      // Try official first, then unofficial
+      let code = loadExtensionCode(EXTENSIONS_OFFICIAL_DIR, depName);
+      if (!code) {
+        code = loadExtensionCode(EXTENSIONS_UNOFFICIAL_DIR, depName);
       }
 
-      if (fs.existsSync(depPath)) {
+      if (code) {
         dependencyCode += `\n      // Load dependency: ${depName}\n`;
-        dependencyCode += `      ${fs.readFileSync(depPath, 'utf8')}\n`;
+        dependencyCode += `      ${code}\n`;
       }
     }
 
@@ -126,7 +154,8 @@ ${dependencyCode}
         var callAIProvider = global.callAIProvider;
       }
 
-      ${fs.readFileSync(indexPath, 'utf8')}
+      // Load extension (multi-file or single-file)
+      ${loadExtensionCode(path.dirname(extension.path), path.basename(extension.path))}
 
       // Expose commands from global registry to local scope for tests
       ${commandDeclarations}
