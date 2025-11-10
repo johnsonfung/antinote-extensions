@@ -66,24 +66,24 @@
     return new ReturnObject({status: "success", message: "Present value calculated", payload: output});
   };
 
-  // --- Command: fv (Future Value) ---
-  const fv = new Command({
-    name: "fv",
+  // --- Command: fv_simple (Simple Future Value) ---
+  const fv_simple = new Command({
+    name: "fv_simple",
     parameters: [
       new Parameter({type: "number", name: "presentAmount", helpText: "Amount today", default: 0}),
       new Parameter({type: "number", name: "years", helpText: "Number of years", default: 0}),
       new Parameter({type: "number", name: "returnRate", helpText: "Expected return rate (default 4%)", default: 4})
     ],
     type: "insert",
-    helpText: "Calculate the future value of a present amount.",
+    helpText: "Calculate the future value of a present amount (simple calculation).",
     tutorials: [
-      new TutorialCommand({command: "FV(10000, 10)", description: "Future value of $10k in 10 years at 4%"}),
-      new TutorialCommand({command: "FV(50000, 30, 7)", description: "Future value of $50k in 30 years at 7%"})
+      new TutorialCommand({command: "fv_simple(10000, 10)", description: "Future value of $10k in 10 years at 4%"}),
+      new TutorialCommand({command: "fv_simple(50000, 30, 7)", description: "Future value of $50k in 30 years at 7%"})
     ],
     extension: extensionRoot
   });
 
-  fv.execute = function(payload) {
+  fv_simple.execute = function(payload) {
     const params = this.getParsedParams(payload);
     const presentAmount = parseFloat(params[0]) || 0;
     const years = parseFloat(params[1]) || 0;

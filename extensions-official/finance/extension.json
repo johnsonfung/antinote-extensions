@@ -1,11 +1,11 @@
 {
   "name": "finance",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": "johnsonfung",
   "description": "Personal finance calculations for loans, mortgages, investments, FIRE planning, and more",
   "license": "MIT",
   "category": "Finance & Math",
-  "dataScope": "none",
+  "dataScope": "line",
   "endpoints": [],
   "requiredAPIKeys": [],
   "files": [
@@ -14,7 +14,8 @@
     "commands/loan-mortgage.js",
     "commands/investment.js",
     "commands/fire.js",
-    "commands/utilities.js"
+    "commands/utilities.js",
+    "commands/excel-functions.js"
   ],
   "commands": [
     {
@@ -48,9 +49,29 @@
       "type": "insert"
     },
     {
-      "name": "fv",
-      "description": "Calculate future value of a present amount",
+      "name": "fv_simple",
+      "description": "Calculate future value of a present amount (simple calculation)",
       "type": "insert"
+    },
+    {
+      "name": "fv",
+      "description": "Calculate future value (Excel FV function)",
+      "type": "insert"
+    },
+    {
+      "name": "pmt",
+      "description": "Calculate payment per period (Excel PMT function)",
+      "type": "insert"
+    },
+    {
+      "name": "npv",
+      "description": "Calculate net present value from cash flows (Excel NPV function)",
+      "type": "replaceLine"
+    },
+    {
+      "name": "irr",
+      "description": "Calculate internal rate of return from cash flows (Excel IRR function)",
+      "type": "replaceLine"
     },
     {
       "name": "tax",
@@ -61,7 +82,7 @@
   "official": true,
   "includedByDefault": true,
   "size": {
-    "total": 40387,
-    "totalKB": 39.4
+    "total": 54769,
+    "totalKB": 53.5
   }
 }

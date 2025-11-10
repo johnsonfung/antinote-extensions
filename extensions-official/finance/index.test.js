@@ -64,19 +64,19 @@ describe("Finance Extension - Metadata Validation", function() {
     expect(metadata.version).toBeDefined();
     expect(metadata.author).toBeDefined();
     expect(metadata.category).toBeDefined();
-    expect(metadata.dataScope).toBe("none");
+    expect(metadata.dataScope).toBe("line");
   });
 
-  it("should have 8 commands", function() {
+  it("should have 12 commands", function() {
     expect(metadata.commands).toBeDefined();
     expect(metadata.commands).toBeArray();
-    expect(metadata.commands.length).toBe(8);
+    expect(metadata.commands.length).toBe(12);
   });
 
   it("should have multi-file structure", function() {
     expect(metadata.files).toBeDefined();
     expect(metadata.files).toBeArray();
-    expect(metadata.files.length).toBe(6);
+    expect(metadata.files.length).toBe(7);
     expect(metadata.files[0]).toBe("index.js");
   });
 
@@ -88,7 +88,11 @@ describe("Finance Extension - Metadata Validation", function() {
     expect(commandNames).toContain("fire_amount");
     expect(commandNames).toContain("fire_plan");
     expect(commandNames).toContain("pv");
+    expect(commandNames).toContain("fv_simple");
     expect(commandNames).toContain("fv");
+    expect(commandNames).toContain("pmt");
+    expect(commandNames).toContain("npv");
+    expect(commandNames).toContain("irr");
     expect(commandNames).toContain("tax");
   });
 });
@@ -204,9 +208,9 @@ describe("Finance Extension - Command Execution Tests", function() {
     });
   });
 
-  describe("fv command", function() {
-    it("should calculate future value", function() {
-      var result = fv.execute({
+  describe("fv_simple command", function() {
+    it("should calculate simple future value", function() {
+      var result = fv_simple.execute({
         parameters: ["10000", "10", "4"],
         fullText: "",
         userSettings: {},
@@ -215,6 +219,59 @@ describe("Finance Extension - Command Execution Tests", function() {
       expect(result.status).toBe("success");
       expect(result.payload).toContain("Future Value Analysis");
       expect(result.payload).toContain("Rule of 72");
+    });
+  });
+
+  describe("fv command (Excel-compatible)", function() {
+    it("should calculate Excel FV", function() {
+      var result = fv.execute({
+        parameters: ["0.05", "10", "-1000", "0", "0"],
+        fullText: "",
+        userSettings: {},
+        preferences: {}
+      });
+      expect(result.status).toBe("success");
+      expect(result.payload).toContain("Future Value (Excel FV)");
+    });
+  });
+
+  describe("pmt command (Excel-compatible)", function() {
+    it("should calculate Excel PMT", function() {
+      var result = pmt.execute({
+        parameters: ["0.004167", "360", "300000", "0", "0"],
+        fullText: "",
+        userSettings: {},
+        preferences: {}
+      });
+      expect(result.status).toBe("success");
+      expect(result.payload).toContain("Payment Calculation");
+      expect(result.payload).toContain("Payment per period");
+    });
+  });
+
+  describe("npv command (Excel-compatible)", function() {
+    it("should calculate NPV from cash flows", function() {
+      var result = npv.execute({
+        parameters: [],
+        fullText: "0.1, -10000, 3000, 4200, 6800",
+        userSettings: {},
+        preferences: {}
+      });
+      expect(result.status).toBe("success");
+      expect(result.payload).toContain("Net Present Value");
+    });
+  });
+
+  describe("irr command (Excel-compatible)", function() {
+    it("should calculate IRR from cash flows", function() {
+      var result = irr.execute({
+        parameters: [],
+        fullText: "-10000, 3000, 4200, 6800",
+        userSettings: {},
+        preferences: {}
+      });
+      expect(result.status).toBe("success");
+      expect(result.payload).toContain("Internal Rate of Return");
     });
   });
 

@@ -14,7 +14,7 @@
     requiredAPIKeys: [],
     author: "johnsonfung",
     category: "Finance & Math",
-    dataScope: "none"
+    dataScope: "line"
   });
 
   // Create shared namespace
