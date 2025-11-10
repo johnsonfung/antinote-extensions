@@ -1,0 +1,92 @@
+{
+  "name": "json_tools",
+  "version": "1.0.0",
+  "author": "johnsonfung",
+  "description": "Transform, filter, and manipulate JSON and CSV data with powerful tools",
+  "license": "MIT",
+  "category": "Data Tools",
+  "dataScope": "full",
+  "endpoints": [],
+  "requiredAPIKeys": [],
+  "preferences": [
+    {
+      "key": "key_casing",
+      "label": "Preferred Key Casing",
+      "type": "select",
+      "default": "snake_case",
+      "options": [
+        {"label": "snake_case", "value": "snake_case"},
+        {"label": "camelCase", "value": "camelCase"},
+        {"label": "PascalCase", "value": "PascalCase"},
+        {"label": "kebab-case", "value": "kebab-case"},
+        {"label": "UPPER_CASE", "value": "UPPER_CASE"},
+        {"label": "lowercase", "value": "lowercase"}
+      ],
+      "description": "Default casing style for JSON keys when converting from CSV"
+    }
+  ],
+  "commands": [
+    {
+      "name": "csv_to_json",
+      "description": "Convert CSV to JSON array of objects using first row as keys",
+      "type": "replaceAll"
+    },
+    {
+      "name": "json_sort",
+      "description": "Sort array of objects by a key value",
+      "type": "replaceAll"
+    },
+    {
+      "name": "json_filter",
+      "description": "Filter array of objects keeping only items matching criteria",
+      "type": "replaceAll"
+    },
+    {
+      "name": "json_filter_out",
+      "description": "Filter array of objects removing items matching criteria",
+      "type": "replaceAll"
+    },
+    {
+      "name": "json_add_key",
+      "description": "Add a key-value pair to all objects in array",
+      "type": "replaceAll"
+    },
+    {
+      "name": "json_remove_key",
+      "description": "Remove a key from all objects in array",
+      "type": "replaceAll"
+    },
+    {
+      "name": "json_set_key",
+      "description": "Set a key to a specific value in all objects",
+      "type": "replaceAll"
+    },
+    {
+      "name": "json_append_key",
+      "description": "Append value to the end of existing key values",
+      "type": "replaceAll"
+    },
+    {
+      "name": "json_prepend_key",
+      "description": "Prepend value to the beginning of existing key values",
+      "type": "replaceAll"
+    },
+    {
+      "name": "json_dupes",
+      "description": "Find and display duplicate objects by key value",
+      "type": "insert"
+    },
+    {
+      "name": "json_dedupe",
+      "description": "Remove exact duplicate objects from array",
+      "type": "replaceAll"
+    },
+    {
+      "name": "json_sort_array",
+      "description": "Sort an array of primitive values (strings/numbers)",
+      "type": "replaceAll"
+    }
+  ],
+  "official": true,
+  "includedByDefault": true
+}
