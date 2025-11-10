@@ -1,0 +1,67 @@
+{
+  "name": "finance",
+  "version": "1.0.0",
+  "author": "johnsonfung",
+  "description": "Personal finance calculations for loans, mortgages, investments, FIRE planning, and more",
+  "license": "MIT",
+  "category": "Finance & Math",
+  "dataScope": "none",
+  "endpoints": [],
+  "requiredAPIKeys": [],
+  "files": [
+    "index.js",
+    "helpers/calculations.js",
+    "commands/loan-mortgage.js",
+    "commands/investment.js",
+    "commands/fire.js",
+    "commands/utilities.js"
+  ],
+  "commands": [
+    {
+      "name": "loan",
+      "description": "Calculate loan payment, total interest, and amortization schedule",
+      "type": "insert"
+    },
+    {
+      "name": "mortgage",
+      "description": "Calculate mortgage payment, total interest, and amortization schedule",
+      "type": "insert"
+    },
+    {
+      "name": "investment",
+      "description": "Calculate investment growth with contributions, taxes, and inflation",
+      "type": "insert"
+    },
+    {
+      "name": "fire_amount",
+      "description": "Calculate annual income from investments using safe withdrawal rate",
+      "type": "insert"
+    },
+    {
+      "name": "fire_plan",
+      "description": "Calculate path to financial independence and retirement timeline",
+      "type": "insert"
+    },
+    {
+      "name": "pv",
+      "description": "Calculate present value of a future amount",
+      "type": "insert"
+    },
+    {
+      "name": "fv",
+      "description": "Calculate future value of a present amount",
+      "type": "insert"
+    },
+    {
+      "name": "tax",
+      "description": "Calculate tax amount and after-tax income",
+      "type": "insert"
+    }
+  ],
+  "official": true,
+  "includedByDefault": true,
+  "size": {
+    "total": 40387,
+    "totalKB": 39.4
+  }
+}
