@@ -1,0 +1,77 @@
+{
+  "name": "business",
+  "version": "1.0.0",
+  "author": "johnsonfung",
+  "description": "Business metrics and analytics for growth, A/B testing, forecasting, SaaS metrics, and more",
+  "license": "MIT",
+  "category": "Business & Analytics",
+  "dataScope": "full",
+  "endpoints": [],
+  "requiredAPIKeys": [],
+  "files": [
+    "index.js",
+    "helpers/statistics.js",
+    "commands/growth.js",
+    "commands/forecast.js",
+    "commands/templates.js"
+  ],
+  "commands": [
+    {
+      "name": "growth",
+      "description": "Analyze percentage growth between consecutive numbers",
+      "type": "insert"
+    },
+    {
+      "name": "forecast",
+      "description": "Forecast future values using linear regression and variance analysis",
+      "type": "insert"
+    },
+    {
+      "name": "cac",
+      "description": "Customer Acquisition Cost calculator template",
+      "type": "insert"
+    },
+    {
+      "name": "ab_test",
+      "description": "A/B test statistical significance calculator template",
+      "type": "insert"
+    },
+    {
+      "name": "sample_size",
+      "description": "Sample size calculator for A/B tests template",
+      "type": "insert"
+    },
+    {
+      "name": "retention_churn",
+      "description": "Retention and churn analysis template",
+      "type": "insert"
+    },
+    {
+      "name": "ltv",
+      "description": "Customer Lifetime Value calculator template",
+      "type": "insert"
+    },
+    {
+      "name": "arpu",
+      "description": "Average Revenue Per User calculator template",
+      "type": "insert"
+    },
+    {
+      "name": "arppu",
+      "description": "Average Revenue Per Paying User calculator template",
+      "type": "insert"
+    },
+    {
+      "name": "runway",
+      "description": "Cash runway calculator for startups template",
+      "type": "insert"
+    },
+    {
+      "name": "saas_pricing",
+      "description": "SaaS pricing strategy helper template",
+      "type": "insert"
+    }
+  ],
+  "official": true,
+  "includedByDefault": true
+}
