@@ -13,9 +13,10 @@
   const pv = new Command({
     name: "pv",
     parameters: [
-      new Parameter({type: "number", name: "futureAmount", helpText: "Amount in the future", default: 0}),
-      new Parameter({type: "number", name: "years", helpText: "Number of years", default: 0}),
-      new Parameter({type: "number", name: "riskFreeRate", helpText: "Discount rate (default 4%)", default: 4})
+      new Parameter({type: "expression", name: "futureAmount", helpText: "Amount in the future", default: 0}),
+      new Parameter({type: "expression", name: "years", helpText: "Number of years", default: 0}),
+      new Parameter({type: "expression", name: "riskFreeRate", helpText: "Discount rate (default 4%)", default: 4}),
+      new Parameter({type: "bool", name: "showAnalysis", helpText: "Show detailed analysis", default: false})
     ],
     type: "insert",
     helpText: "Calculate the present value of a future amount.",
@@ -28,15 +29,24 @@
 
   pv.execute = function(payload) {
     const params = this.getParsedParams(payload);
-    const futureAmount = parseFloat(params[0]) || 0;
-    const years = parseFloat(params[1]) || 0;
-    const rate = (parseFloat(params[2]) || 4) / 100;
+
+    // Parameters are already evaluated by getParsedParams for 'expression' type
+    const futureAmount = params[0] || 0;
+    const years = params[1] || 0;
+    const rate = (params[2] || 4) / 100;
+    const showAnalysis = params[3];
 
     if (futureAmount <= 0 || years < 0) {
       return new ReturnObject({status: "error", message: "Please provide valid future amount and time period."});
     }
 
     const presentValue = Calc.calculatePV(futureAmount, years, rate);
+
+    // If showAnalysis is false, just return the present value
+    if (!showAnalysis) {
+      return new ReturnObject({status: "success", message: "Present value calculated", payload: Calc.formatDollar(presentValue)});
+    }
+
     const totalDiscount = futureAmount - presentValue;
     const discountPercent = (totalDiscount / futureAmount) * 100;
 
@@ -70,9 +80,10 @@
   const fv_simple = new Command({
     name: "fv_simple",
     parameters: [
-      new Parameter({type: "number", name: "presentAmount", helpText: "Amount today", default: 0}),
-      new Parameter({type: "number", name: "years", helpText: "Number of years", default: 0}),
-      new Parameter({type: "number", name: "returnRate", helpText: "Expected return rate (default 4%)", default: 4})
+      new Parameter({type: "expression", name: "presentAmount", helpText: "Amount today", default: 0}),
+      new Parameter({type: "expression", name: "years", helpText: "Number of years", default: 0}),
+      new Parameter({type: "expression", name: "returnRate", helpText: "Expected return rate (default 4%)", default: 4}),
+      new Parameter({type: "bool", name: "showAnalysis", helpText: "Show detailed analysis", default: false})
     ],
     type: "insert",
     helpText: "Calculate the future value of a present amount (simple calculation).",
@@ -85,15 +96,24 @@
 
   fv_simple.execute = function(payload) {
     const params = this.getParsedParams(payload);
-    const presentAmount = parseFloat(params[0]) || 0;
-    const years = parseFloat(params[1]) || 0;
-    const rate = (parseFloat(params[2]) || 4) / 100;
+
+    // Parameters are already evaluated by getParsedParams for 'expression' type
+    const presentAmount = params[0] || 0;
+    const years = params[1] || 0;
+    const rate = (params[2] || 4) / 100;
+    const showAnalysis = params[3];
 
     if (presentAmount <= 0 || years < 0) {
       return new ReturnObject({status: "error", message: "Please provide valid present amount and time period."});
     }
 
     const futureValue = Calc.calculateFV(presentAmount, years, rate);
+
+    // If showAnalysis is false, just return the future value
+    if (!showAnalysis) {
+      return new ReturnObject({status: "success", message: "Future value calculated", payload: Calc.formatDollar(futureValue)});
+    }
+
     const totalGrowth = futureValue - presentAmount;
     const growthMultiple = futureValue / presentAmount;
 
@@ -128,8 +148,9 @@
   const tax = new Command({
     name: "tax",
     parameters: [
-      new Parameter({type: "number", name: "amount", helpText: "Pre-tax amount", default: 0}),
-      new Parameter({type: "number", name: "averageTaxRate", helpText: "Average tax rate (e.g., 25 for 25%)", default: 0})
+      new Parameter({type: "expression", name: "amount", helpText: "Pre-tax amount (e.g., 100000 or 50000*2)", default: 50000}),
+      new Parameter({type: "expression", name: "averageTaxRate", helpText: "Average tax rate (e.g., 25 for 25%)", default: 12}),
+      new Parameter({type: "bool", name: "showAnalysis", helpText: "Show detailed analysis", default: false})
     ],
     type: "insert",
     helpText: "Calculate tax amount and after-tax income.",
@@ -142,8 +163,11 @@
 
   tax.execute = function(payload) {
     const params = this.getParsedParams(payload);
-    const amount = parseFloat(params[0]) || 0;
-    const taxRate = (parseFloat(params[1]) || 0) / 100;
+
+    // Parameters are already evaluated by getParsedParams for 'expression' type
+    const amount = params[0] || 50000;
+    const taxRate = (params[1] || 12) / 100;
+    const showAnalysis = params[2];
 
     if (amount < 0 || taxRate < 0) {
       return new ReturnObject({status: "error", message: "Please provide valid amount and tax rate."});
@@ -152,6 +176,15 @@
     const taxAmount = amount * taxRate;
     const afterTax = amount - taxAmount;
     const takeHomePercent = (afterTax / amount) * 100;
+
+    // If showAnalysis is false, just return the summary
+    if (!showAnalysis) {
+      let summary = `**Pre-Tax Amount**: ${Calc.formatDollar(amount)}\n`;
+      summary += `**Tax Rate**: ${Calc.formatPercent(taxRate)}\n`;
+      summary += `**Tax Amount**: ${Calc.formatDollar(taxAmount)}\n`;
+      summary += `**After-Tax Amount**: ${Calc.formatDollar(afterTax)}`;
+      return new ReturnObject({status: "success", message: "Tax calculated", payload: summary});
+    }
 
     let output = `# Tax Calculation\n\n`;
     output += `## Summary\n`;

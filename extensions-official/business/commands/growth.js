@@ -10,7 +10,9 @@
   // --- Command: growth ---
   const growth = new Command({
   name: "growth",
-  parameters: [],
+  parameters: [
+    new Parameter({type: "bool", name: "showAnalysis", helpText: "Show detailed analysis", default: false})
+  ],
   type: "insert",
   helpText: "Analyze percentage growth between consecutive numbers in the note. Numbers can be comma-separated, space-separated, or line-separated.",
   tutorials: [
@@ -21,6 +23,8 @@
 });
 
 growth.execute = function(payload) {
+  const params = this.getParsedParams(payload);
+  const showAnalysis = params[0];
   const fullText = payload.fullText || "";
 
   if (!fullText.trim()) {
@@ -52,9 +56,7 @@ growth.execute = function(payload) {
 
   // Calculate growth between consecutive pairs
   const growthRates = [];
-  let output = `# Growth Analysis\n\n`;
-  output += `**Numbers analyzed**: ${numbers.length}\n\n`;
-  output += `## Growth Between Consecutive Values\n\n`;
+  const growthLines = [];
 
   for (let i = 0; i < numbers.length - 1; i++) {
     const current = numbers[i];
@@ -65,16 +67,30 @@ growth.execute = function(payload) {
     const changeFormatted = Stats.formatPercent(change, 2);
     const absoluteChange = next - current;
 
-    output += `${Stats.formatNumber(current, 2)} → ${Stats.formatNumber(next, 2)} is **${changeFormatted}**`;
+    let line = `${Stats.formatNumber(current, 2)} → ${Stats.formatNumber(next, 2)} is **${changeFormatted}**`;
 
     if (absoluteChange >= 0) {
-      output += ` ⬆️ (+${Stats.formatNumber(absoluteChange, 2)})`;
+      line += ` ⬆️ (+${Stats.formatNumber(absoluteChange, 2)})`;
     } else {
-      output += ` ⬇️ (${Stats.formatNumber(absoluteChange, 2)})`;
+      line += ` ⬇️ (${Stats.formatNumber(absoluteChange, 2)})`;
     }
 
-    output += `\n`;
+    growthLines.push(line);
   }
+
+  // If showAnalysis is false, just return the growth list
+  if (!showAnalysis) {
+    return new ReturnObject({
+      status: "success",
+      message: "Growth calculated",
+      payload: growthLines.join('\n')
+    });
+  }
+
+  let output = `# Growth Analysis\n\n`;
+  output += `**Numbers analyzed**: ${numbers.length}\n\n`;
+  output += `## Growth Between Consecutive Values\n\n`;
+  output += growthLines.join('\n') + '\n';
 
   // Calculate average growth
   const avgGrowth = Stats.mean(growthRates);

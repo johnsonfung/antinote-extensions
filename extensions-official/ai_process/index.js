@@ -25,7 +25,7 @@
   const polishLevel1Pref = new Preference({
     key: "polish_level1_prompt",
     label: "Polish Level 1 Prompt (Casual)",
-    type: "string",
+    type: "paragraph",
     defaultValue: "Polish this text to be clear and casual while maintaining the author's voice. Keep the tone friendly and approachable.",
     options: null,
     helpText: "System prompt for level 1 polish (casual/friendly)"
@@ -35,7 +35,7 @@
   const polishLevel2Pref = new Preference({
     key: "polish_level2_prompt",
     label: "Polish Level 2 Prompt (Professional)",
-    type: "string",
+    type: "paragraph",
     defaultValue: "Polish this text to be professional and clear. Improve grammar, structure, and clarity while maintaining a business-appropriate tone.",
     options: null,
     helpText: "System prompt for level 2 polish (professional)"
@@ -45,7 +45,7 @@
   const polishLevel3Pref = new Preference({
     key: "polish_level3_prompt",
     label: "Polish Level 3 Prompt (Formal)",
-    type: "string",
+    type: "paragraph",
     defaultValue: "Polish this text to be highly formal and sophisticated. Use precise language, formal structure, and elevated vocabulary appropriate for academic or executive communication.",
     options: null,
     helpText: "System prompt for level 3 polish (formal/sophisticated)"
@@ -55,7 +55,7 @@
   const voicePrintPref = new Preference({
     key: "voice_print",
     label: "Voice Print (Optional)",
-    type: "string",
+    type: "paragraph",
     defaultValue: "",
     options: null,
     helpText: "Optional description of your writing voice to maintain consistency when polishing (e.g., 'concise and direct', 'warm and conversational')"

@@ -32,7 +32,7 @@
     const reverse = params[0];
     const ignoreFirstLine = params[1];
 
-    const lines = payload.fullText.split("\n");
+    const lines = payload.fullText.split("\n").filter(line => line.trim() !== '');
 
     if (lines.length === 0) {
       return new ReturnObject({status: "success", message: "No lines to sort.", payload: payload.fullText});
@@ -51,8 +51,14 @@
       const numA = Extractors.extractFirstNumber(a);
       const numB = Extractors.extractFirstNumber(b);
 
-      // Lines without numbers go to the end
-      if (numA === null && numB === null) return 0;
+      // Lines without numbers - sort alphabetically
+      if (numA === null && numB === null) {
+        const aLower = a.toLowerCase();
+        const bLower = b.toLowerCase();
+        if (aLower < bLower) return reverse ? 1 : -1;
+        if (aLower > bLower) return reverse ? -1 : 1;
+        return 0;
+      }
       if (numA === null) return 1;
       if (numB === null) return -1;
 
@@ -92,7 +98,7 @@
     const reverse = params[0];
     const ignoreFirstLine = params[1];
 
-    const lines = payload.fullText.split("\n");
+    const lines = payload.fullText.split("\n").filter(line => line.trim() !== '');
 
     if (lines.length === 0) {
       return new ReturnObject({status: "success", message: "No lines to sort.", payload: payload.fullText});
@@ -111,8 +117,14 @@
       const numA = Extractors.extractLastNumber(a);
       const numB = Extractors.extractLastNumber(b);
 
-      // Lines without numbers go to the end
-      if (numA === null && numB === null) return 0;
+      // Lines without numbers - sort alphabetically
+      if (numA === null && numB === null) {
+        const aLower = a.toLowerCase();
+        const bLower = b.toLowerCase();
+        if (aLower < bLower) return reverse ? 1 : -1;
+        if (aLower > bLower) return reverse ? -1 : 1;
+        return 0;
+      }
       if (numA === null) return 1;
       if (numB === null) return -1;
 

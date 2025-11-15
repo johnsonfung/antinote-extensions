@@ -13,8 +13,8 @@
   const fire_amount = new Command({
     name: "fire_amount",
     parameters: [
-      new Parameter({type: "number", name: "amountSaved", helpText: "Total amount saved", default: 0}),
-      new Parameter({type: "number", name: "interestRate", helpText: "Safe withdrawal rate (default 4%)", default: 4})
+      new Parameter({type: "expression", name: "amountSaved", helpText: "Total amount saved (e.g., 1000000 or 500000*2)", default: 0}),
+      new Parameter({type: "expression", name: "interestRate", helpText: "Safe withdrawal rate (default 4%)", default: 4})
     ],
     type: "insert",
     helpText: "Calculate annual income from investments using the safe withdrawal rate.",
@@ -27,8 +27,10 @@
 
   fire_amount.execute = function(payload) {
     const params = this.getParsedParams(payload);
-    const amountSaved = parseFloat(params[0]) || 0;
-    const withdrawalRate = (parseFloat(params[1]) || 4) / 100;
+
+    // Parameters are already evaluated by getParsedParams for 'expression' type
+    const amountSaved = params[0] || 0;
+    const withdrawalRate = (params[1] || 4) / 100;
 
     if (amountSaved <= 0) {
       return new ReturnObject({status: "error", message: "Please provide a valid amount saved."});
@@ -38,10 +40,12 @@
     const monthlyIncome = annualIncome / 12;
 
     // Calculate how much you need for different expense levels
-    const expenses25k = 25000 / withdrawalRate;
     const expenses50k = 50000 / withdrawalRate;
-    const expenses75k = 75000 / withdrawalRate;
     const expenses100k = 100000 / withdrawalRate;
+    const expenses150k = 150000 / withdrawalRate;
+    const expenses200k = 200000 / withdrawalRate;
+    const expenses250k = 250000 / withdrawalRate;
+    const expenses300k = 300000 / withdrawalRate;
 
     let output = `# FIRE Income Analysis\n\n`;
     output += `## Your Numbers\n`;
@@ -60,10 +64,12 @@
 
     output += `## FIRE Number Calculator\n`;
     output += `To support different annual expense levels, you would need:\n`;
-    output += `- **$25,000/year**: ${Calc.formatDollar(expenses25k)} saved\n`;
     output += `- **$50,000/year**: ${Calc.formatDollar(expenses50k)} saved\n`;
-    output += `- **$75,000/year**: ${Calc.formatDollar(expenses75k)} saved\n`;
-    output += `- **$100,000/year**: ${Calc.formatDollar(expenses100k)} saved\n\n`;
+    output += `- **$100,000/year**: ${Calc.formatDollar(expenses100k)} saved\n`;
+    output += `- **$150,000/year**: ${Calc.formatDollar(expenses150k)} saved\n`;
+    output += `- **$200,000/year**: ${Calc.formatDollar(expenses200k)} saved\n`;
+    output += `- **$250,000/year**: ${Calc.formatDollar(expenses250k)} saved\n`;
+    output += `- **$300,000/year**: ${Calc.formatDollar(expenses300k)} saved\n\n`;
 
     output += `**Rule of Thumb**: Multiply your annual expenses by 25 (for 4% withdrawal) to find your FIRE number.\n`;
 
@@ -74,12 +80,12 @@
   const fire_plan = new Command({
     name: "fire_plan",
     parameters: [
-      new Parameter({type: "number", name: "currentSavings", helpText: "Current savings/investments", default: 0}),
-      new Parameter({type: "number", name: "monthlyAdditions", helpText: "Monthly contribution to savings", default: 0}),
-      new Parameter({type: "number", name: "monthlyExpensesAtRetirement", helpText: "Expected monthly expenses in retirement", default: 0}),
-      new Parameter({type: "number", name: "returnRatePreFIRE", helpText: "Investment return before retirement (default 7%)", default: 7}),
-      new Parameter({type: "number", name: "returnRatePostFIRE", helpText: "Safe withdrawal rate after retirement (default 4%)", default: 4}),
-      new Parameter({type: "number", name: "inflationRate", helpText: "Annual inflation rate (default 3%)", default: 3})
+      new Parameter({type: "expression", name: "currentSavings", helpText: "Current savings/investments", default: 0}),
+      new Parameter({type: "expression", name: "monthlyAdditions", helpText: "Monthly contribution to savings", default: 0}),
+      new Parameter({type: "expression", name: "monthlyExpensesAtRetirement", helpText: "Expected monthly expenses in retirement", default: 0}),
+      new Parameter({type: "expression", name: "returnRatePreFIRE", helpText: "Investment return before retirement (default 7%)", default: 7}),
+      new Parameter({type: "expression", name: "returnRatePostFIRE", helpText: "Safe withdrawal rate after retirement (default 4%)", default: 4}),
+      new Parameter({type: "expression", name: "inflationRate", helpText: "Annual inflation rate (default 3%)", default: 3})
     ],
     type: "insert",
     helpText: "Calculate path to financial independence and retirement timeline.",
@@ -92,12 +98,14 @@
 
   fire_plan.execute = function(payload) {
     const params = this.getParsedParams(payload);
-    const currentSavings = parseFloat(params[0]) || 0;
-    const monthlyAdditions = parseFloat(params[1]) || 0;
-    const monthlyExpenses = parseFloat(params[2]) || 0;
-    const preFireRate = (parseFloat(params[3]) || 7) / 100;
-    const postFireRate = (parseFloat(params[4]) || 4) / 100;
-    const inflationRate = (parseFloat(params[5]) || 3) / 100;
+
+    // Parameters are already evaluated by getParsedParams for 'expression' type
+    const currentSavings = params[0] || 0;
+    const monthlyAdditions = params[1] || 0;
+    const monthlyExpenses = params[2] || 0;
+    const preFireRate = (params[3] || 7) / 100;
+    const postFireRate = (params[4] || 4) / 100;
+    const inflationRate = (params[5] || 3) / 100;
 
     if (currentSavings < 0 || monthlyAdditions < 0 || monthlyExpenses <= 0) {
       return new ReturnObject({status: "error", message: "Please provide valid savings, contributions, and expense amounts."});

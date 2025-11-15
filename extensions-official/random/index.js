@@ -25,7 +25,8 @@
     parameters: [
       new Parameter({type: "float", name: "from", helpText: "bottom range", default: 0}),
       new Parameter({type: "float", name: "to", helpText: "top range", default: 100}),
-      new Parameter({type: "bool", name: "int", helpText: "round to nearest whole number", default: true})
+      new Parameter({type: "bool", name: "int", helpText: "round to nearest whole number", default: true}),
+      new Parameter({type: "int", name: "count", helpText: "number of random numbers to generate", default: 1})
     ],
     type: "insert", // This is the action the command will do to the user's note: "insert", "replaceLine", "replaceAll", or "openURL"
     helpText: "Insert a random number between two values.", // This is the description text for the command
@@ -34,7 +35,8 @@
     tutorials: [
       new TutorialCommand({command: "random_number", description: "Insert a random integer between 0 and 100."}),
       new TutorialCommand({command: "random_number(10, 20)", description: "Insert a random integer between 10 and 20."}),
-      new TutorialCommand({command: "random_number(10, 20, false)", description: "Insert a random decimal number between 10 and 20."})
+      new TutorialCommand({command: "random_number(10, 20, false)", description: "Insert a random decimal number between 10 and 20."}),
+      new TutorialCommand({command: "random_number(1, 100, true, 5)", description: "Insert 5 random integers between 1 and 100, comma-separated."})
     ],
     extension: extensionRoot
   });
@@ -42,7 +44,7 @@
   // 5. Write your function
   random_number.execute = function (payload) {
     // This will automatically replace empty parameters with the default values and parse them based on the parameter type
-    const [from, to, int] = this.getParsedParams(payload);
+    const [from, to, int, count] = this.getParsedParams(payload);
 
     // Error handling
     if (from > to) {
@@ -53,14 +55,28 @@
       return new ReturnObject({status: "error", message: "Values cannot be negative."});
     }
 
-    console.log(from, to, int); // Console logs will appear in Terminal if you launch Antinote from the command line. Starts with 'JS console.log'
-
-    let result = Math.random() * (to - from) + from;
-    if (int) {
-      result = Math.floor(result);
+    if (count < 1) {
+      return new ReturnObject({status: "error", message: "Count must be at least 1."});
     }
 
-    return new ReturnObject({status: "success", message: "Random number generated.", payload: result});
+    if (count > 1000) {
+      return new ReturnObject({status: "error", message: "Cannot generate more than 1000 numbers at once."});
+    }
+
+    console.log(from, to, int, count); // Console logs will appear in Terminal if you launch Antinote from the command line. Starts with 'JS console.log'
+
+    const numbers = [];
+    for (let i = 0; i < count; i++) {
+      let result = Math.random() * (to - from) + from;
+      if (int) {
+        result = Math.floor(result);
+      }
+      numbers.push(result);
+    }
+
+    const payload_result = count === 1 ? numbers[0] : numbers.join(', ');
+
+    return new ReturnObject({status: "success", message: "Random number(s) generated.", payload: payload_result});
   };
 
   // Another example command that generates a series of random letters

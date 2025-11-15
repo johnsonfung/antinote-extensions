@@ -13,14 +13,14 @@
   const investment = new Command({
     name: "investment",
     parameters: [
-      new Parameter({type: "number", name: "initial", helpText: "Initial investment amount", default: 0}),
-      new Parameter({type: "number", name: "annualContribution", helpText: "Annual contribution", default: 0}),
-      new Parameter({type: "number", name: "monthlyContribution", helpText: "Monthly contribution", default: 0}),
-      new Parameter({type: "number", name: "interestRate", helpText: "Annual interest rate (e.g., 7 for 7%)", default: 7}),
-      new Parameter({type: "number", name: "years", helpText: "Investment period in years", default: 0}),
-      new Parameter({type: "number", name: "months", helpText: "Additional months (added to years)", default: 0}),
-      new Parameter({type: "number", name: "taxRate", helpText: "Tax rate on gains (e.g., 15 for 15%)", default: 0}),
-      new Parameter({type: "number", name: "inflationRate", helpText: "Annual inflation rate (e.g., 3 for 3%)", default: 3})
+      new Parameter({type: "expression", name: "initial", helpText: "Initial investment amount", default: 0}),
+      new Parameter({type: "expression", name: "annualContribution", helpText: "Annual contribution", default: 0}),
+      new Parameter({type: "expression", name: "monthlyContribution", helpText: "Monthly contribution (added to annual contribution)", default: 0}),
+      new Parameter({type: "expression", name: "interestRate", helpText: "Annual interest rate (e.g., 7 for 7%)", default: 7}),
+      new Parameter({type: "expression", name: "years", helpText: "Investment period in years", default: 0}),
+      new Parameter({type: "expression", name: "months", helpText: "Additional months (added to years)", default: 0}),
+      new Parameter({type: "expression", name: "taxRate", helpText: "Tax rate on gains (e.g., 15 for 15%)", default: 0}),
+      new Parameter({type: "expression", name: "inflationRate", helpText: "Annual inflation rate (e.g., 3 for 3%)", default: 3})
     ],
     type: "insert",
     helpText: "Calculate investment growth with contributions, taxes, and inflation adjustment.",
@@ -33,14 +33,16 @@
 
   investment.execute = function(payload) {
     const params = this.getParsedParams(payload);
-    const initial = parseFloat(params[0]) || 0;
-    const annualContribution = parseFloat(params[1]) || 0;
-    const monthlyContribution = parseFloat(params[2]) || 0;
-    const annualRate = (parseFloat(params[3]) || 7) / 100;
-    const years = parseFloat(params[4]) || 0;
-    const months = parseFloat(params[5]) || 0;
-    const taxRate = (parseFloat(params[6]) || 0) / 100;
-    const inflationRate = (parseFloat(params[7]) || 3) / 100;
+
+    // Parameters are already evaluated by getParsedParams for 'expression' type
+    const initial = params[0] || 0;
+    const annualContribution = params[1] || 0;
+    const monthlyContribution = params[2] || 0;
+    const annualRate = (params[3] || 7) / 100;
+    const years = params[4] || 0;
+    const months = params[5] || 0;
+    const taxRate = (params[6] || 0) / 100;
+    const inflationRate = (params[7] || 3) / 100;
 
     const totalYears = Number(years) + (Number(months) / 12);
 

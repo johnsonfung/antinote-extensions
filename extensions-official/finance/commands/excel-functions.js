@@ -13,28 +13,32 @@
   const fv = new Command({
     name: "fv",
     parameters: [
-      new Parameter({type: "number", name: "rate", helpText: "Interest rate per period (e.g., 0.05 for 5%)", default: 0}),
-      new Parameter({type: "number", name: "nper", helpText: "Total number of payment periods", default: 0}),
-      new Parameter({type: "number", name: "pmt", helpText: "Payment per period (negative for outflows)", default: 0}),
-      new Parameter({type: "number", name: "pv", helpText: "Present value (default 0)", default: 0}),
-      new Parameter({type: "number", name: "type", helpText: "0=end of period, 1=beginning (default 0)", default: 0})
+      new Parameter({type: "expression", name: "rate", helpText: "Interest rate per period (e.g., 0.05 or 0.05/12)", default: 0.05}),
+      new Parameter({type: "expression", name: "nper", helpText: "Total number of payment periods", default: 120}),
+      new Parameter({type: "expression", name: "pmt", helpText: "Payment per period (negative for outflows)", default: -500}),
+      new Parameter({type: "expression", name: "pv", helpText: "Present value (default 0)", default: 0}),
+      new Parameter({type: "expression", name: "type", helpText: "0=end of period, 1=beginning (default 0)", default: 0}),
+      new Parameter({type: "bool", name: "showAnalysis", helpText: "Show detailed analysis", default: false})
     ],
     type: "insert",
     helpText: "Calculate future value (Excel FV function). FV(rate, nper, pmt, [pv], [type])",
     tutorials: [
-      new TutorialCommand({command: "fv(0.05, 10, -1000, 0, 0)", description: "Future value of $1k/year at 5% for 10 years"}),
-      new TutorialCommand({command: "fv(0.06/12, 360, -2000, -200000, 0)", description: "Future value of mortgage payments"})
+      new TutorialCommand({command: "fv(0.05, 10, -1000)", description: "Future value of $1k/year at 5% for 10 years"}),
+      new TutorialCommand({command: "fv(0.06/12, 360, -2000, -200000)", description: "Future value of mortgage payments (using expression 0.06/12)"})
     ],
     extension: extensionRoot
   });
 
   fv.execute = function(payload) {
     const params = this.getParsedParams(payload);
-    const rate = parseFloat(params[0]) || 0;
-    const nper = parseFloat(params[1]) || 0;
-    const pmt = parseFloat(params[2]) || 0;
-    const pv = parseFloat(params[3]) || 0;
-    const type = parseFloat(params[4]) || 0;
+
+    // Parameters are already evaluated by getParsedParams for 'expression' type
+    const rate = params[0] || 0.05;
+    const nper = params[1] || 120;
+    const pmt = params[2] || -500;
+    const pv = params[3] || 0;
+    const type = params[4] || 0;
+    const showAnalysis = params[5];
 
     if (nper <= 0) {
       return new ReturnObject({status: "error", message: "Number of periods must be greater than 0."});
@@ -48,6 +52,11 @@
       const pvFactor = Math.pow(1 + rate, nper);
       const pmtFactor = ((pvFactor - 1) / rate) * (1 + rate * type);
       futureValue = -pv * pvFactor - pmt * pmtFactor;
+    }
+
+    // If showAnalysis is false, just return the FV number
+    if (!showAnalysis) {
+      return new ReturnObject({status: "success", message: "FV calculated", payload: Calc.formatDollar(futureValue)});
     }
 
     let output = `# Future Value (Excel FV)\n\n`;
@@ -81,28 +90,30 @@
   const pmt = new Command({
     name: "pmt",
     parameters: [
-      new Parameter({type: "number", name: "rate", helpText: "Interest rate per period", default: 0}),
-      new Parameter({type: "number", name: "nper", helpText: "Total number of payment periods", default: 0}),
-      new Parameter({type: "number", name: "pv", helpText: "Present value (loan amount)", default: 0}),
-      new Parameter({type: "number", name: "fv", helpText: "Future value (default 0)", default: 0}),
-      new Parameter({type: "number", name: "type", helpText: "0=end of period, 1=beginning (default 0)", default: 0})
+      new Parameter({type: "expression", name: "rate", helpText: "Interest rate per period (e.g., 0.05 or 0.05/12)", default: 0}),
+      new Parameter({type: "expression", name: "nper", helpText: "Total number of payment periods (e.g., 360 or 30*12)", default: 0}),
+      new Parameter({type: "expression", name: "pv", helpText: "Present value (loan amount)", default: 0}),
+      new Parameter({type: "expression", name: "fv", helpText: "Future value (default 0)", default: 0}),
+      new Parameter({type: "expression", name: "type", helpText: "0=end of period, 1=beginning (default 0)", default: 0})
     ],
     type: "insert",
     helpText: "Calculate payment per period (Excel PMT function). PMT(rate, nper, pv, [fv], [type])",
     tutorials: [
-      new TutorialCommand({command: "pmt(0.05/12, 360, 300000, 0, 0)", description: "Monthly payment on $300k mortgage at 5%"}),
-      new TutorialCommand({command: "pmt(0.06/12, 60, 25000, 0, 0)", description: "Monthly payment on $25k car loan at 6%"})
+      new TutorialCommand({command: "pmt(0.05/12, 360, 300000)", description: "Monthly payment on $300k mortgage at 5% (using expression 0.05/12)"}),
+      new TutorialCommand({command: "pmt(0.06/12, 60, 25000)", description: "Monthly payment on $25k car loan at 6%"})
     ],
     extension: extensionRoot
   });
 
   pmt.execute = function(payload) {
     const params = this.getParsedParams(payload);
-    const rate = parseFloat(params[0]) || 0;
-    const nper = parseFloat(params[1]) || 0;
-    const pv = parseFloat(params[2]) || 0;
-    const fv = parseFloat(params[3]) || 0;
-    const type = parseFloat(params[4]) || 0;
+
+    // Parameters are already evaluated by getParsedParams for 'expression' type
+    const rate = params[0] || 0;
+    const nper = params[1] || 0;
+    const pv = params[2] || 0;
+    const fv = params[3] || 0;
+    const type = params[4] || 0;
 
     if (nper <= 0) {
       return new ReturnObject({status: "error", message: "Number of periods must be greater than 0."});
@@ -143,10 +154,10 @@
   const npv = new Command({
     name: "npv",
     parameters: [
-      new Parameter({type: "number", name: "rate", helpText: "Discount rate per period (e.g., 0.1 for 10%)", default: 0})
+      new Parameter({type: "expression", name: "rate", helpText: "Discount rate per period (e.g., 0.1 for 10%)", default: 0})
     ],
     type: "replaceLine",
-    helpText: "Calculate net present value from comma-separated cash flows on current line. NPV(rate) on line: value1, value2, ...",
+    helpText: "Calculate net present value (Excel NPV function) from comma-separated cash flows on current line. NPV(rate) on line: value1, value2, ...",
     tutorials: [
       new TutorialCommand({command: "npv(0.1)", description: "On line: -10000, 3000, 4200, 6800"}),
       new TutorialCommand({command: "npv(0.08)", description: "Calculate NPV at 8% discount rate"})
@@ -156,13 +167,15 @@
 
   npv.execute = function(payload) {
     const params = this.getParsedParams(payload);
-    const rate = parseFloat(params[0]) || 0;
+
+    // Parameters are already evaluated by getParsedParams for 'expression' type
+    const rate = params[0] || 0;
 
     const text = payload.fullText.trim();
     const cashFlows = text.split(',').map(v => parseFloat(v.trim())).filter(v => !isNaN(v));
 
     if (cashFlows.length < 1) {
-      return new ReturnObject({status: "error", message: "Need at least one cash flow on the line. Format: value1, value2, ..."});
+      return new ReturnObject({status: "error", message: "Requires values to be on the same line. Format: value1, value2, ..."});
     }
 
     // Excel NPV formula: Sum of (cashFlow / (1 + rate)^period) for period 1 to n
@@ -209,7 +222,7 @@
     name: "irr",
     parameters: [],
     type: "replaceLine",
-    helpText: "Calculate internal rate of return from comma-separated cash flows. Place on line with: value1, value2, ...",
+    helpText: "Calculate internal rate of return (Excel IRR function) from comma-separated cash flows. Place on line with: value1, value2, ...",
     tutorials: [
       new TutorialCommand({command: "irr", description: "On line: -10000, 3000, 4200, 6800 (calculates IRR)"}),
       new TutorialCommand({command: "irr", description: "Returns the discount rate that makes NPV = 0"})
@@ -222,7 +235,7 @@
     const cashFlows = text.split(',').map(v => parseFloat(v.trim())).filter(v => !isNaN(v));
 
     if (cashFlows.length < 2) {
-      return new ReturnObject({status: "error", message: "Need at least 2 cash flows. Format: value1, value2, ..."});
+      return new ReturnObject({status: "error", message: "Requires values to be on the same line (at least 2). Format: value1, value2, ..."});
     }
 
     // Check if there's at least one positive and one negative cash flow

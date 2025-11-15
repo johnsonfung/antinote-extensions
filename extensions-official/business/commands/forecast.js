@@ -11,7 +11,8 @@
   const forecast = new Command({
   name: "forecast",
   parameters: [
-    new Parameter({type: "number", name: "periods", helpText: "Number of future periods to forecast", default: 3})
+    new Parameter({type: "number", name: "periods", helpText: "Number of future periods to forecast", default: 3}),
+    new Parameter({type: "bool", name: "showAnalysis", helpText: "Show detailed analysis", default: false})
   ],
   type: "insert",
   helpText: "Forecast future values based on historical numbers. Uses linear regression and variance analysis.",
@@ -25,6 +26,7 @@
 forecast.execute = function(payload) {
   const params = this.getParsedParams(payload);
   const periodsToForecast = parseInt(params[0]) || 3;
+  const showAnalysis = params[1];
   const fullText = payload.fullText || "";
 
   if (!fullText.trim()) {
@@ -104,6 +106,23 @@ forecast.execute = function(payload) {
     });
 
     output += `| ${periodIndex + 1} | ${Stats.formatNumber(pointForecast, 2)} | ${Stats.formatNumber(lowerBound, 2)} | ${Stats.formatNumber(upperBound, 2)} |\n`;
+  }
+
+  // If showAnalysis is false, just return the simple forecast list
+  if (!showAnalysis) {
+    let simpleOutput = '';
+    for (let i = 0; i < forecasts.length; i++) {
+      const f = forecasts[i];
+      simpleOutput += `${Stats.formatNumber(f.point, 2)} (lower: ${Stats.formatNumber(f.lower, 2)}, upper: ${Stats.formatNumber(f.upper, 2)})`;
+      if (i < forecasts.length - 1) {
+        simpleOutput += '\n';
+      }
+    }
+    return new ReturnObject({
+      status: "success",
+      message: "Forecast generated",
+      payload: simpleOutput
+    });
   }
 
   output += `\n## Forecast Method\n\n`;

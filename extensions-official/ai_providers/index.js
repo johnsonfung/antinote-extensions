@@ -118,7 +118,7 @@
     const systemPromptPref = new Preference({
     key: "systemPrompt",
     label: "System Prompt",
-    type: "string",
+    type: "paragraph",
     defaultValue: "You are a helpful assistant integrated into a plaintext scratch notes app. Be concise and direct.",
     options: null,
     helpText: "Default system prompt for AI requests"

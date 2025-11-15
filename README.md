@@ -9,6 +9,7 @@ Antinote supports custom JavaScript (ES6) extensions that let you add text to yo
 **Building Specific Types of Extensions:**
 - 🌐 **[Network Extensions](docs/NETWORK_EXTENSIONS.md)** - Call external APIs safely and securely
 - 🤖 **[AI & LLM Extensions](docs/AI_EXTENSIONS.md)** - Build AI-powered extensions using the centralized AI service
+- 🧮 **[Math Expression Evaluator](#-math-expression-evaluator)** - Use the built-in math evaluator in your extensions
 - 🔒 **[Security & Privacy Guide](docs/SECURITY.md)** - Understanding security architecture and best practices
 
 **Reference:**
@@ -497,6 +498,139 @@ if (typeof global !== 'undefined') {
 
 ---
 
+## 🧮 Math Expression Evaluator
+
+Antinote provides a **Math Expression Evaluator API** (`MathEvaluator`) that's available to all extensions. This evaluator uses the same powerful math engine as Antinote's built-in `math` keyword feature.
+
+### Why Use the Math Evaluator?
+
+- **User-Friendly Input** - Users can enter `0.05/12` instead of `0.00416667`
+- **Readability** - Expressions like `365/12` are clearer than pre-calculated decimals
+- **Consistency** - Same math engine across all extensions and core features
+- **Safety** - Evaluated in Swift, not JavaScript `eval()` - no code execution risks
+
+### Available Methods
+
+The `MathEvaluator` object provides these methods:
+
+#### `MathEvaluator.eval(expression)`
+Evaluate a math expression string. Throws error if evaluation fails.
+
+```js
+const result = MathEvaluator.eval("0.05/12");  // Returns 0.00416667
+const value = MathEvaluator.eval("(2+3)*4");    // Returns 20
+```
+
+#### `MathEvaluator.evalSafe(expression, defaultValue)`
+Safely evaluate an expression, returning a default value on error.
+
+```js
+const rate = MathEvaluator.evalSafe("0.05/12", 0);  // Returns 0.00416667
+const bad = MathEvaluator.evalSafe("invalid", 0);    // Returns 0 (default)
+```
+
+#### `MathEvaluator.isMathExpression(str)`
+Check if a string looks like a math expression.
+
+```js
+MathEvaluator.isMathExpression("5+3");      // true
+MathEvaluator.isMathExpression("0.05/12");  // true
+MathEvaluator.isMathExpression("42");       // false (just a number)
+```
+
+#### `MathEvaluator.parseNumeric(value)`
+Parse a parameter that could be a number or math expression. This is the most common method you'll use.
+
+```js
+const rate = MathEvaluator.parseNumeric("0.05/12");  // Returns 0.00416667
+const num = MathEvaluator.parseNumeric(42);          // Returns 42
+const calc = MathEvaluator.parseNumeric("5*12");     // Returns 60
+```
+
+### Supported Expressions
+
+The evaluator supports:
+- **Basic operators**: `+`, `-`, `*`, `/`
+- **Parentheses**: `(2 + 3) * 4`
+- **Exponents**: `2^3` or `2**3`
+- **Modulo**: `10 % 3`
+- **Decimals**: `0.05 / 12`
+- **Negative numbers**: `-5 + 3`
+
+### Usage in Extensions
+
+Add graceful fallback for compatibility:
+
+```js
+my_command.execute = function(payload) {
+  const params = this.getParsedParams(payload);
+
+  // Support math expressions with fallback
+  const parseNumeric = (typeof MathEvaluator !== 'undefined') ?
+    (val) => MathEvaluator.parseNumeric(val) :
+    (val) => parseFloat(val);
+
+  const rate = parseNumeric(params[0]) / 100;  // Supports "5" or "0.05*100"
+  const months = parseNumeric(params[1]);       // Supports "360" or "30*12"
+
+  // ... rest of your logic
+};
+```
+
+### Example: Finance Command
+
+```js
+const pmt = new Command({
+  name: "pmt",
+  parameters: [
+    new Parameter({type: "number", name: "rate", helpText: "Interest rate per period (e.g., 0.05 for 5% or 0.05/12 for monthly)", default: 0}),
+    new Parameter({type: "number", name: "nper", helpText: "Number of periods (e.g., 360 or 30*12)", default: 0}),
+    new Parameter({type: "number", name: "pv", helpText: "Present value (loan amount)", default: 0})
+  ],
+  type: "insert",
+  helpText: "Calculate payment per period (Excel PMT function)",
+  tutorials: [
+    new TutorialCommand({command: "pmt(0.05/12, 360, 300000)", description: "Monthly payment on $300k mortgage at 5%"}),
+    new TutorialCommand({command: "pmt(0.06/12, 60, 25000)", description: "Monthly payment on $25k car loan at 6%"})
+  ],
+  extension: extensionRoot
+});
+
+pmt.execute = function(payload) {
+  const params = this.getParsedParams(payload);
+
+  // Support math expressions if MathEvaluator is available
+  const parseNumeric = (typeof MathEvaluator !== 'undefined') ?
+    (val) => MathEvaluator.parseNumeric(val) :
+    (val) => parseFloat(val);
+
+  const rate = parseNumeric(params[0]);  // Now accepts "0.05/12"!
+  const nper = parseNumeric(params[1]);  // Now accepts "30*12"!
+  const pv = parseNumeric(params[2]);
+
+  // Calculate payment...
+  const payment = calculatePMT(pv, rate, nper);
+
+  return new ReturnObject({status: "success", message: "Payment calculated", payload: payment});
+};
+```
+
+### Benefits for Users
+
+**Before (requires pre-calculation):**
+```
+::pmt(0.00416667, 360, 300000)
+```
+
+**After (readable expressions):**
+```
+::pmt(0.05/12, 30*12, 300000)
+```
+
+The expression `0.05/12` is immediately recognizable as "5% divided by 12 months" - much clearer than the decimal `0.00416667`.
+
+---
+
 ## 🐞 Debugging
 
 ### Enable Extension Logging
@@ -959,6 +1093,18 @@ Gets preference value for an extension.
 Makes authenticated API call (for network extensions).
 - Extension identity is automatically determined by the system for security
 - Cannot be spoofed by malicious extensions
+
+#### `MathEvaluator.eval(expression)`
+Evaluates a math expression string and returns the result. Throws error if evaluation fails.
+
+#### `MathEvaluator.evalSafe(expression, defaultValue)`
+Safely evaluates a math expression, returning defaultValue if evaluation fails.
+
+#### `MathEvaluator.isMathExpression(str)`
+Returns true if string contains math operators, false otherwise.
+
+#### `MathEvaluator.parseNumeric(value)`
+Parses a value that could be a number or math expression. Most commonly used method for handling numeric parameters that support expressions.
 
 ---
 

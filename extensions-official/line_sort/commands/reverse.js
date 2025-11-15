@@ -27,7 +27,7 @@
     const params = this.getParsedParams(payload);
     const ignoreFirstLine = params[0];
 
-    const lines = payload.fullText.split("\n");
+    const lines = payload.fullText.split("\n").filter(line => line.trim() !== '');
 
     if (lines.length === 0) {
       return new ReturnObject({status: "success", message: "No lines to reverse.", payload: payload.fullText});

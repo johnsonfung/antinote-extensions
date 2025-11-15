@@ -13,26 +13,29 @@
   const loan = new Command({
     name: "loan",
     parameters: [
-      new Parameter({type: "number", name: "amount", helpText: "Loan amount", default: 0}),
-      new Parameter({type: "number", name: "termInMonths", helpText: "Loan term in months", default: 0}),
-      new Parameter({type: "number", name: "interestRate", helpText: "Annual interest rate (e.g., 5 for 5%)", default: 0}),
+      new Parameter({type: "expression", name: "amount", helpText: "Loan amount (e.g., 10000 or 5000*2)", default: 10000}),
+      new Parameter({type: "expression", name: "termInMonths", helpText: "Loan term in months (e.g., 60 or 5*12)", default: 60}),
+      new Parameter({type: "expression", name: "interestRate", helpText: "Annual interest rate (e.g., 5 for 5% or 0.05*100)", default: 4}),
       new Parameter({type: "string", name: "compound", helpText: "Compounding frequency (annually, monthly)", default: "annually"}),
       new Parameter({type: "string", name: "payback", helpText: "Payment frequency (monthly, biweekly)", default: "monthly"})
     ],
     type: "insert",
     helpText: "Calculate loan payment, total interest, and generate amortization table.",
     tutorials: [
+      new TutorialCommand({command: "loan", description: "Calculate $10k loan at 4% over 60 months (uses defaults)"}),
       new TutorialCommand({command: "loan(10000, 36, 5)", description: "Calculate $10k loan at 5% over 36 months"}),
-      new TutorialCommand({command: "loan(25000, 60, 6.5, annually, monthly)", description: "Calculate $25k loan at 6.5% over 60 months"})
+      new TutorialCommand({command: "loan(25000, 5*12, 6.5, annually, monthly)", description: "Calculate $25k loan at 6.5% over 5 years (using expression 5*12)"})
     ],
     extension: extensionRoot
   });
 
   loan.execute = function(payload) {
     const params = this.getParsedParams(payload);
-    const amount = parseFloat(params[0]) || 0;
-    const termInMonths = parseFloat(params[1]) || 0;
-    const annualRate = (parseFloat(params[2]) || 0) / 100; // Convert percentage to decimal
+
+    // Parameters are already evaluated by getParsedParams for 'expression' type
+    const amount = params[0] || 0;
+    const termInMonths = params[1] || 0;
+    const annualRate = (params[2] || 0) / 100; // Convert percentage to decimal
     const compound = params[3] || "annually";
     const payback = params[4] || "monthly";
 
@@ -99,37 +102,36 @@
   const mortgage = new Command({
     name: "mortgage",
     parameters: [
-      new Parameter({type: "number", name: "homeCost", helpText: "Home purchase price", default: 0}),
-      new Parameter({type: "number", name: "downPayment", helpText: "Down payment amount", default: 0}),
-      new Parameter({type: "number", name: "interestRate", helpText: "Annual interest rate (e.g., 6.5 for 6.5%)", default: 0}),
-      new Parameter({type: "number", name: "termInYears", helpText: "Loan term in years (typically 15 or 30)", default: 30})
+      new Parameter({type: "expression", name: "homeCost", helpText: "Home purchase price (e.g., 500000)", default: 500000}),
+      new Parameter({type: "expression", name: "downPaymentPercent", helpText: "Down payment as percentage (e.g., 20 for 20%)", default: 20}),
+      new Parameter({type: "expression", name: "interestRate", helpText: "Annual interest rate (e.g., 6.5 for 6.5%)", default: 3.5}),
+      new Parameter({type: "expression", name: "termInYears", helpText: "Loan term in years (e.g., 30 or 15)", default: 30})
     ],
     type: "insert",
     helpText: "Calculate mortgage payment, total interest, and generate amortization table.",
     tutorials: [
-      new TutorialCommand({command: "mortgage(400000, 80000, 6.5, 30)", description: "Calculate mortgage for $400k home with $80k down"}),
-      new TutorialCommand({command: "mortgage(500000, 100000, 7, 15)", description: "Calculate 15-year mortgage at 7%"})
+      new TutorialCommand({command: "mortgage", description: "Calculate mortgage for $500k home with 20% down at 3.5% (uses defaults)"}),
+      new TutorialCommand({command: "mortgage(400000, 20, 6.5, 30)", description: "Calculate mortgage for $400k home with 20% down at 6.5%"}),
+      new TutorialCommand({command: "mortgage(500000, 10, 7, 15)", description: "Calculate 15-year mortgage with 10% down at 7%"})
     ],
     extension: extensionRoot
   });
 
   mortgage.execute = function(payload) {
     const params = this.getParsedParams(payload);
-    const homeCost = parseFloat(params[0]) || 0;
-    const downPayment = parseFloat(params[1]) || 0;
-    const annualRate = (parseFloat(params[2]) || 0) / 100;
-    const termInYears = parseFloat(params[3]) || 30;
 
-    if (homeCost <= 0 || downPayment < 0 || annualRate < 0 || termInYears <= 0) {
-      return new ReturnObject({status: "error", message: "Please provide valid home cost, down payment, interest rate, and term."});
+    // Parameters are already evaluated by getParsedParams for 'expression' type
+    const homeCost = params[0] || 500000;
+    const downPaymentPercent = params[1] || 20;
+    const annualRate = (params[2] || 3.5) / 100;
+    const termInYears = params[3] || 30;
+
+    if (homeCost <= 0 || downPaymentPercent < 0 || downPaymentPercent >= 100 || annualRate < 0 || termInYears <= 0) {
+      return new ReturnObject({status: "error", message: "Please provide valid home cost, down payment percent (0-100), interest rate, and term."});
     }
 
-    if (downPayment >= homeCost) {
-      return new ReturnObject({status: "error", message: "Down payment must be less than home cost."});
-    }
-
+    const downPayment = (downPaymentPercent / 100) * homeCost;
     const loanAmount = homeCost - downPayment;
-    const downPaymentPercent = (downPayment / homeCost) * 100;
     const monthlyRate = annualRate / 12;
     const numberOfPayments = termInYears * 12;
 
