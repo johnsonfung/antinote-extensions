@@ -1,6 +1,6 @@
 {
   "name": "line_sort",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "author": "johnsonfung",
   "description": "Sort lines in your notes alphabetically, numerically, or reverse order",
   "license": "MIT",
@@ -13,8 +13,7 @@
     "helpers/extractors.js",
     "commands/sort-alpha.js",
     "commands/sort-numeric.js",
-    "commands/reverse.js",
-    "commands/dedupe.js"
+    "commands/reverse.js"
   ],
   "commands": [
     {
@@ -36,16 +35,6 @@
       "name": "sort_lines_reverse",
       "description": "Reverse the order of lines",
       "type": "replaceAll"
-    },
-    {
-      "name": "dedupe_lines",
-      "description": "Remove duplicate lines keeping first or last occurrence",
-      "type": "replaceAll"
-    },
-    {
-      "name": "get_dupes",
-      "description": "Find and display duplicate lines grouped together",
-      "type": "insert"
     }
   ],
   "official": true,

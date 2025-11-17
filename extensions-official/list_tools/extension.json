@@ -1,0 +1,41 @@
+{
+  "name": "list_tools",
+  "version": "1.0.0",
+  "author": "johnsonfung",
+  "description": "Convert between comma-separated lists, lines, and custom delimiters",
+  "license": "MIT",
+  "category": "Text Manipulation",
+  "dataScope": "full",
+  "endpoints": [],
+  "requiredAPIKeys": [],
+  "files": [
+    "index.js",
+    "helpers/parser.js",
+    "commands/comma-conversions.js",
+    "commands/line-conversions.js"
+  ],
+  "commands": [
+    {
+      "name": "commas_to_list",
+      "description": "Convert comma-separated items to lines",
+      "type": "replaceAll"
+    },
+    {
+      "name": "commas_to",
+      "description": "Convert comma-separated items to custom delimiter",
+      "type": "replaceAll"
+    },
+    {
+      "name": "lines_to_commas",
+      "description": "Convert lines to comma-separated list",
+      "type": "replaceAll"
+    },
+    {
+      "name": "lines_to",
+      "description": "Convert lines to custom delimiter-separated list",
+      "type": "replaceAll"
+    }
+  ],
+  "official": true,
+  "includedByDefault": true
+}

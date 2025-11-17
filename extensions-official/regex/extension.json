@@ -1,0 +1,35 @@
+{
+  "name": "regex",
+  "version": "1.0.0",
+  "author": "johnsonfung",
+  "description": "Powerful regex-based text manipulation with pattern matching",
+  "license": "MIT",
+  "category": "Text Manipulation",
+  "dataScope": "full",
+  "endpoints": [],
+  "requiredAPIKeys": [],
+  "files": [
+    "index.js",
+    "helpers/regex-parser.js",
+    "commands/regex-operations.js"
+  ],
+  "commands": [
+    {
+      "name": "regex_remove",
+      "description": "Remove all text matching the regex pattern",
+      "type": "replaceAll"
+    },
+    {
+      "name": "regex_keep",
+      "description": "Keep only text matching the regex pattern",
+      "type": "replaceAll"
+    },
+    {
+      "name": "regex_insert",
+      "description": "Extract and insert regex matches with a delimiter",
+      "type": "replaceAll"
+    }
+  ],
+  "official": true,
+  "includedByDefault": true
+}

@@ -1,0 +1,29 @@
+{
+  "name": "clean_line",
+  "version": "1.0.0",
+  "author": "johnsonfung",
+  "description": "Clean whitespace from the current line",
+  "license": "MIT",
+  "category": "Text Formatting",
+  "dataScope": "line",
+  "endpoints": [],
+  "requiredAPIKeys": [],
+  "files": [
+    "index.js",
+    "commands/whitespace.js"
+  ],
+  "commands": [
+    {
+      "name": "remove_all_whitespace",
+      "description": "Remove all whitespace from current line",
+      "type": "replaceLine"
+    },
+    {
+      "name": "trim_whitespace",
+      "description": "Remove leading/trailing whitespace from current line",
+      "type": "replaceLine"
+    }
+  ],
+  "official": true,
+  "includedByDefault": true
+}

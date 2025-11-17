@@ -1,11 +1,11 @@
 // ===============================
-// line_sort: Deduplication Commands
+// filter_lines: Deduplication Commands
 // ===============================
 
 (function() {
   const globalScope = (typeof global !== 'undefined') ? global :
                       (typeof window !== 'undefined') ? window : this;
-  const ctx = globalScope.__EXTENSION_SHARED__["line_sort"];
+  const ctx = globalScope.__EXTENSION_SHARED__["filter_lines"];
   const extensionRoot = ctx.root;
 
   // --- Command: dedupe_lines ---
@@ -30,7 +30,7 @@
     const keepFirst = params[0];
     const ignoreFirstLine = params[1];
 
-    const lines = payload.fullText.split("\n").filter(line => line.trim() !== '');
+    const lines = payload.fullText.split("\n");
 
     if (lines.length === 0) {
       return new ReturnObject({status: "success", message: "No lines to dedupe.", payload: payload.fullText});

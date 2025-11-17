@@ -1,0 +1,74 @@
+{
+  "name": "filter_lines",
+  "version": "1.0.0",
+  "author": "johnsonfung",
+  "description": "Filter and manipulate lines based on content, delimiters, and patterns",
+  "license": "MIT",
+  "category": "Text Manipulation",
+  "dataScope": "full",
+  "endpoints": [],
+  "requiredAPIKeys": [],
+  "files": [
+    "index.js",
+    "helpers/text-utils.js",
+    "commands/remove-lines.js",
+    "commands/trim-lines.js",
+    "commands/remove-each.js",
+    "commands/between.js",
+    "commands/dedupe.js"
+  ],
+  "commands": [
+    {
+      "name": "remove_lines_with",
+      "description": "Remove lines containing specified text",
+      "type": "replaceAll"
+    },
+    {
+      "name": "remove_lines_without",
+      "description": "Remove lines not containing specified text",
+      "type": "replaceAll"
+    },
+    {
+      "name": "remove_lines_empty",
+      "description": "Remove all empty lines",
+      "type": "replaceAll"
+    },
+    {
+      "name": "trim_each_whitespace",
+      "description": "Remove leading/trailing whitespace from every line",
+      "type": "replaceAll"
+    },
+    {
+      "name": "remove_each_after",
+      "description": "Remove content after delimiter on each line",
+      "type": "replaceAll"
+    },
+    {
+      "name": "remove_each_before",
+      "description": "Remove content before delimiter on each line",
+      "type": "replaceAll"
+    },
+    {
+      "name": "keep_between",
+      "description": "Keep only content between delimiters on each line",
+      "type": "replaceAll"
+    },
+    {
+      "name": "remove_between",
+      "description": "Remove content between delimiters on each line",
+      "type": "replaceAll"
+    },
+    {
+      "name": "dedupe_lines",
+      "description": "Remove duplicate lines keeping first or last occurrence",
+      "type": "replaceAll"
+    },
+    {
+      "name": "get_dupes",
+      "description": "Find and display duplicate lines grouped together",
+      "type": "insert"
+    }
+  ],
+  "official": true,
+  "includedByDefault": true
+}
