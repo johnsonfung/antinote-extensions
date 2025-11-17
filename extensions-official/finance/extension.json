@@ -1,6 +1,6 @@
 {
   "name": "finance",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "author": "johnsonfung",
   "description": "Personal finance calculations for loans, mortgages, investments, FIRE planning, and more",
   "license": "MIT",
