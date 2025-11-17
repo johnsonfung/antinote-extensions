@@ -16,7 +16,7 @@ var payloadContextDemo = new Extension({
  * Displays which keywords are active in the current note
  */
 new Command({
-  name: "showKeywords",
+  name: "show_keywords",
   parameters: [],
   extension: payloadContextDemo,
   type: "insert",
@@ -47,7 +47,7 @@ new Command({
  * Uses payload.checkedCheckboxTriggers to respect user's configuration
  */
 new Command({
-  name: "removeChecked",
+  name: "remove_checked",
   parameters: [],
   extension: payloadContextDemo,
   type: "replaceAll",
@@ -110,7 +110,7 @@ new Command({
  * Notice: dataScope is "none" - we don't need note content!
  */
 new Command({
-  name: "checkMath",
+  name: "check_math",
   parameters: [],
   extension: payloadContextDemo,
   type: "insert",
@@ -136,7 +136,7 @@ new Command({
  * Shows how many keywords are currently active
  */
 new Command({
-  name: "countKeywords",
+  name: "count_keywords",
   parameters: [],
   extension: payloadContextDemo,
   type: "insert",

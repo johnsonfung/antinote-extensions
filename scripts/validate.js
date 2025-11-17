@@ -358,6 +358,15 @@ function validateCodeDisclosures(extension, metadata, allExtensions) {
         return; // Skip referer headers
       }
 
+      // Skip if this URL is used in an openURL command (check if URL is in a command with type: "openURL")
+      const isOpenURLCommand = metadata.commands && metadata.commands.some(cmd =>
+        cmd.type === 'openURL' && code.includes(foundEndpoint)
+      );
+
+      if (isOpenURLCommand) {
+        return; // Skip URLs used in openURL commands (they're returned as payload, not called)
+      }
+
       // Check if this endpoint is declared (either directly or inherited)
       const isDeclared = allEndpoints.some(declared => {
         const declaredDomain = declared.replace(/^https?:\/\//, '').split('/')[0];

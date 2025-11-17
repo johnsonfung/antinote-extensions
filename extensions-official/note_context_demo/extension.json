@@ -1,0 +1,38 @@
+{
+  "name": "note_context_demo",
+  "version": "1.0.0",
+  "author": "Antinote",
+  "description": "Demonstrates how extensions can access note metadata through the payload context",
+  "license": "MIT",
+  "category": "Utilities",
+  "dataScope": "line",
+  "endpoints": [],
+  "requiredAPIKeys": [],
+  "files": [
+    "index.js"
+  ],
+  "commands": [
+    {
+      "name": "show_keywords",
+      "description": "Shows which keywords are active in the current note",
+      "type": "insert"
+    },
+    {
+      "name": "remove_checked",
+      "description": "Removes all checked checkbox items from the note",
+      "type": "replaceAll"
+    },
+    {
+      "name": "check_math",
+      "description": "Checks if MATH keyword is active",
+      "type": "insert"
+    },
+    {
+      "name": "count_keywords",
+      "description": "Counts how many keywords are active",
+      "type": "insert"
+    }
+  ],
+  "official": true,
+  "includedByDefault": false
+}
