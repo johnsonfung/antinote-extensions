@@ -38,6 +38,32 @@ Remove all empty lines from the document.
 remove_lines_empty()               // Remove all empty lines
 ```
 
+### keep_lines_with(text, caseSensitive?)
+Keep only lines containing the specified text.
+
+**Parameters:**
+- `text` (string): Text to search for in lines
+- `caseSensitive` (boolean, optional): Case sensitive matching (default: false)
+
+**Examples:**
+```
+keep_lines_with('TODO')            // Keep only lines containing "TODO"
+keep_lines_with('error', true)     // Keep only lines with "error" (case-sensitive)
+```
+
+### keep_lines_without(text, caseSensitive?)
+Keep only lines that do NOT contain the specified text.
+
+**Parameters:**
+- `text` (string): Text that must NOT be in lines to keep
+- `caseSensitive` (boolean, optional): Case sensitive matching (default: false)
+
+**Examples:**
+```
+keep_lines_without('TODO')         // Remove lines containing "TODO"
+keep_lines_without('error', true)  // Remove lines with "error" (case-sensitive)
+```
+
 ### trim_each_whitespace()
 Remove leading and trailing whitespace from every line.
 

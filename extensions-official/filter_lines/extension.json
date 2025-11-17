@@ -1,6 +1,6 @@
 {
   "name": "filter_lines",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": "johnsonfung",
   "description": "Filter and manipulate lines based on content, delimiters, and patterns",
   "license": "MIT",
@@ -31,6 +31,16 @@
     {
       "name": "remove_lines_empty",
       "description": "Remove all empty lines",
+      "type": "replaceAll"
+    },
+    {
+      "name": "keep_lines_with",
+      "description": "Keep only lines containing specified text",
+      "type": "replaceAll"
+    },
+    {
+      "name": "keep_lines_without",
+      "description": "Keep only lines not containing specified text",
       "type": "replaceAll"
     },
     {

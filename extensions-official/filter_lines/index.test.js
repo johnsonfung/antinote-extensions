@@ -82,10 +82,10 @@ describe("Filter Lines Extension - Metadata Validation", function() {
     expect(metadata.dataScope).toBe("full");
   });
 
-  it("should have 10 commands", function() {
+  it("should have 12 commands", function() {
     expect(metadata.commands).toBeDefined();
     expect(metadata.commands).toBeArray();
-    expect(metadata.commands.length).toBe(10);
+    expect(metadata.commands.length).toBe(12);
   });
 });
 
@@ -133,6 +133,62 @@ describe("Filter Lines Extension - Command Execution Tests", function() {
       var result = remove_lines_empty.execute(payload);
       expect(result.status).toBe("success");
       expect(result.payload).toBe("Line 1\nLine 2\nLine 3");
+    });
+  });
+
+  describe("keep_lines_with command", function() {
+    it("should keep only lines containing text", function() {
+      var payload = {
+        parameters: ["TODO"],
+        fullText: "This is a line\nTODO: Fix this\nAnother line\nTODO: And this",
+        userSettings: {},
+        preferences: {}
+      };
+
+      var result = keep_lines_with.execute(payload);
+      expect(result.status).toBe("success");
+      expect(result.payload).toBe("TODO: Fix this\nTODO: And this");
+    });
+
+    it("should handle case sensitivity", function() {
+      var payload = {
+        parameters: ["error", "true"],
+        fullText: "This is an Error\nerror found\nNo issues here",
+        userSettings: {},
+        preferences: {}
+      };
+
+      var result = keep_lines_with.execute(payload);
+      expect(result.status).toBe("success");
+      expect(result.payload).toBe("error found");
+    });
+  });
+
+  describe("keep_lines_without command", function() {
+    it("should keep only lines not containing text", function() {
+      var payload = {
+        parameters: ["TODO"],
+        fullText: "This is a line\nTODO: Fix this\nAnother line\nTODO: And this",
+        userSettings: {},
+        preferences: {}
+      };
+
+      var result = keep_lines_without.execute(payload);
+      expect(result.status).toBe("success");
+      expect(result.payload).toBe("This is a line\nAnother line");
+    });
+
+    it("should handle case sensitivity", function() {
+      var payload = {
+        parameters: ["error", "true"],
+        fullText: "This is an Error\nerror found\nNo issues here",
+        userSettings: {},
+        preferences: {}
+      };
+
+      var result = keep_lines_without.execute(payload);
+      expect(result.status).toBe("success");
+      expect(result.payload).toBe("This is an Error\nNo issues here");
     });
   });
 
