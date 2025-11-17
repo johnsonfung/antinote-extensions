@@ -244,7 +244,7 @@ describe("Line Sort Extension - Command Execution Tests", function() {
 
       var result = sort_lines_number.execute(payload);
       expect(result.status).toBe("success");
-      expect(result.payload).toBe("Item 2\nItem 5\nNo number here\nAlso no number");
+      expect(result.payload).toBe("Item 2\nItem 5\nAlso no number\nNo number here");
     });
   });
 

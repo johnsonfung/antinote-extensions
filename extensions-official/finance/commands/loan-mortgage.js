@@ -33,9 +33,9 @@
     const params = this.getParsedParams(payload);
 
     // Parameters are already evaluated by getParsedParams for 'expression' type
-    const amount = params[0] || 0;
-    const termInMonths = params[1] || 0;
-    const annualRate = (params[2] || 0) / 100; // Convert percentage to decimal
+    const amount = Number(params[0]) || 0;
+    const termInMonths = Number(params[1]) || 0;
+    const annualRate = (Number(params[2]) || 0) / 100; // Convert percentage to decimal
     const compound = params[3] || "annually";
     const payback = params[4] || "monthly";
 
@@ -121,10 +121,10 @@
     const params = this.getParsedParams(payload);
 
     // Parameters are already evaluated by getParsedParams for 'expression' type
-    const homeCost = params[0] || 500000;
-    const downPaymentPercent = params[1] || 20;
-    const annualRate = (params[2] || 3.5) / 100;
-    const termInYears = params[3] || 30;
+    const homeCost = Number(params[0]) || 500000;
+    const downPaymentPercent = Number(params[1]) || 20;
+    const annualRate = (Number(params[2]) || 3.5) / 100;
+    const termInYears = Number(params[3]) || 30;
 
     if (homeCost <= 0 || downPaymentPercent < 0 || downPaymentPercent >= 100 || annualRate < 0 || termInYears <= 0) {
       return new ReturnObject({status: "error", message: "Please provide valid home cost, down payment percent (0-100), interest rate, and term."});

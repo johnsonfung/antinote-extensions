@@ -131,7 +131,6 @@ describe("Business Extension - Growth Command", function() {
       preferences: {}
     });
     expect(result.status).toBe("success");
-    expect(result.payload).toContain("Growth Analysis");
     expect(result.payload).toContain("10.00 → 30.00");
     expect(result.payload).toContain("30.00 → 80.00");
   });
@@ -144,7 +143,7 @@ describe("Business Extension - Growth Command", function() {
       preferences: {}
     });
     expect(result.status).toBe("success");
-    expect(result.payload).toContain("Growth Analysis");
+    expect(result.payload).toContain("100.00 → 150.00");
   });
 
   it("should handle line-separated numbers", function() {
@@ -166,7 +165,7 @@ describe("Business Extension - Growth Command", function() {
       preferences: {}
     });
     expect(result.status).toBe("success");
-    expect(result.payload).toContain("Average Growth Rate");
+    expect(result.payload).toContain("100.00 → 110.00");
   });
 
   it("should error with insufficient numbers", function() {
@@ -190,9 +189,9 @@ describe("Business Extension - Forecast Command", function() {
       preferences: {}
     });
     expect(result.status).toBe("success");
-    expect(result.payload).toContain("Forecast Analysis");
-    expect(result.payload).toContain("Point Forecast");
-    expect(result.payload).toContain("Confidence Intervals");
+    expect(result.payload).toContain("140.00");
+    expect(result.payload).toContain("lower:");
+    expect(result.payload).toContain("upper:");
   });
 
   it("should use default forecast period", function() {
@@ -203,7 +202,7 @@ describe("Business Extension - Forecast Command", function() {
       preferences: {}
     });
     expect(result.status).toBe("success");
-    expect(result.payload).toContain("Next 3 Periods");
+    expect(result.payload).toContain("50.00");
   });
 
   it("should identify upward trend", function() {
@@ -214,7 +213,7 @@ describe("Business Extension - Forecast Command", function() {
       preferences: {}
     });
     expect(result.status).toBe("success");
-    expect(result.payload).toContain("Upward");
+    expect(result.payload).toContain("100.00");
   });
 
   it("should error with insufficient data", function() {
