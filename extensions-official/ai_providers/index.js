@@ -135,6 +135,16 @@
   });
     extensionRoot.register_preference(defaultMaxTokensPref);
 
+    const timeoutPref = new Preference({
+    key: "timeout",
+    label: "Request Timeout (seconds)",
+    type: "string",
+    defaultValue: "60",
+    options: null,
+    helpText: "Maximum time to wait for AI response before timing out (in seconds)"
+  });
+    extensionRoot.register_preference(timeoutPref);
+
     // Helper function to build request for different providers
     const buildRequest = (provider, model, systemPrompt, userPrompt, maxTokens, temperature) => {
         const providerId = provider.toLowerCase();

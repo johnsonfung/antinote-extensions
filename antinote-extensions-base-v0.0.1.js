@@ -2,6 +2,7 @@
 // At the top of Antinote.js
 if (typeof global === 'undefined') { var global = this; }
 global.commandRegistry = new Array();
+global.extensionRegistry = new Array();
 
 // Accepts object literal: {name: "cmd", parameters: [], type: "insert", helpText: "Help", tutorials: [], extension: ext}
 function Command(config) {
@@ -95,6 +96,9 @@ function Extension(config) {
   this.dataScope = config.dataScope || "full";  // Default to "full" for backwards compatibility
   this.dependencies = config.dependencies || [];  // Array of extension names this extension depends on
   this.isService = config.isService || false;  // Whether this extension is a service (provides functionality for other extensions)
+
+  // Register this extension in the global extension registry
+  global.extensionRegistry.push(this);
 }
 
 Extension.prototype.register_command = function(cmd) {

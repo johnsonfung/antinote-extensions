@@ -29,9 +29,9 @@
     const ai = new Command({
     name: "ai",
     parameters: [
-            new Parameter({type: "string", name: "prompt", helpText: "The prompt to send to the AI", default: "Hello, how are you?"}),
-            new Parameter({type: "int", name: "max_tokens", helpText: "Maximum tokens in the response (0 = use default)", default: 0}),
-            new Parameter({type: "float", name: "temperature", helpText: "Randomness of the response (0.0-2.0)", default: 0.7})
+            new Parameter({type: "string", name: "prompt", helpText: "The prompt to send to the AI", required: true}),
+            new Parameter({type: "int", name: "max_tokens", helpText: "Maximum tokens in the response (0 = use default)", default: 0, required: false}),
+            new Parameter({type: "float", name: "temperature", helpText: "Randomness of the response (0.0-2.0)", default: 0.7, required: false})
         ],
     type: "insert",
     helpText: "Insert an AI-generated response to your prompt",
