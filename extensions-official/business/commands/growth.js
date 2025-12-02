@@ -11,7 +11,7 @@
   const growth = new Command({
   name: "growth",
   parameters: [
-    new Parameter({type: "bool", name: "showAnalysis", helpText: "Show detailed analysis", default: false})
+    new Parameter({type: "bool", name: "showAnalysis", helpText: "Show detailed analysis", default: false, required: false})
   ],
   type: "insert",
   helpText: "Analyze percentage growth between consecutive numbers in the note. Numbers can be comma-separated, space-separated, or line-separated.",

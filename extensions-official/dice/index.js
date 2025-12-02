@@ -16,8 +16,8 @@
   const roll = new Command({
     name: "roll",
     parameters: [
-      new Parameter({type: "string", name: "dieType", helpText: "Type of die to roll (e.g., D6, D20)", default: "D6"}),
-      new Parameter({type: "int", name: "numberOfDice", helpText: "Number of dice to roll", default: 1})
+      new Parameter({type: "string", name: "dieType", helpText: "Type of die to roll (e.g., D6, D20)", default: "D6", required: false}),
+      new Parameter({type: "int", name: "numberOfDice", helpText: "Number of dice to roll", default: 1, required: false})
     ],
     type: "insert",
     helpText: "Roll dice. Default is one D6. Specify die type (e.g., D20) and optionally the number of dice to roll.",

@@ -12,8 +12,8 @@
   const sort_lines_alpha = new Command({
     name: "sort_lines_alpha",
     parameters: [
-      new Parameter({type: "bool", name: "reverse", helpText: "Sort in reverse order", default: false}),
-      new Parameter({type: "bool", name: "ignoreFirstLine", helpText: "Skip first line when sorting", default: false})
+      new Parameter({type: "bool", name: "reverse", helpText: "Sort in reverse order", default: false, required: false}),
+      new Parameter({type: "bool", name: "ignoreFirstLine", helpText: "Skip first line when sorting", default: false, required: false})
     ],
     type: "replaceAll",
     helpText: "Sort lines alphabetically with optional reverse and skip first line.",

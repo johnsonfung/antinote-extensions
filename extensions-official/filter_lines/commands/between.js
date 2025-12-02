@@ -12,9 +12,9 @@
   const keep_between = new Command({
     name: "keep_between",
     parameters: [
-      new Parameter({type: "string", name: "start", helpText: "Start boundary text"}),
-      new Parameter({type: "string", name: "end", helpText: "End boundary text"}),
-      new Parameter({type: "bool", name: "includeBoundaries", helpText: "Include the boundary delimiters in result", default: false})
+      new Parameter({type: "string", name: "start", helpText: "Start boundary text", default: "[", required: true}),
+      new Parameter({type: "string", name: "end", helpText: "End boundary text", default: "]", required: true}),
+      new Parameter({type: "bool", name: "includeBoundaries", helpText: "Include the boundary delimiters in result", default: false, required: false})
     ],
     type: "replaceAll",
     helpText: "Keep only content between start and end delimiters on each line.",
@@ -60,9 +60,9 @@
   const remove_between = new Command({
     name: "remove_between",
     parameters: [
-      new Parameter({type: "string", name: "start", helpText: "Start boundary text"}),
-      new Parameter({type: "string", name: "end", helpText: "End boundary text"}),
-      new Parameter({type: "bool", name: "includeBoundaries", helpText: "Remove the boundary delimiters as well", default: false})
+      new Parameter({type: "string", name: "start", helpText: "Start boundary text", default: "[", required: true}),
+      new Parameter({type: "string", name: "end", helpText: "End boundary text", default: "]", required: true}),
+      new Parameter({type: "bool", name: "includeBoundaries", helpText: "Remove the boundary delimiters as well", default: false, required: false})
     ],
     type: "replaceAll",
     helpText: "Remove content between start and end delimiters on each line.",

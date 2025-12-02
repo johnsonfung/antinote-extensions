@@ -68,9 +68,9 @@
   const json_add_key = new Command({
     name: "json_add_key",
     parameters: [
-      new Parameter({type: "string", name: "key", helpText: "Key to add", default: ""}),
-      new Parameter({type: "string", name: "value", helpText: "Value for the key (blank = null)", default: ""}),
-      new Parameter({type: "string", name: "parent_key", helpText: "Parent key containing the array (optional)", default: ""})
+      new Parameter({type: "string", name: "key", helpText: "Key to add", default: "status", required: true}),
+      new Parameter({type: "string", name: "value", helpText: "Value for the key (blank = null)", default: "active", required: false}),
+      new Parameter({type: "string", name: "parent_key", helpText: "Parent key containing the array (optional)", default: "", required: false})
     ],
     type: "replaceAll",
     helpText: "Add a key-value pair to all objects in array.",
@@ -140,8 +140,8 @@
   const json_remove_key = new Command({
     name: "json_remove_key",
     parameters: [
-      new Parameter({type: "string", name: "key", helpText: "Key to remove", default: ""}),
-      new Parameter({type: "string", name: "parent_key", helpText: "Parent key containing the array (optional)", default: ""})
+      new Parameter({type: "string", name: "key", helpText: "Key to remove", default: "temp_id", required: true}),
+      new Parameter({type: "string", name: "parent_key", helpText: "Parent key containing the array (optional)", default: "", required: false})
     ],
     type: "replaceAll",
     helpText: "Remove a key from all objects in array.",
@@ -215,9 +215,9 @@
   const json_set_key = new Command({
     name: "json_set_key",
     parameters: [
-      new Parameter({type: "string", name: "key", helpText: "Key to set", default: ""}),
-      new Parameter({type: "string", name: "value", helpText: "New value for the key", default: ""}),
-      new Parameter({type: "string", name: "parent_key", helpText: "Parent key containing the array (optional)", default: ""})
+      new Parameter({type: "string", name: "key", helpText: "Key to set", default: "verified", required: true}),
+      new Parameter({type: "string", name: "value", helpText: "New value for the key", default: "true", required: true}),
+      new Parameter({type: "string", name: "parent_key", helpText: "Parent key containing the array (optional)", default: "", required: false})
     ],
     type: "replaceAll",
     helpText: "Set a key to a specific value in all objects.",
@@ -287,9 +287,9 @@
   const json_append_key = new Command({
     name: "json_append_key",
     parameters: [
-      new Parameter({type: "string", name: "key", helpText: "Key to append to", default: ""}),
-      new Parameter({type: "string", name: "value", helpText: "Value to append", default: ""}),
-      new Parameter({type: "string", name: "parent_key", helpText: "Parent key containing the array (optional)", default: ""})
+      new Parameter({type: "string", name: "key", helpText: "Key to append to", default: "name", required: true}),
+      new Parameter({type: "string", name: "value", helpText: "Value to append", default: " Jr.", required: true}),
+      new Parameter({type: "string", name: "parent_key", helpText: "Parent key containing the array (optional)", default: "", required: false})
     ],
     type: "replaceAll",
     helpText: "Append value to the end of existing key values.",
@@ -365,9 +365,9 @@
   const json_prepend_key = new Command({
     name: "json_prepend_key",
     parameters: [
-      new Parameter({type: "string", name: "key", helpText: "Key to prepend to", default: ""}),
-      new Parameter({type: "string", name: "value", helpText: "Value to prepend", default: ""}),
-      new Parameter({type: "string", name: "parent_key", helpText: "Parent key containing the array (optional)", default: ""})
+      new Parameter({type: "string", name: "key", helpText: "Key to prepend to", default: "name", required: true}),
+      new Parameter({type: "string", name: "value", helpText: "Value to prepend", default: "Dr. ", required: true}),
+      new Parameter({type: "string", name: "parent_key", helpText: "Parent key containing the array (optional)", default: "", required: false})
     ],
     type: "replaceAll",
     helpText: "Prepend value to the beginning of existing key values.",

@@ -1,6 +1,6 @@
 {
   "name": "list_tools",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": "johnsonfung",
   "description": "Convert between comma-separated lists, lines, and custom delimiters",
   "license": "MIT",

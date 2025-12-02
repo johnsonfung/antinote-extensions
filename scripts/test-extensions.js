@@ -148,6 +148,39 @@ async function runExtensionTests(extension) {
           })
         };
       }
+
+      // Mock MathEvaluator (provided by Swift app at runtime)
+      var MathEvaluator = {
+        eval: function(expression) {
+          try {
+            // Simple eval for basic math expressions (safe in test context)
+            return Function('"use strict"; return (' + expression + ')')();
+          } catch (e) {
+            throw new Error("Invalid expression: " + expression);
+          }
+        },
+        evalSafe: function(expression, defaultValue) {
+          try {
+            return this.eval(expression);
+          } catch (e) {
+            return defaultValue;
+          }
+        },
+        isMathExpression: function(str) {
+          if (typeof str !== 'string') return false;
+          return /[+\\-*\\/^%]/.test(str);
+        },
+        parseNumeric: function(value) {
+          if (typeof value === 'number') return value;
+          if (typeof value === 'string') {
+            if (this.isMathExpression(value)) {
+              return this.evalSafe(value, parseFloat(value));
+            }
+            return parseFloat(value);
+          }
+          return NaN;
+        }
+      };
 ${dependencyCode}
       // Expose global functions to local scope (for dependencies like ai_providers)
       if (typeof global.callAIProvider !== 'undefined') {

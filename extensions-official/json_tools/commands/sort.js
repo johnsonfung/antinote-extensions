@@ -54,9 +54,9 @@
   const json_sort = new Command({
     name: "json_sort",
     parameters: [
-      new Parameter({type: "string", name: "key", helpText: "Key to sort by", default: ""}),
-      new Parameter({type: "bool", name: "reverse", helpText: "Sort in reverse order", default: false}),
-      new Parameter({type: "string", name: "parent_key", helpText: "Parent key containing the array (optional)", default: ""})
+      new Parameter({type: "string", name: "key", helpText: "Key to sort by", default: "name", required: true}),
+      new Parameter({type: "bool", name: "reverse", helpText: "Sort in reverse order", default: false, required: false}),
+      new Parameter({type: "string", name: "parent_key", helpText: "Parent key containing the array (optional)", default: "", required: false})
     ],
     type: "replaceAll",
     helpText: "Sort array of objects by a key value.",
@@ -142,8 +142,8 @@
   const json_sort_array = new Command({
     name: "json_sort_array",
     parameters: [
-      new Parameter({type: "bool", name: "reverse", helpText: "Sort in reverse order", default: false}),
-      new Parameter({type: "string", name: "parent_key", helpText: "Parent key containing the array (optional)", default: ""})
+      new Parameter({type: "bool", name: "reverse", helpText: "Sort in reverse order", default: false, required: false}),
+      new Parameter({type: "string", name: "parent_key", helpText: "Parent key containing the array (optional)", default: "", required: false})
     ],
     type: "replaceAll",
     helpText: "Sort an array of primitive values (strings/numbers).",

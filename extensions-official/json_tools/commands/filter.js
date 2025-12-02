@@ -81,10 +81,10 @@
   const json_filter = new Command({
     name: "json_filter",
     parameters: [
-      new Parameter({type: "string", name: "key", helpText: "Key to filter by", default: ""}),
-      new Parameter({type: "string", name: "operator", helpText: "Comparison operator (=, !=, >, <, >=, <=, contains, startsWith, endsWith)", default: "="}),
-      new Parameter({type: "string", name: "value", helpText: "Value to compare against", default: ""}),
-      new Parameter({type: "string", name: "parent_key", helpText: "Parent key containing the array (optional)", default: ""})
+      new Parameter({type: "string", name: "key", helpText: "Key to filter by", default: "status", required: true}),
+      new Parameter({type: "string", name: "operator", helpText: "Comparison operator (=, !=, >, <, >=, <=, contains, startsWith, endsWith)", default: "=", required: false}),
+      new Parameter({type: "string", name: "value", helpText: "Value to compare against", default: "active", required: true}),
+      new Parameter({type: "string", name: "parent_key", helpText: "Parent key containing the array (optional)", default: "", required: false})
     ],
     type: "replaceAll",
     helpText: "Filter array of objects keeping only items matching criteria.",
@@ -162,10 +162,10 @@
   const json_filter_out = new Command({
     name: "json_filter_out",
     parameters: [
-      new Parameter({type: "string", name: "key", helpText: "Key to filter by", default: ""}),
-      new Parameter({type: "string", name: "operator", helpText: "Comparison operator", default: "="}),
-      new Parameter({type: "string", name: "value", helpText: "Value to compare against", default: ""}),
-      new Parameter({type: "string", name: "parent_key", helpText: "Parent key containing the array (optional)", default: ""})
+      new Parameter({type: "string", name: "key", helpText: "Key to filter by", default: "status", required: true}),
+      new Parameter({type: "string", name: "operator", helpText: "Comparison operator", default: "=", required: false}),
+      new Parameter({type: "string", name: "value", helpText: "Value to compare against", default: "deleted", required: true}),
+      new Parameter({type: "string", name: "parent_key", helpText: "Parent key containing the array (optional)", default: "", required: false})
     ],
     type: "replaceAll",
     helpText: "Filter array of objects removing items matching criteria.",

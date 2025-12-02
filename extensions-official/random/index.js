@@ -23,10 +23,10 @@
     // helpText: The help text for the parameter that the user sees
     // default: The default value for the parameter
     parameters: [
-      new Parameter({type: "float", name: "from", helpText: "bottom range", default: 0}),
-      new Parameter({type: "float", name: "to", helpText: "top range", default: 100}),
-      new Parameter({type: "bool", name: "int", helpText: "round to nearest whole number", default: true}),
-      new Parameter({type: "int", name: "count", helpText: "number of random numbers to generate", default: 1})
+      new Parameter({type: "float", name: "from", helpText: "bottom range", default: 0, required: false}),
+      new Parameter({type: "float", name: "to", helpText: "top range", default: 100, required: false}),
+      new Parameter({type: "bool", name: "int", helpText: "round to nearest whole number", default: true, required: false}),
+      new Parameter({type: "int", name: "count", helpText: "number of random numbers to generate", default: 1, required: false})
     ],
     type: "insert", // This is the action the command will do to the user's note: "insert", "replaceLine", "replaceAll", or "openURL"
     helpText: "Insert a random number between two values.", // This is the description text for the command
@@ -83,7 +83,7 @@
   const random_letters = new Command({
     name: "random_letters",
     parameters: [
-      new Parameter({type: "int", name: "numberOfLetters", helpText: "Number of letters to generate", default: 1}),
+      new Parameter({type: "int", name: "numberOfLetters", helpText: "Number of letters to generate", default: 1, required: false}),
     ],
     type: "insert",
     helpText: "Insert a random letter or series of letters.",

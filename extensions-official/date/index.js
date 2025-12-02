@@ -100,7 +100,7 @@
     name: "today",
     parameters: [
       // Optional days offset - can be positive or negative
-      new Parameter({type: "int", name: "daysOffset", helpText: "Days to add/subtract from today", default: 0})
+      new Parameter({type: "int", name: "daysOffset", helpText: "Days to add/subtract from today", default: 0, required: false})
     ],
     type: "insert",
     helpText: "Insert today's date, optionally offset by days.",
@@ -126,7 +126,7 @@
     name: "tomorrow",
     parameters: [
       // Optional additional days offset (added to base +1)
-      new Parameter({type: "int", name: "daysOffset", helpText: "Additional days to add/subtract", default: 0})
+      new Parameter({type: "int", name: "daysOffset", helpText: "Additional days to add/subtract", default: 0, required: false})
     ],
     type: "insert",
     helpText: "Insert tomorrow's date, optionally offset by additional days.",
@@ -152,7 +152,7 @@
     name: "yesterday",
     parameters: [
       // Optional additional days offset (added to base -1)
-      new Parameter({type: "int", name: "daysOffset", helpText: "Additional days to add/subtract", default: 0})
+      new Parameter({type: "int", name: "daysOffset", helpText: "Additional days to add/subtract", default: 0, required: false})
     ],
     type: "insert",
     helpText: "Insert yesterday's date, optionally offset by additional days.",
@@ -178,7 +178,7 @@
     name: "business_day",
     parameters: [
       // Business days offset (positive = future, negative = past, 0 = today if weekday or next Monday)
-      new Parameter({type: "int", name: "businessDaysOffset", helpText: "Business days to add/subtract", default: 0})
+      new Parameter({type: "int", name: "businessDaysOffset", helpText: "Business days to add/subtract", default: 0, required: false})
     ],
     type: "insert",
     helpText: "Insert a date offset by business days (excludes weekends).",

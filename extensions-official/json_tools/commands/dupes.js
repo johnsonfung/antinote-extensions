@@ -73,8 +73,8 @@
   const json_get_dupes = new Command({
     name: "json_get_dupes",
     parameters: [
-      new Parameter({type: "string", name: "key", helpText: "Key to check for duplicates (leave empty for primitive arrays)", default: ""}),
-      new Parameter({type: "string", name: "parent_key", helpText: "Parent key containing the array (optional)", default: ""})
+      new Parameter({type: "string", name: "key", helpText: "Key to check for duplicates (leave empty for primitive arrays)", default: "", required: false}),
+      new Parameter({type: "string", name: "parent_key", helpText: "Parent key containing the array (optional)", default: "", required: false})
     ],
     type: "insert",
     helpText: "Find and display duplicate objects by key or duplicate primitives.",
@@ -233,8 +233,8 @@
   const json_dedupe = new Command({
     name: "json_dedupe",
     parameters: [
-      new Parameter({type: "bool", name: "keepFirst", helpText: "Keep first occurrence (true) or last (false)", default: true}),
-      new Parameter({type: "string", name: "parent_key", helpText: "Parent key containing the array (optional)", default: ""})
+      new Parameter({type: "bool", name: "keepFirst", helpText: "Keep first occurrence (true) or last (false)", default: true, required: false}),
+      new Parameter({type: "string", name: "parent_key", helpText: "Parent key containing the array (optional)", default: "", required: false})
     ],
     type: "replaceAll",
     helpText: "Remove exact duplicate objects from array.",

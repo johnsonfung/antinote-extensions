@@ -35,7 +35,7 @@
   const lines_to = new Command({
     name: "lines_to",
     parameters: [
-      new Parameter({type: "string", name: "delimiter", helpText: "Delimiter to use for joining lines"})
+      new Parameter({type: "string", name: "delimiter", helpText: "Delimiter to use for joining lines", default: "|", required: true})
     ],
     type: "replaceAll",
     helpText: "Convert lines to custom delimiter-separated list.",

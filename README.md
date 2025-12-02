@@ -217,8 +217,15 @@ var my_command = new Command({
 ### Parameters
 
 ```js
-new Parameter({type, name, helpText, default})
+new Parameter({type, name, helpText, default, required})
 ```
+
+**Parameter Properties:**
+- **`type`** (string): Parameter type - see below
+- **`name`** (string): Parameter name (shown to user)
+- **`helpText`** (string): Description of the parameter
+- **`default`** (any): Default value (for autocomplete/tutorials)
+- **`required`** (boolean): Whether the parameter must be provided by the user (defaults to `true`)
 
 **Parameter Types:**
 - `"float"` - Decimal numbers
@@ -226,6 +233,25 @@ new Parameter({type, name, helpText, default})
 - `"bool"` - true/false (accepts: true, false, "true", "false")
 - `"string"` - Text (use quotes if contains commas: `"hello, world"`)
 - `"paragraph"` - Multi-line text editor (shown as textarea in UI)
+- `"expression"` / `"mathExpression"` - Math expressions evaluated via MathEvaluator
+
+**Required vs Optional Parameters:**
+
+Parameters are **required by default**. Set `required: false` to make a parameter optional:
+
+```js
+parameters: [
+  // Required - user must provide this value
+  new Parameter({type: "string", name: "text", helpText: "Text to search", default: "TODO", required: true}),
+
+  // Optional - uses default if not provided
+  new Parameter({type: "bool", name: "caseSensitive", helpText: "Case sensitive", default: false, required: false})
+]
+```
+
+The `default` value serves two purposes:
+1. **For autocomplete/tutorials** - Shows users example values
+2. **For optional parameters** - Used when user doesn't provide a value
 
 ---
 
@@ -1066,9 +1092,11 @@ Creates extension container.
 #### `Command({name, parameters, type, helpText, tutorials, extension})`
 Registers a command (note: aliases parameter has been removed).
 
-#### `Parameter({type, name, helpText, default})`
+#### `Parameter({type, name, helpText, default, required})`
 Defines command parameter.
-- Types: `"float"`, `"int"`, `"bool"`, `"string"`, `"paragraph"`
+- **type**: `"float"`, `"int"`, `"bool"`, `"string"`, `"paragraph"`, `"expression"`, `"mathExpression"`
+- **default**: Default value for autocomplete/tutorials and optional parameters
+- **required**: Whether user must provide value (defaults to `true`)
 
 #### `TutorialCommand({command, description})`
 Example usage for users.

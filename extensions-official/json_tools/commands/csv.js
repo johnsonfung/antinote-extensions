@@ -92,7 +92,7 @@
   const csv_to_json = new Command({
     name: "csv_to_json",
     parameters: [
-      new Parameter({type: "string", name: "parent_key", helpText: "Parent key to find CSV data (optional)", default: ""})
+      new Parameter({type: "string", name: "parent_key", helpText: "Parent key to find CSV data (optional)", default: "", required: false})
     ],
     type: "replaceAll",
     helpText: "Convert CSV to JSON array of objects using first row as keys.",

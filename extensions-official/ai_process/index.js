@@ -91,7 +91,7 @@
   const polish = new Command({
     name: "polish",
     parameters: [
-      new Parameter({type: "int", name: "level", helpText: "Professionalism level (1=casual, 2=professional, 3=formal)", default: 2})
+      new Parameter({type: "int", name: "level", helpText: "Professionalism level (1=casual, 2=professional, 3=formal)", default: 2, required: false})
     ],
     type: "replaceAll",
     helpText: "Polish text with AI to improve professionalism and clarity",
@@ -155,7 +155,7 @@
   const translate = new Command({
     name: "translate",
     parameters: [
-      new Parameter({type: "string", name: "language", helpText: "Target language for translation", default: ""})
+      new Parameter({type: "string", name: "language", helpText: "Target language for translation", default: "Spanish", required: false})
     ],
     type: "replaceAll",
     helpText: "Translate text to another language using AI",

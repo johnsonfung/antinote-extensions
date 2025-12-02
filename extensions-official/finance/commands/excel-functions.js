@@ -13,12 +13,12 @@
   const fv = new Command({
     name: "fv",
     parameters: [
-      new Parameter({type: "expression", name: "rate", helpText: "Interest rate per period (e.g., 0.05 or 0.05/12)", default: 0.05}),
-      new Parameter({type: "expression", name: "nper", helpText: "Total number of payment periods", default: 120}),
-      new Parameter({type: "expression", name: "pmt", helpText: "Payment per period (negative for outflows)", default: -500}),
-      new Parameter({type: "expression", name: "pv", helpText: "Present value (default 0)", default: 0}),
-      new Parameter({type: "expression", name: "type", helpText: "0=end of period, 1=beginning (default 0)", default: 0}),
-      new Parameter({type: "bool", name: "showAnalysis", helpText: "Show detailed analysis", default: false})
+      new Parameter({type: "expression", name: "rate", helpText: "Interest rate per period (e.g., 0.05 or 0.05/12)", default: 0.05, required: true}),
+      new Parameter({type: "expression", name: "nper", helpText: "Total number of payment periods", default: 10, required: true}),
+      new Parameter({type: "expression", name: "pmt", helpText: "Payment per period (negative for outflows)", default: -1000, required: true}),
+      new Parameter({type: "expression", name: "pv", helpText: "Present value (default 0)", default: 0, required: false}),
+      new Parameter({type: "expression", name: "type", helpText: "0=end of period, 1=beginning (default 0)", default: 0, required: false}),
+      new Parameter({type: "bool", name: "showAnalysis", helpText: "Show detailed analysis", default: false, required: false})
     ],
     type: "insert",
     helpText: "Calculate future value (Excel FV function). FV(rate, nper, pmt, [pv], [type])",
@@ -90,11 +90,11 @@
   const pmt = new Command({
     name: "pmt",
     parameters: [
-      new Parameter({type: "expression", name: "rate", helpText: "Interest rate per period (e.g., 0.05 or 0.05/12)", default: 0}),
-      new Parameter({type: "expression", name: "nper", helpText: "Total number of payment periods (e.g., 360 or 30*12)", default: 0}),
-      new Parameter({type: "expression", name: "pv", helpText: "Present value (loan amount)", default: 0}),
-      new Parameter({type: "expression", name: "fv", helpText: "Future value (default 0)", default: 0}),
-      new Parameter({type: "expression", name: "type", helpText: "0=end of period, 1=beginning (default 0)", default: 0})
+      new Parameter({type: "expression", name: "rate", helpText: "Interest rate per period (e.g., 0.05 or 0.05/12)", default: 0.05, required: true}),
+      new Parameter({type: "expression", name: "nper", helpText: "Total number of payment periods (e.g., 360 or 30*12)", default: 360, required: true}),
+      new Parameter({type: "expression", name: "pv", helpText: "Present value (loan amount)", default: 300000, required: true}),
+      new Parameter({type: "expression", name: "fv", helpText: "Future value (default 0)", default: 0, required: false}),
+      new Parameter({type: "expression", name: "type", helpText: "0=end of period, 1=beginning (default 0)", default: 0, required: false})
     ],
     type: "insert",
     helpText: "Calculate payment per period (Excel PMT function). PMT(rate, nper, pv, [fv], [type])",
@@ -154,7 +154,7 @@
   const npv = new Command({
     name: "npv",
     parameters: [
-      new Parameter({type: "expression", name: "rate", helpText: "Discount rate per period (e.g., 0.1 for 10%)", default: 0})
+      new Parameter({type: "expression", name: "rate", helpText: "Discount rate per period (e.g., 0.1 for 10%)", default: 0.1, required: true})
     ],
     type: "replaceLine",
     helpText: "Calculate net present value (Excel NPV function) from comma-separated cash flows on current line. NPV(rate) on line: value1, value2, ...",

@@ -13,14 +13,14 @@
   const investment = new Command({
     name: "investment",
     parameters: [
-      new Parameter({type: "expression", name: "initial", helpText: "Initial investment amount", default: 0}),
-      new Parameter({type: "expression", name: "annualContribution", helpText: "Annual contribution", default: 0}),
-      new Parameter({type: "expression", name: "monthlyContribution", helpText: "Monthly contribution (added to annual contribution)", default: 0}),
-      new Parameter({type: "expression", name: "interestRate", helpText: "Annual interest rate (e.g., 7 for 7%)", default: 7}),
-      new Parameter({type: "expression", name: "years", helpText: "Investment period in years", default: 0}),
-      new Parameter({type: "expression", name: "months", helpText: "Additional months (added to years)", default: 0}),
-      new Parameter({type: "expression", name: "taxRate", helpText: "Tax rate on gains (e.g., 15 for 15%)", default: 0}),
-      new Parameter({type: "expression", name: "inflationRate", helpText: "Annual inflation rate (e.g., 3 for 3%)", default: 3})
+      new Parameter({type: "expression", name: "initial", helpText: "Initial investment amount", default: 10000, required: true}),
+      new Parameter({type: "expression", name: "annualContribution", helpText: "Annual contribution", default: 5000, required: false}),
+      new Parameter({type: "expression", name: "monthlyContribution", helpText: "Monthly contribution (added to annual contribution)", default: 500, required: false}),
+      new Parameter({type: "expression", name: "interestRate", helpText: "Annual interest rate (e.g., 7 for 7%)", default: 7, required: false}),
+      new Parameter({type: "expression", name: "years", helpText: "Investment period in years", default: 30, required: true}),
+      new Parameter({type: "expression", name: "months", helpText: "Additional months (added to years)", default: 0, required: false}),
+      new Parameter({type: "expression", name: "taxRate", helpText: "Tax rate on gains (e.g., 15 for 15%)", default: 0, required: false}),
+      new Parameter({type: "expression", name: "inflationRate", helpText: "Annual inflation rate (e.g., 3 for 3%)", default: 3, required: false})
     ],
     type: "insert",
     helpText: "Calculate investment growth with contributions, taxes, and inflation adjustment.",

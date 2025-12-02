@@ -15,11 +15,11 @@
   var three = new Command({
     name: "three",
     parameters: [
-      new Parameter({type: "string", name: "ref1", helpText: "Reference 1", default: "1"}),
-      new Parameter({type: "string", name: "ref2", helpText: "Reference 2", default: "1"}),
-      new Parameter({type: "string", name: "req1", helpText: "Required 1", default: "1"}),
-      new Parameter({type: "string", name: "req2", helpText: "Required 2", default: "1"}),
-      new Parameter({type: "bool", name: "logic", helpText: "Add rule of three logic", default: false})
+      new Parameter({type: "string", name: "ref1", helpText: "Reference 1", default: "5", required: true}),
+      new Parameter({type: "string", name: "ref2", helpText: "Reference 2", default: "10", required: true}),
+      new Parameter({type: "string", name: "req1", helpText: "Required 1", default: "1", required: true}),
+      new Parameter({type: "string", name: "req2", helpText: "Required 2", default: "x", required: true}),
+      new Parameter({type: "bool", name: "logic", helpText: "Add rule of three logic", default: false, required: false})
     ],
     type: "replaceLine",
     helpText: "Compute rule of three, either req1 or req2 must be set to 'x'. If you set the last parameter to true, a nice diagram will be outputed.",

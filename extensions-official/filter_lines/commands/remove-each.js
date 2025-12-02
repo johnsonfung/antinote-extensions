@@ -13,8 +13,8 @@
   const remove_each_after = new Command({
     name: "remove_each_after",
     parameters: [
-      new Parameter({type: "string", name: "delimiter", helpText: "Text to remove content after"}),
-      new Parameter({type: "int", name: "occurrence", helpText: "Which occurrence to use (1 = first, 2 = second, etc.)", default: 1})
+      new Parameter({type: "string", name: "delimiter", helpText: "Text to remove content after", default: ",", required: true}),
+      new Parameter({type: "int", name: "occurrence", helpText: "Which occurrence to use (1 = first, 2 = second, etc.)", default: 1, required: false})
     ],
     type: "replaceAll",
     helpText: "Remove content after the specified delimiter on each line.",
@@ -50,8 +50,8 @@
   const remove_each_before = new Command({
     name: "remove_each_before",
     parameters: [
-      new Parameter({type: "string", name: "delimiter", helpText: "Text to remove content before"}),
-      new Parameter({type: "int", name: "occurrence", helpText: "Which occurrence from the end (1 = last, 2 = second-to-last, etc.)", default: 1})
+      new Parameter({type: "string", name: "delimiter", helpText: "Text to remove content before", default: ",", required: true}),
+      new Parameter({type: "int", name: "occurrence", helpText: "Which occurrence from the end (1 = last, 2 = second-to-last, etc.)", default: 1, required: false})
     ],
     type: "replaceAll",
     helpText: "Remove content before the specified delimiter on each line.",

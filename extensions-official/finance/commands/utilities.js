@@ -13,10 +13,10 @@
   const pv = new Command({
     name: "pv",
     parameters: [
-      new Parameter({type: "expression", name: "futureAmount", helpText: "Amount in the future", default: 0}),
-      new Parameter({type: "expression", name: "years", helpText: "Number of years", default: 0}),
-      new Parameter({type: "expression", name: "riskFreeRate", helpText: "Discount rate (default 4%)", default: 4}),
-      new Parameter({type: "bool", name: "showAnalysis", helpText: "Show detailed analysis", default: false})
+      new Parameter({type: "expression", name: "futureAmount", helpText: "Amount in the future", default: 100000, required: true}),
+      new Parameter({type: "expression", name: "years", helpText: "Number of years", default: 10, required: true}),
+      new Parameter({type: "expression", name: "riskFreeRate", helpText: "Discount rate (default 4%)", default: 4, required: false}),
+      new Parameter({type: "bool", name: "showAnalysis", helpText: "Show detailed analysis", default: false, required: false})
     ],
     type: "insert",
     helpText: "Calculate the present value of a future amount.",
@@ -80,10 +80,10 @@
   const fv_simple = new Command({
     name: "fv_simple",
     parameters: [
-      new Parameter({type: "expression", name: "presentAmount", helpText: "Amount today", default: 0}),
-      new Parameter({type: "expression", name: "years", helpText: "Number of years", default: 0}),
-      new Parameter({type: "expression", name: "returnRate", helpText: "Expected return rate (default 4%)", default: 4}),
-      new Parameter({type: "bool", name: "showAnalysis", helpText: "Show detailed analysis", default: false})
+      new Parameter({type: "expression", name: "presentAmount", helpText: "Amount today", default: 10000, required: true}),
+      new Parameter({type: "expression", name: "years", helpText: "Number of years", default: 10, required: true}),
+      new Parameter({type: "expression", name: "returnRate", helpText: "Expected return rate (default 4%)", default: 4, required: false}),
+      new Parameter({type: "bool", name: "showAnalysis", helpText: "Show detailed analysis", default: false, required: false})
     ],
     type: "insert",
     helpText: "Calculate the future value of a present amount (simple calculation).",
@@ -148,9 +148,9 @@
   const tax = new Command({
     name: "tax",
     parameters: [
-      new Parameter({type: "expression", name: "amount", helpText: "Pre-tax amount (e.g., 100000 or 50000*2)", default: 50000}),
-      new Parameter({type: "expression", name: "averageTaxRate", helpText: "Average tax rate (e.g., 25 for 25%)", default: 12}),
-      new Parameter({type: "bool", name: "showAnalysis", helpText: "Show detailed analysis", default: false})
+      new Parameter({type: "expression", name: "amount", helpText: "Pre-tax amount (e.g., 100000 or 50000*2)", default: 100000, required: true}),
+      new Parameter({type: "expression", name: "averageTaxRate", helpText: "Average tax rate (e.g., 25 for 25%)", default: 22, required: true}),
+      new Parameter({type: "bool", name: "showAnalysis", helpText: "Show detailed analysis", default: false, required: false})
     ],
     type: "insert",
     helpText: "Calculate tax amount and after-tax income.",

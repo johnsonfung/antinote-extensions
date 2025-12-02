@@ -13,8 +13,8 @@
   const remove_lines_with = new Command({
     name: "remove_lines_with",
     parameters: [
-      new Parameter({type: "string", name: "text", helpText: "Text to search for in lines"}),
-      new Parameter({type: "bool", name: "caseSensitive", helpText: "Case sensitive matching", default: false})
+      new Parameter({type: "string", name: "text", helpText: "Text to search for in lines", default: "TODO", required: true}),
+      new Parameter({type: "bool", name: "caseSensitive", helpText: "Case sensitive matching", default: false, required: false})
     ],
     type: "replaceAll",
     helpText: "Remove all lines containing the specified text.",
@@ -47,8 +47,8 @@
   const remove_lines_without = new Command({
     name: "remove_lines_without",
     parameters: [
-      new Parameter({type: "string", name: "text", helpText: "Text that must be in lines to keep"}),
-      new Parameter({type: "bool", name: "caseSensitive", helpText: "Case sensitive matching", default: false})
+      new Parameter({type: "string", name: "text", helpText: "Text that must be in lines to keep", default: "TODO", required: true}),
+      new Parameter({type: "bool", name: "caseSensitive", helpText: "Case sensitive matching", default: false, required: false})
     ],
     type: "replaceAll",
     helpText: "Remove all lines that do NOT contain the specified text.",
@@ -107,8 +107,8 @@
   const keep_lines_with = new Command({
     name: "keep_lines_with",
     parameters: [
-      new Parameter({type: "string", name: "text", helpText: "Text to search for in lines"}),
-      new Parameter({type: "bool", name: "caseSensitive", helpText: "Case sensitive matching", default: false})
+      new Parameter({type: "string", name: "text", helpText: "Text to search for in lines", default: "TODO", required: true}),
+      new Parameter({type: "bool", name: "caseSensitive", helpText: "Case sensitive matching", default: false, required: false})
     ],
     type: "replaceAll",
     helpText: "Keep only lines containing the specified text.",
@@ -141,8 +141,8 @@
   const keep_lines_without = new Command({
     name: "keep_lines_without",
     parameters: [
-      new Parameter({type: "string", name: "text", helpText: "Text that must NOT be in lines to keep"}),
-      new Parameter({type: "bool", name: "caseSensitive", helpText: "Case sensitive matching", default: false})
+      new Parameter({type: "string", name: "text", helpText: "Text that must NOT be in lines to keep", default: "TODO", required: true}),
+      new Parameter({type: "bool", name: "caseSensitive", helpText: "Case sensitive matching", default: false, required: false})
     ],
     type: "replaceAll",
     helpText: "Keep only lines that do NOT contain the specified text.",

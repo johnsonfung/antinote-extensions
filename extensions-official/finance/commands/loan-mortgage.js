@@ -13,11 +13,11 @@
   const loan = new Command({
     name: "loan",
     parameters: [
-      new Parameter({type: "expression", name: "amount", helpText: "Loan amount (e.g., 10000 or 5000*2)", default: 10000}),
-      new Parameter({type: "expression", name: "termInMonths", helpText: "Loan term in months (e.g., 60 or 5*12)", default: 60}),
-      new Parameter({type: "expression", name: "interestRate", helpText: "Annual interest rate (e.g., 5 for 5% or 0.05*100)", default: 4}),
-      new Parameter({type: "string", name: "compound", helpText: "Compounding frequency (annually, monthly)", default: "annually"}),
-      new Parameter({type: "string", name: "payback", helpText: "Payment frequency (monthly, biweekly)", default: "monthly"})
+      new Parameter({type: "expression", name: "amount", helpText: "Loan amount (e.g., 10000 or 5000*2)", default: 10000, required: false}),
+      new Parameter({type: "expression", name: "termInMonths", helpText: "Loan term in months (e.g., 60 or 5*12)", default: 60, required: false}),
+      new Parameter({type: "expression", name: "interestRate", helpText: "Annual interest rate (e.g., 5 for 5% or 0.05*100)", default: 4, required: false}),
+      new Parameter({type: "string", name: "compound", helpText: "Compounding frequency (annually, monthly)", default: "annually", required: false}),
+      new Parameter({type: "string", name: "payback", helpText: "Payment frequency (monthly, biweekly)", default: "monthly", required: false})
     ],
     type: "insert",
     helpText: "Calculate loan payment, total interest, and generate amortization table.",
@@ -102,10 +102,10 @@
   const mortgage = new Command({
     name: "mortgage",
     parameters: [
-      new Parameter({type: "expression", name: "homeCost", helpText: "Home purchase price (e.g., 500000)", default: 500000}),
-      new Parameter({type: "expression", name: "downPaymentPercent", helpText: "Down payment as percentage (e.g., 20 for 20%)", default: 20}),
-      new Parameter({type: "expression", name: "interestRate", helpText: "Annual interest rate (e.g., 6.5 for 6.5%)", default: 3.5}),
-      new Parameter({type: "expression", name: "termInYears", helpText: "Loan term in years (e.g., 30 or 15)", default: 30})
+      new Parameter({type: "expression", name: "homeCost", helpText: "Home purchase price (e.g., 500000)", default: 500000, required: false}),
+      new Parameter({type: "expression", name: "downPaymentPercent", helpText: "Down payment as percentage (e.g., 20 for 20%)", default: 20, required: false}),
+      new Parameter({type: "expression", name: "interestRate", helpText: "Annual interest rate (e.g., 6.5 for 6.5%)", default: 3.5, required: false}),
+      new Parameter({type: "expression", name: "termInYears", helpText: "Loan term in years (e.g., 30 or 15)", default: 30, required: false})
     ],
     type: "insert",
     helpText: "Calculate mortgage payment, total interest, and generate amortization table.",

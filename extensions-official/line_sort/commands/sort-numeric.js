@@ -13,8 +13,8 @@
   const sort_lines_number = new Command({
     name: "sort_lines_number",
     parameters: [
-      new Parameter({type: "bool", name: "reverse", helpText: "Sort in reverse order", default: false}),
-      new Parameter({type: "bool", name: "ignoreFirstLine", helpText: "Skip first line when sorting", default: false})
+      new Parameter({type: "bool", name: "reverse", helpText: "Sort in reverse order", default: false, required: false}),
+      new Parameter({type: "bool", name: "ignoreFirstLine", helpText: "Skip first line when sorting", default: false, required: false})
     ],
     type: "replaceAll",
     helpText: "Sort lines by the first number found in each line.",
@@ -79,8 +79,8 @@
   const sort_lines_number_last = new Command({
     name: "sort_lines_number_last",
     parameters: [
-      new Parameter({type: "bool", name: "reverse", helpText: "Sort in reverse order", default: false}),
-      new Parameter({type: "bool", name: "ignoreFirstLine", helpText: "Skip first line when sorting", default: false})
+      new Parameter({type: "bool", name: "reverse", helpText: "Sort in reverse order", default: false, required: false}),
+      new Parameter({type: "bool", name: "ignoreFirstLine", helpText: "Skip first line when sorting", default: false, required: false})
     ],
     type: "replaceAll",
     helpText: "Sort lines by the last number found in each line.",

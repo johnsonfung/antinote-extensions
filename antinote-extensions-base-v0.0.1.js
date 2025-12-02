@@ -23,15 +23,25 @@ function Command(config) {
 
 Command.prototype.getParsedParams = function(payload) {
     var resolved = [];
-    
+
     for (var i = 0; i < this.parameters.length; i++) {
+      var param = this.parameters[i];
       // Get the raw value from payload.
       var rawValue = payload.parameters?.[i];
-      // If missing, use the default from the parameter definition.
-      if (rawValue === undefined || rawValue === null) {
-        rawValue = this.parameters[i].defaultValue;
+
+      // Check if this is a required parameter that's missing
+      // For string types, empty string "" is a valid value, not missing
+      var isStringType = (param.parameterType === "string" || param.parameterType === "paragraph");
+      var isMissing = (rawValue === undefined || rawValue === null || (!isStringType && rawValue === ""));
+      if (param.required && isMissing) {
+        throw new Error("Required parameter '" + param.name + "' is missing");
       }
-      
+
+      // If missing and optional, use the default from the parameter definition.
+      if (isMissing) {
+        rawValue = param.defaultValue;
+      }
+
       // Parse the value based on the parameter type.
       var parsedValue;
       switch (this.parameters[i].parameterType) {
@@ -40,6 +50,11 @@ Command.prototype.getParsedParams = function(payload) {
           break;
         case "int":
           parsedValue = parseInt(rawValue);
+          break;
+        case "expression":
+        case "mathExpression":
+          // Use MathEvaluator to parse numbers or evaluate expressions
+          parsedValue = MathEvaluator.parseNumeric(rawValue);
           break;
         case "bool":
           // For booleans, we consider both boolean and string representations.
@@ -54,10 +69,10 @@ Command.prototype.getParsedParams = function(payload) {
           parsedValue = rawValue.toString();
           break;
       }
-      
+
       resolved.push(parsedValue);
     }
-    
+
     return resolved;
   };
 
@@ -102,12 +117,14 @@ Extension.prototype.register_preference = function(pref) {
 };
 
 // Parameter constructor function
-// Accepts object literal: {type: "float", name: "from", helpText: "Help text", default: 0}
+// Accepts object literal: {type: "float", name: "from", helpText: "Help text", default: 0, required: true}
 function Parameter(config) {
   this.parameterType = config.type;
   this.name = config.name;
   this.helpText = config.helpText || "This parameter needs help text.";
   this.defaultValue = (config.default !== undefined) ? config.default : null;
+  // Required defaults to true for backwards compatibility (stricter validation)
+  this.required = (config.required !== undefined) ? config.required : true;
 }
 
 // TutorialCommand constructor function

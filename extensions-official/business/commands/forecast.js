@@ -11,8 +11,8 @@
   const forecast = new Command({
   name: "forecast",
   parameters: [
-    new Parameter({type: "number", name: "periods", helpText: "Number of future periods to forecast", default: 3}),
-    new Parameter({type: "bool", name: "showAnalysis", helpText: "Show detailed analysis", default: false})
+    new Parameter({type: "number", name: "periods", helpText: "Number of future periods to forecast", default: 3, required: false}),
+    new Parameter({type: "bool", name: "showAnalysis", helpText: "Show detailed analysis", default: false, required: false})
   ],
   type: "insert",
   helpText: "Forecast future values based on historical numbers. Uses linear regression and variance analysis.",

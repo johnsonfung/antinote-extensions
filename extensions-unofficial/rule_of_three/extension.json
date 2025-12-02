@@ -1,6 +1,6 @@
 {
   "name": "rule_of_three",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "author": "johnsonfung",
   "description": "Calculate proportions using the rule of three mathematical formula, with support for units",
   "license": "MIT",

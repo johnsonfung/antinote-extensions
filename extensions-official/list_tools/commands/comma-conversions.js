@@ -13,8 +13,8 @@
   const commas_to_list = new Command({
     name: "commas_to_list",
     parameters: [
-      new Parameter({type: "bool", name: "trimWhitespace", helpText: "Trim whitespace from each item", default: true}),
-      new Parameter({type: "string", name: "quoteChar", helpText: "Quote character to respect (empty for all quotes)", default: ""})
+      new Parameter({type: "bool", name: "trimWhitespace", helpText: "Trim whitespace from each item", default: true, required: false}),
+      new Parameter({type: "string", name: "quoteChar", helpText: "Quote character to respect (empty for all quotes)", default: "", required: false})
     ],
     type: "replaceAll",
     helpText: "Convert comma-separated items to lines.",
@@ -45,9 +45,9 @@
   const commas_to = new Command({
     name: "commas_to",
     parameters: [
-      new Parameter({type: "string", name: "delimiter", helpText: "Delimiter to use for output"}),
-      new Parameter({type: "bool", name: "trimWhitespace", helpText: "Trim whitespace from each item", default: true}),
-      new Parameter({type: "string", name: "quoteChar", helpText: "Quote character to respect (empty for all quotes)", default: ""})
+      new Parameter({type: "string", name: "delimiter", helpText: "Delimiter to use for output", default: "|", required: true}),
+      new Parameter({type: "bool", name: "trimWhitespace", helpText: "Trim whitespace from each item", default: true, required: false}),
+      new Parameter({type: "string", name: "quoteChar", helpText: "Quote character to respect (empty for all quotes)", default: "", required: false})
     ],
     type: "replaceAll",
     helpText: "Convert comma-separated items to custom delimiter.",

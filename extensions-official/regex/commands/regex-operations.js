@@ -13,7 +13,7 @@
   const regex_remove = new Command({
     name: "regex_remove",
     parameters: [
-      new Parameter({type: "string", name: "expression", helpText: "Regex pattern (plain or /pattern/flags format)"})
+      new Parameter({type: "string", name: "expression", helpText: "Regex pattern (plain or /pattern/flags format)", default: "\\d+", required: true})
     ],
     type: "replaceAll",
     helpText: "Remove all text matching the regex pattern.",
@@ -51,7 +51,7 @@
   const regex_keep = new Command({
     name: "regex_keep",
     parameters: [
-      new Parameter({type: "string", name: "expression", helpText: "Regex pattern (plain or /pattern/flags format)"})
+      new Parameter({type: "string", name: "expression", helpText: "Regex pattern (plain or /pattern/flags format)", default: "\\d+", required: true})
     ],
     type: "replaceAll",
     helpText: "Keep only text matching the regex pattern.",
@@ -99,8 +99,8 @@
   const regex_insert = new Command({
     name: "regex_insert",
     parameters: [
-      new Parameter({type: "string", name: "expression", helpText: "Regex pattern (plain or /pattern/flags format)"}),
-      new Parameter({type: "string", name: "delimiter", helpText: "Delimiter to use between matches", default: "\n"})
+      new Parameter({type: "string", name: "expression", helpText: "Regex pattern (plain or /pattern/flags format)", default: "\\d+", required: true}),
+      new Parameter({type: "string", name: "delimiter", helpText: "Delimiter to use between matches", default: "\n", required: false})
     ],
     type: "replaceAll",
     helpText: "Extract and insert regex matches with a delimiter.",

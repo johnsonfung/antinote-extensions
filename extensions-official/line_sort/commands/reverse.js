@@ -12,7 +12,7 @@
   const sort_lines_reverse = new Command({
     name: "sort_lines_reverse",
     parameters: [
-      new Parameter({type: "bool", name: "ignoreFirstLine", helpText: "Skip first line when reversing", default: false})
+      new Parameter({type: "bool", name: "ignoreFirstLine", helpText: "Skip first line when reversing", default: false, required: false})
     ],
     type: "replaceAll",
     helpText: "Reverse the order of lines in the document.",

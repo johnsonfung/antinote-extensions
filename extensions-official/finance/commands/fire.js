@@ -13,8 +13,8 @@
   const fire_amount = new Command({
     name: "fire_amount",
     parameters: [
-      new Parameter({type: "expression", name: "amountSaved", helpText: "Total amount saved (e.g., 1000000 or 500000*2)", default: 0}),
-      new Parameter({type: "expression", name: "interestRate", helpText: "Safe withdrawal rate (default 4%)", default: 4})
+      new Parameter({type: "expression", name: "amountSaved", helpText: "Total amount saved (e.g., 1000000 or 500000*2)", default: 1000000, required: true}),
+      new Parameter({type: "expression", name: "interestRate", helpText: "Safe withdrawal rate (default 4%)", default: 4, required: false})
     ],
     type: "insert",
     helpText: "Calculate annual income from investments using the safe withdrawal rate.",
@@ -80,12 +80,12 @@
   const fire_plan = new Command({
     name: "fire_plan",
     parameters: [
-      new Parameter({type: "expression", name: "currentSavings", helpText: "Current savings/investments", default: 0}),
-      new Parameter({type: "expression", name: "monthlyAdditions", helpText: "Monthly contribution to savings", default: 0}),
-      new Parameter({type: "expression", name: "monthlyExpensesAtRetirement", helpText: "Expected monthly expenses in retirement", default: 0}),
-      new Parameter({type: "expression", name: "returnRatePreFIRE", helpText: "Investment return before retirement (default 7%)", default: 7}),
-      new Parameter({type: "expression", name: "returnRatePostFIRE", helpText: "Safe withdrawal rate after retirement (default 4%)", default: 4}),
-      new Parameter({type: "expression", name: "inflationRate", helpText: "Annual inflation rate (default 3%)", default: 3})
+      new Parameter({type: "expression", name: "currentSavings", helpText: "Current savings/investments", default: 100000, required: true}),
+      new Parameter({type: "expression", name: "monthlyAdditions", helpText: "Monthly contribution to savings", default: 3000, required: true}),
+      new Parameter({type: "expression", name: "monthlyExpensesAtRetirement", helpText: "Expected monthly expenses in retirement", default: 5000, required: true}),
+      new Parameter({type: "expression", name: "returnRatePreFIRE", helpText: "Investment return before retirement (default 7%)", default: 7, required: false}),
+      new Parameter({type: "expression", name: "returnRatePostFIRE", helpText: "Safe withdrawal rate after retirement (default 4%)", default: 4, required: false}),
+      new Parameter({type: "expression", name: "inflationRate", helpText: "Annual inflation rate (default 3%)", default: 3, required: false})
     ],
     type: "insert",
     helpText: "Calculate path to financial independence and retirement timeline.",

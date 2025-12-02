@@ -12,8 +12,8 @@
   const dedupe_lines = new Command({
     name: "dedupe_lines",
     parameters: [
-      new Parameter({type: "bool", name: "keepFirst", helpText: "Keep first occurrence (true) or last (false)", default: true}),
-      new Parameter({type: "bool", name: "ignoreFirstLine", helpText: "Skip first line when deduping", default: false})
+      new Parameter({type: "bool", name: "keepFirst", helpText: "Keep first occurrence (true) or last (false)", default: true, required: false}),
+      new Parameter({type: "bool", name: "ignoreFirstLine", helpText: "Skip first line when deduping", default: false, required: false})
     ],
     type: "replaceAll",
     helpText: "Remove duplicate lines keeping first or last occurrence.",
@@ -77,7 +77,7 @@
   const get_dupes = new Command({
     name: "get_dupes",
     parameters: [
-      new Parameter({type: "bool", name: "ignoreFirstLine", helpText: "Skip first line when finding dupes", default: false})
+      new Parameter({type: "bool", name: "ignoreFirstLine", helpText: "Skip first line when finding dupes", default: false, required: false})
     ],
     type: "insert",
     helpText: "Find and display duplicate lines grouped together.",
