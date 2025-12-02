@@ -15,7 +15,7 @@
     // No endpoints or API keys needed - all handled by ai_providers
     const extensionRoot = new Extension({
         name: extensionName,
-        version: "3.0.1",
+        version: "3.0.5",
         endpoints: [],  // No endpoints - uses ai_providers
         requiredAPIKeys: [],  // No API keys - uses ai_providers
         author: "johnsonfung",

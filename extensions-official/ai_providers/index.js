@@ -84,7 +84,7 @@
 
     const extensionRoot = new Extension({
         name: extensionName,
-        version: "1.0.0",
+        version: "1.0.5",
         endpoints: allEndpoints,
         requiredAPIKeys: allApiKeys,
         author: "johnsonfung",

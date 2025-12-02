@@ -4,7 +4,7 @@
 
   var extensionRoot = new Extension({
     name: extensionName,
-    version: "1.0.1",
+    version: "1.0.4",
     endpoints: [], // No external API endpoints
     requiredAPIKeys: [],  // No API keys required
     author: "johnsonfung",  // Author (GitHub username)

@@ -10,7 +10,7 @@
   // Create extension root
   const extensionRoot = new Extension({
     name: extensionName,
-    version: "2.0.0",
+    version: "2.0.1",
     endpoints: [],
     requiredAPIKeys: [],
     author: "johnsonfung",

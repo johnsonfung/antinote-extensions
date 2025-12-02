@@ -5,7 +5,7 @@
   // Create the extension root with metadata
   const extensionRoot = new Extension({
     name: extensionName,
-    version: "1.0.0",
+    version: "1.0.5",
     endpoints: [], // No external API endpoints
     requiredAPIKeys: [], // No API keys required
     author: "Antinote Community",

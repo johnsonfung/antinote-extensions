@@ -9,7 +9,7 @@
 
   const extensionRoot = new Extension({
     name: extensionName,
-    version: "1.0.0",
+    version: "1.0.6",
     endpoints: [], // No external API endpoints
     requiredAPIKeys: [],  // No API keys required
     author: "johnsonfung",  // Author (GitHub username)

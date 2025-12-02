@@ -418,6 +418,61 @@ function validateCodeDisclosures(extension, metadata, allExtensions) {
   }
 }
 
+// Validation: Check that version in index.js matches extension.json
+function validateVersionSync(extension, metadata) {
+  const { name } = extension;
+
+  if (!metadata || !metadata.version) {
+    return; // Already reported as missing required field
+  }
+
+  // Read all extension code files to find version
+  let code = '';
+  if (metadata.files && Array.isArray(metadata.files)) {
+    // Multi-file extension - read index.js (first file)
+    const indexPath = path.join(extension.path, metadata.files[0]);
+    if (fs.existsSync(indexPath)) {
+      code = fs.readFileSync(indexPath, 'utf8');
+    }
+  } else {
+    // Single-file extension
+    if (fs.existsSync(extension.indexPath)) {
+      code = fs.readFileSync(extension.indexPath, 'utf8');
+    }
+  }
+
+  if (!code) {
+    return; // No code to check
+  }
+
+  // Look for version in Extension constructor
+  // Patterns to match:
+  //   version: "1.0.0"
+  //   version: '1.0.0'
+  const versionPatterns = [
+    /new\s+Extension\s*\(\s*\{[^}]*version\s*:\s*["']([^"']+)["']/s,
+    /version\s*:\s*["']([^"']+)["']/
+  ];
+
+  let jsVersion = null;
+  for (const pattern of versionPatterns) {
+    const match = code.match(pattern);
+    if (match) {
+      jsVersion = match[1];
+      break;
+    }
+  }
+
+  if (!jsVersion) {
+    warnings.push(`[${name}] Could not find version in index.js to verify sync with extension.json`);
+    return;
+  }
+
+  if (jsVersion !== metadata.version) {
+    errors.push(`[${name}] Version mismatch: extension.json has "${metadata.version}" but index.js has "${jsVersion}"`);
+  }
+}
+
 // Validation: Check for test file
 function validateTests(extension) {
   const { testPath, name } = extension;
@@ -451,6 +506,7 @@ function validateExtension(extension, allExtensions) {
   const metadata = validateMetadata(extension, allExtensions);
   if (metadata) {
     validateCodeDisclosures(extension, metadata, allExtensions);
+    validateVersionSync(extension, metadata);
   }
   validateTests(extension);
   validateReadme(extension);
