@@ -5,14 +5,27 @@
   const globalScope = (typeof global !== 'undefined') ? global :
                       (typeof window !== 'undefined') ? window : this;
 
-  // Format percentage
-  const formatPercent = (value, decimals = 2) => {
-    return `${(value * 100).toFixed(decimals)}%`;
+  // Default separators (can be overridden by user settings)
+  const defaultSeparators = {
+    decimal: '.',
+    thousands: ','
   };
 
-  // Format number with commas
-  const formatNumber = (value, decimals = 2) => {
-    return value.toFixed(decimals).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  // Format percentage with regional settings support
+  const formatPercent = (value, decimals = 2, userSettings = null) => {
+    const decimalSep = userSettings?.decimalSeparator || defaultSeparators.decimal;
+    const formatted = (value * 100).toFixed(decimals);
+    return `${formatted.replace('.', decimalSep)}%`;
+  };
+
+  // Format number with regional settings support
+  const formatNumber = (value, decimals = 2, userSettings = null) => {
+    const decimalSep = userSettings?.decimalSeparator || defaultSeparators.decimal;
+    const thousandsSep = userSettings?.thousandsSeparator || defaultSeparators.thousands;
+
+    const parts = value.toFixed(decimals).split('.');
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, thousandsSep);
+    return parts.join(decimalSep);
   };
 
   // Calculate percentage change between two numbers

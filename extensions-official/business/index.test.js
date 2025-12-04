@@ -243,33 +243,100 @@ describe("Business Extension - Template Commands", function() {
     expect(result.payload).toContain("cac =");
   });
 
-  it("should insert A/B test template", function() {
+  it("should calculate A/B test significance", function() {
     var result = ab_test.execute({
-      parameters: [],
+      parameters: ["250", "10000", "300", "10000"],
       fullText: "",
       userSettings: {},
       preferences: {}
     });
     expect(result.status).toBe("success");
-    expect(result.payload).toContain("math");
-    expect(result.payload).toContain("A/B Test");
-    expect(result.payload).toContain("a_visitors");
-    expect(result.payload).toContain("b_visitors");
-    expect(result.payload).toContain("Statistical Significance");
+    expect(result.payload).toContain("A/B Test Results");
+    expect(result.payload).toContain("Conversion Rates");
+    expect(result.payload).toContain("A (Control)");
+    expect(result.payload).toContain("B (Treatment)");
+    expect(result.payload).toContain("Confidence Level");
+    expect(result.payload).toContain("p-value");
   });
 
-  it("should insert sample size template", function() {
-    var result = sample_size.execute({
-      parameters: [],
+  it("should detect statistically significant difference", function() {
+    // Large difference with large sample sizes should be significant
+    var result = ab_test.execute({
+      parameters: ["100", "10000", "200", "10000"],
       fullText: "",
       userSettings: {},
       preferences: {}
     });
     expect(result.status).toBe("success");
-    expect(result.payload).toContain("math");
-    expect(result.payload).toContain("Sample Size Calculator");
-    expect(result.payload).toContain("baseline_conversion_rate");
-    expect(result.payload).toContain("minimum_detectable_effect");
+    expect(result.payload).toContain("Winner: Variant B");
+  });
+
+  it("should detect non-significant results", function() {
+    // Small difference with small sample sizes
+    var result = ab_test.execute({
+      parameters: ["10", "100", "12", "100"],
+      fullText: "",
+      userSettings: {},
+      preferences: {}
+    });
+    expect(result.status).toBe("success");
+    expect(result.payload).toContain("Not Significant");
+  });
+
+  it("should accept custom confidence level", function() {
+    var result = ab_test.execute({
+      parameters: ["250", "10000", "300", "10000", "0.99"],
+      fullText: "",
+      userSettings: {},
+      preferences: {}
+    });
+    expect(result.status).toBe("success");
+    expect(result.payload).toContain("99%");
+  });
+
+  it("should validate ab_test inputs", function() {
+    var result = ab_test.execute({
+      parameters: ["100", "50", "100", "100"],  // conversions > sample size
+      fullText: "",
+      userSettings: {},
+      preferences: {}
+    });
+    expect(result.status).toBe("error");
+  });
+
+  it("should calculate sample size for A/B test", function() {
+    var result = sample_size.execute({
+      parameters: ["250", "10000", "0.1"],
+      fullText: "",
+      userSettings: {},
+      preferences: {}
+    });
+    expect(result.status).toBe("success");
+    expect(result.payload).toContain("Sample Size Calculator Results");
+    expect(result.payload).toContain("Baseline Conversion Rate");
+    expect(result.payload).toContain("Per Variant");
+    expect(result.payload).toContain("Total (Both Variants)");
+  });
+
+  it("should calculate sample size with custom confidence", function() {
+    var result = sample_size.execute({
+      parameters: ["250", "10000", "0.1", "0.99"],
+      fullText: "",
+      userSettings: {},
+      preferences: {}
+    });
+    expect(result.status).toBe("success");
+    expect(result.payload).toContain("99%");
+  });
+
+  it("should validate sample_size inputs", function() {
+    var result = sample_size.execute({
+      parameters: ["250", "10000", "-0.1"],  // negative lift
+      fullText: "",
+      userSettings: {},
+      preferences: {}
+    });
+    expect(result.status).toBe("error");
   });
 
   it("should insert retention/churn template", function() {
@@ -283,7 +350,7 @@ describe("Business Extension - Template Commands", function() {
     expect(result.payload).toContain("math");
     expect(result.payload).toContain("Retention & Churn");
     expect(result.payload).toContain("monthly_churn_rate");
-    expect(result.payload).toContain("average_customer_lifetime");
+    expect(result.payload).toContain("average_lifetime_months");
   });
 
   it("should insert LTV template", function() {

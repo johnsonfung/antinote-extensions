@@ -1,6 +1,6 @@
 {
   "name": "business",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "author": "johnsonfung",
   "description": "Business metrics and analytics for growth, A/B testing, forecasting, SaaS metrics, and more",
   "license": "MIT",
@@ -33,12 +33,12 @@
     },
     {
       "name": "ab_test",
-      "description": "A/B test statistical significance calculator template",
+      "description": "Calculate A/B test statistical significance from conversion data",
       "type": "insert"
     },
     {
       "name": "sample_size",
-      "description": "Sample size calculator for A/B tests template",
+      "description": "Calculate required sample size for A/B tests",
       "type": "insert"
     },
     {

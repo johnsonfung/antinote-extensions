@@ -5,7 +5,7 @@
   // Create the extension root with metadata
   const extensionRoot = new Extension({
     name: extensionName,
-    version: "1.0.5",
+    version: "1.0.6",
     endpoints: [], // No external API endpoints
     requiredAPIKeys: [], // No API keys required
     author: "Antinote Community",
@@ -16,46 +16,53 @@
   const roll = new Command({
     name: "roll",
     parameters: [
-      new Parameter({type: "string", name: "dieType", helpText: "Type of die to roll (e.g., D6, D20)", default: "D6", required: false}),
-      new Parameter({type: "int", name: "numberOfDice", helpText: "Number of dice to roll", default: 1, required: false})
+      new Parameter({type: "string", name: "dice", helpText: "Dice to roll (e.g., 20, d20, 4d20)", default: "d6", required: false})
     ],
     type: "insert",
-    helpText: "Roll dice. Default is one D6. Specify die type (e.g., D20) and optionally the number of dice to roll.",
+    helpText: "Roll dice. Accepts number (20), die notation (d20), or multiple dice (4d20). Default is d6.",
     tutorials: [
       new TutorialCommand({command: "roll", description: "Roll one D6 (six-sided die)."}),
-      new TutorialCommand({command: "roll(D20)", description: "Roll one D20 (twenty-sided die)."}),
-      new TutorialCommand({command: "roll(D6, 3)", description: "Roll three D6 dice."}),
-      new TutorialCommand({command: "roll(D12, 2)", description: "Roll two D12 dice."}),
-      new TutorialCommand({command: "roll(D100, 1)", description: "Roll one D100 (percentile die)."})
+      new TutorialCommand({command: "roll(20)", description: "Roll one D20 (twenty-sided die)."}),
+      new TutorialCommand({command: "roll(d20)", description: "Roll one D20 (twenty-sided die)."}),
+      new TutorialCommand({command: "roll(4d6)", description: "Roll four D6 dice."})
     ],
     extension: extensionRoot
   });
 
   roll.execute = function(payload) {
-    const [dieType, numberOfDice] = this.getParsedParams(payload);
+    const [diceParam] = this.getParsedParams(payload);
+    const input = diceParam.toString().toLowerCase().trim();
 
-    // Parse die type (e.g., "D6", "d20", "6")
-    const dieTypeUpper = dieType.toString().toUpperCase();
+    let numberOfDice = 1;
     let sides;
 
-    // Extract number from die type string
-    if (dieTypeUpper.startsWith('D')) {
-      sides = parseInt(dieTypeUpper.substring(1));
+    // Parse the input format
+    // Formats: "20" (just number), "d20" (die notation), "4d20" (multiple dice notation)
+    const diceNotationMatch = input.match(/^(\d+)?d(\d+)$/);
+    const plainNumberMatch = input.match(/^(\d+)$/);
+
+    if (diceNotationMatch) {
+      // Format: "d20" or "4d20"
+      numberOfDice = diceNotationMatch[1] ? parseInt(diceNotationMatch[1]) : 1;
+      sides = parseInt(diceNotationMatch[2]);
+    } else if (plainNumberMatch) {
+      // Format: "20" (just the number of sides)
+      sides = parseInt(plainNumberMatch[1]);
     } else {
-      sides = parseInt(dieTypeUpper);
+      return new ReturnObject({status: "error", message: "Invalid format. Use number (20), die notation (d20), or multiple dice (4d20)."});
     }
 
     // Validation
     if (isNaN(sides) || sides < 2) {
-      return new ReturnObject({status: "error", message: "Die type must be at least D2 (e.g., D6, D20)."});
+      return new ReturnObject({status: "error", message: "Die must have at least 2 sides."});
     }
 
     if (sides > 1000) {
-      return new ReturnObject({status: "error", message: "Die type cannot exceed D1000."});
+      return new ReturnObject({status: "error", message: "Die cannot exceed 1000 sides."});
     }
 
     if (numberOfDice < 1) {
-      return new ReturnObject({status: "error", message: "Number of dice must be at least 1."});
+      return new ReturnObject({status: "error", message: "Must roll at least 1 die."});
     }
 
     if (numberOfDice > 100) {
@@ -65,14 +72,20 @@
     // Roll the dice
     const results = [];
     for (let i = 0; i < numberOfDice; i++) {
-      const roll = Math.floor(Math.random() * sides) + 1;
-      results.push(roll);
+      const rollResult = Math.floor(Math.random() * sides) + 1;
+      results.push(rollResult);
     }
 
     // Format output
-    const output = results.length === 1 ? results[0].toString() : results.join(", ");
+    const total = results.reduce((sum, val) => sum + val, 0);
+    let output;
+    if (results.length === 1) {
+      output = results[0].toString();
+    } else {
+      output = `${results.join(" + ")} = ${total}`;
+    }
 
-    const message = `Rolled ${numberOfDice} D${sides}${numberOfDice > 1 ? " dice" : " die"}.`;
+    const message = `Rolled ${numberOfDice}d${sides}.`;
     return new ReturnObject({status: "success", message, payload: output});
   };
 })();

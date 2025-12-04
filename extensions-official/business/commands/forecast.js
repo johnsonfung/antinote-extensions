@@ -28,6 +28,7 @@ forecast.execute = function(payload) {
   const periodsToForecast = parseInt(params[0]) || 3;
   const showAnalysis = params[1];
   const fullText = payload.fullText || "";
+  const userSettings = payload.userSettings || null;
 
   if (!fullText.trim()) {
     return new ReturnObject({
@@ -36,9 +37,11 @@ forecast.execute = function(payload) {
     });
   }
 
-  // Extract all numbers from the text
+  // Extract all numbers from the text, excluding the command line itself
   const numbers = [];
-  const matches = fullText.match(/-?\d+\.?\d*/g);
+  // Remove the command line (e.g., "::forecast(3)") before extracting numbers
+  const textWithoutCommand = fullText.replace(/::forecast\([^)]*\)/gi, '');
+  const matches = textWithoutCommand.match(/-?\d+\.?\d*/g);
 
   if (matches) {
     matches.forEach(match => {
@@ -76,8 +79,8 @@ forecast.execute = function(payload) {
   let output = `# Forecast Analysis\n\n`;
   output += `## Historical Data\n\n`;
   output += `**Data Points**: ${numbers.length}\n`;
-  output += `**Range**: ${Stats.formatNumber(Math.min(...numbers), 2)} to ${Stats.formatNumber(Math.max(...numbers), 2)}\n`;
-  output += `**Average Change**: ${Stats.formatNumber(avgChange, 2)} per period (${Stats.formatPercent(avgPercentChange, 2)})\n`;
+  output += `**Range**: ${Stats.formatNumber(Math.min(...numbers), 2, userSettings)} to ${Stats.formatNumber(Math.max(...numbers), 2, userSettings)}\n`;
+  output += `**Average Change**: ${Stats.formatNumber(avgChange, 2, userSettings)} per period (${Stats.formatPercent(avgPercentChange, 2, userSettings)})\n`;
   output += `**Trend**: ${slope > 0 ? '📈 Upward' : slope < 0 ? '📉 Downward' : '➡️ Flat'}\n\n`;
 
   output += `## Forecast (Next ${periodsToForecast} Periods)\n\n`;
@@ -105,7 +108,7 @@ forecast.execute = function(payload) {
       upper: upperBound
     });
 
-    output += `| ${periodIndex + 1} | ${Stats.formatNumber(pointForecast, 2)} | ${Stats.formatNumber(lowerBound, 2)} | ${Stats.formatNumber(upperBound, 2)} |\n`;
+    output += `| ${periodIndex + 1} | ${Stats.formatNumber(pointForecast, 2, userSettings)} | ${Stats.formatNumber(lowerBound, 2, userSettings)} | ${Stats.formatNumber(upperBound, 2, userSettings)} |\n`;
   }
 
   // If showAnalysis is false, just return the simple forecast list
@@ -113,7 +116,7 @@ forecast.execute = function(payload) {
     let simpleOutput = '';
     for (let i = 0; i < forecasts.length; i++) {
       const f = forecasts[i];
-      simpleOutput += `${Stats.formatNumber(f.point, 2)} (lower: ${Stats.formatNumber(f.lower, 2)}, upper: ${Stats.formatNumber(f.upper, 2)})`;
+      simpleOutput += `${Stats.formatNumber(f.point, 2, userSettings)} (lower: ${Stats.formatNumber(f.lower, 2, userSettings)}, upper: ${Stats.formatNumber(f.upper, 2, userSettings)})`;
       if (i < forecasts.length - 1) {
         simpleOutput += '\n';
       }
@@ -126,7 +129,7 @@ forecast.execute = function(payload) {
   }
 
   output += `\n## Forecast Method\n\n`;
-  output += `**Regression Equation**: y = ${Stats.formatNumber(slope, 4)}x + ${Stats.formatNumber(intercept, 2)}\n\n`;
+  output += `**Regression Equation**: y = ${Stats.formatNumber(slope, 4, userSettings)}x + ${Stats.formatNumber(intercept, 2, userSettings)}\n\n`;
   output += `This forecast uses **linear regression** to identify the underlying trend in your historical data. `;
   output += `The point forecast represents the most likely value, while the confidence intervals show the range where we expect the actual value to fall 90% of the time.\n\n`;
 
@@ -137,7 +140,7 @@ forecast.execute = function(payload) {
   output += `Notice the intervals get wider further into the future—this reflects increasing uncertainty.\n\n`;
 
   if (stdError / Stats.mean(numbers) > 0.2) {
-    output += `**⚠️ High Variability**: Your historical data shows significant variation (${Stats.formatPercent(stdError / Stats.mean(numbers), 1)} coefficient of variation). `;
+    output += `**⚠️ High Variability**: Your historical data shows significant variation (${Stats.formatPercent(stdError / Stats.mean(numbers), 1, userSettings)} coefficient of variation). `;
     output += `This means forecasts are less reliable. Consider:\n`;
     output += `- Are there seasonal patterns not captured by this model?\n`;
     output += `- Are there external factors affecting the trend?\n`;
@@ -145,11 +148,11 @@ forecast.execute = function(payload) {
   }
 
   if (slope > 0) {
-    output += `**📈 Upward Trend**: Your data shows growth of approximately ${Stats.formatNumber(slope, 2)} per period. `;
-    output += `If this trend continues, you'll reach ${Stats.formatNumber(forecasts[forecasts.length - 1].point, 2)} by period ${forecasts[forecasts.length - 1].period}.\n\n`;
+    output += `**📈 Upward Trend**: Your data shows growth of approximately ${Stats.formatNumber(slope, 2, userSettings)} per period. `;
+    output += `If this trend continues, you'll reach ${Stats.formatNumber(forecasts[forecasts.length - 1].point, 2, userSettings)} by period ${forecasts[forecasts.length - 1].period}.\n\n`;
   } else if (slope < 0) {
-    output += `**📉 Downward Trend**: Your data shows a decline of approximately ${Stats.formatNumber(Math.abs(slope), 2)} per period. `;
-    output += `If this trend continues, you'll reach ${Stats.formatNumber(forecasts[forecasts.length - 1].point, 2)} by period ${forecasts[forecasts.length - 1].period}.\n\n`;
+    output += `**📉 Downward Trend**: Your data shows a decline of approximately ${Stats.formatNumber(Math.abs(slope), 2, userSettings)} per period. `;
+    output += `If this trend continues, you'll reach ${Stats.formatNumber(forecasts[forecasts.length - 1].point, 2, userSettings)} by period ${forecasts[forecasts.length - 1].period}.\n\n`;
   } else {
     output += `**➡️ Flat Trend**: Your data shows little to no clear trend. Forecasts will be close to recent average values.\n\n`;
   }

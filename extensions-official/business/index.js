@@ -3,7 +3,7 @@ const extensionName = "business";
 // Create extension root
 const extensionRoot = new Extension({
   name: extensionName,
-  version: "1.0.2",
+  version: "1.0.3",
   endpoints: [],
   requiredAPIKeys: [],
   author: "johnsonfung",

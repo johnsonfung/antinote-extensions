@@ -145,9 +145,9 @@ describe("Dice Extension - Command Execution Tests", function() {
     expect(value).toBeLessThanOrEqual(6);
   });
 
-  it("should roll a D20 when specified", function() {
+  it("should roll a D20 with just number (20)", function() {
     var payload = {
-      parameters: ["D20"],
+      parameters: ["20"],
       fullText: "",
       userSettings: {}
     };
@@ -160,29 +160,7 @@ describe("Dice Extension - Command Execution Tests", function() {
     expect(value).toBeLessThanOrEqual(20);
   });
 
-  it("should roll multiple dice and return comma-separated results", function() {
-    var payload = {
-      parameters: ["D6", "3"],
-      fullText: "",
-      userSettings: {}
-    };
-
-    var result = roll.execute(payload);
-    expect(result.status).toBe("success");
-    expect(result.payload).toContain(", ");
-
-    var values = result.payload.split(", ");
-    expect(values.length).toBe(3);
-
-    // Check each value is in valid range
-    for (var i = 0; i < values.length; i++) {
-      var value = parseInt(values[i]);
-      expect(value).toBeGreaterThanOrEqual(1);
-      expect(value).toBeLessThanOrEqual(6);
-    }
-  });
-
-  it("should handle lowercase die type (d20)", function() {
+  it("should roll a D20 with die notation (d20)", function() {
     var payload = {
       parameters: ["d20"],
       fullText: "",
@@ -197,9 +175,22 @@ describe("Dice Extension - Command Execution Tests", function() {
     expect(value).toBeLessThanOrEqual(20);
   });
 
-  it("should handle die type without 'D' prefix", function() {
+  it("should roll multiple dice with notation (4d6)", function() {
     var payload = {
-      parameters: ["12"],
+      parameters: ["4d6"],
+      fullText: "",
+      userSettings: {}
+    };
+
+    var result = roll.execute(payload);
+    expect(result.status).toBe("success");
+    expect(result.payload).toContain(" + ");
+    expect(result.payload).toContain(" = ");
+  });
+
+  it("should handle uppercase die notation (D20)", function() {
+    var payload = {
+      parameters: ["D20"],
       fullText: "",
       userSettings: {}
     };
@@ -209,48 +200,36 @@ describe("Dice Extension - Command Execution Tests", function() {
 
     var value = parseInt(result.payload);
     expect(value).toBeGreaterThanOrEqual(1);
-    expect(value).toBeLessThanOrEqual(12);
+    expect(value).toBeLessThanOrEqual(20);
   });
 
-  it("should return error for invalid die type (D1)", function() {
+  it("should return error for invalid die (d1)", function() {
     var payload = {
-      parameters: ["D1"],
+      parameters: ["d1"],
       fullText: "",
       userSettings: {}
     };
 
     var result = roll.execute(payload);
     expect(result.status).toBe("error");
-    expect(result.message).toContain("at least D2");
+    expect(result.message).toContain("at least 2 sides");
   });
 
-  it("should return error for die type exceeding D1000", function() {
+  it("should return error for die exceeding 1000 sides", function() {
     var payload = {
-      parameters: ["D1001"],
+      parameters: ["d1001"],
       fullText: "",
       userSettings: {}
     };
 
     var result = roll.execute(payload);
     expect(result.status).toBe("error");
-    expect(result.message).toContain("cannot exceed D1000");
-  });
-
-  it("should return error for zero dice", function() {
-    var payload = {
-      parameters: ["D6", "0"],
-      fullText: "",
-      userSettings: {}
-    };
-
-    var result = roll.execute(payload);
-    expect(result.status).toBe("error");
-    expect(result.message).toContain("at least 1");
+    expect(result.message).toContain("cannot exceed 1000");
   });
 
   it("should return error for more than 100 dice", function() {
     var payload = {
-      parameters: ["D6", "101"],
+      parameters: ["101d6"],
       fullText: "",
       userSettings: {}
     };
@@ -260,9 +239,21 @@ describe("Dice Extension - Command Execution Tests", function() {
     expect(result.message).toContain("Cannot roll more than 100");
   });
 
+  it("should return error for invalid format", function() {
+    var payload = {
+      parameters: ["abc"],
+      fullText: "",
+      userSettings: {}
+    };
+
+    var result = roll.execute(payload);
+    expect(result.status).toBe("error");
+    expect(result.message).toContain("Invalid format");
+  });
+
   it("should return single number for one die", function() {
     var payload = {
-      parameters: ["D6", "1"],
+      parameters: ["d6"],
       fullText: "",
       userSettings: {}
     };
@@ -270,9 +261,9 @@ describe("Dice Extension - Command Execution Tests", function() {
     var result = roll.execute(payload);
     expect(result.status).toBe("success");
 
-    // Should be a number without commas
-    var hasComma = result.payload.indexOf(",") !== -1;
-    expect(hasComma).toBe(false);
+    // Should be a single number without + or =
+    var hasPlus = result.payload.indexOf("+") !== -1;
+    expect(hasPlus).toBe(false);
   });
 
   it("should return ReturnObject with correct structure", function() {

@@ -26,6 +26,7 @@ growth.execute = function(payload) {
   const params = this.getParsedParams(payload);
   const showAnalysis = params[0];
   const fullText = payload.fullText || "";
+  const userSettings = payload.userSettings || null;
 
   if (!fullText.trim()) {
     return new ReturnObject({
@@ -64,15 +65,15 @@ growth.execute = function(payload) {
     const change = Stats.percentageChange(current, next);
     growthRates.push(change);
 
-    const changeFormatted = Stats.formatPercent(change, 2);
+    const changeFormatted = Stats.formatPercent(change, 2, userSettings);
     const absoluteChange = next - current;
 
-    let line = `${Stats.formatNumber(current, 2)} → ${Stats.formatNumber(next, 2)} is **${changeFormatted}**`;
+    let line = `${Stats.formatNumber(current, 2, userSettings)} → ${Stats.formatNumber(next, 2, userSettings)} is **${changeFormatted}**`;
 
     if (absoluteChange >= 0) {
-      line += ` ⬆️ (+${Stats.formatNumber(absoluteChange, 2)})`;
+      line += ` ⬆️ (+${Stats.formatNumber(absoluteChange, 2, userSettings)})`;
     } else {
-      line += ` ⬇️ (${Stats.formatNumber(absoluteChange, 2)})`;
+      line += ` ⬇️ (${Stats.formatNumber(absoluteChange, 2, userSettings)})`;
     }
 
     growthLines.push(line);
@@ -97,14 +98,14 @@ growth.execute = function(payload) {
   const stdDev = Stats.standardDeviation(growthRates);
 
   output += `\n## Summary Statistics\n\n`;
-  output += `- **Average Growth Rate**: ${Stats.formatPercent(avgGrowth, 2)}\n`;
-  output += `- **Standard Deviation**: ${Stats.formatPercent(stdDev, 2)}\n`;
+  output += `- **Average Growth Rate**: ${Stats.formatPercent(avgGrowth, 2, userSettings)}\n`;
+  output += `- **Standard Deviation**: ${Stats.formatPercent(stdDev, 2, userSettings)}\n`;
 
   // Find min and max growth
   const minGrowth = Math.min(...growthRates);
   const maxGrowth = Math.max(...growthRates);
-  output += `- **Minimum Growth**: ${Stats.formatPercent(minGrowth, 2)}\n`;
-  output += `- **Maximum Growth**: ${Stats.formatPercent(maxGrowth, 2)}\n`;
+  output += `- **Minimum Growth**: ${Stats.formatPercent(minGrowth, 2, userSettings)}\n`;
+  output += `- **Maximum Growth**: ${Stats.formatPercent(maxGrowth, 2, userSettings)}\n`;
 
   // Calculate CAGR (Compound Annual Growth Rate equivalent)
   const totalPeriods = numbers.length - 1;
@@ -112,20 +113,20 @@ growth.execute = function(payload) {
   const endValue = numbers[numbers.length - 1];
   const cagr = Math.pow(endValue / startValue, 1 / totalPeriods) - 1;
 
-  output += `- **Compound Growth Rate** (CAGR equivalent): ${Stats.formatPercent(cagr, 2)}\n`;
+  output += `- **Compound Growth Rate** (CAGR equivalent): ${Stats.formatPercent(cagr, 2, userSettings)}\n`;
 
   output += `\n## What This Means\n\n`;
-  output += `The **average growth rate** of ${Stats.formatPercent(avgGrowth, 2)} represents the mean percentage change between consecutive values. `;
+  output += `The **average growth rate** of ${Stats.formatPercent(avgGrowth, 2, userSettings)} represents the mean percentage change between consecutive values. `;
 
   if (stdDev > 0.5) {
-    output += `However, with a standard deviation of ${Stats.formatPercent(stdDev, 2)}, your growth is **highly variable**—some periods show rapid growth while others may decline.\n\n`;
+    output += `However, with a standard deviation of ${Stats.formatPercent(stdDev, 2, userSettings)}, your growth is **highly variable**—some periods show rapid growth while others may decline.\n\n`;
   } else if (stdDev > 0.2) {
-    output += `The standard deviation of ${Stats.formatPercent(stdDev, 2)} shows **moderate variability** in your growth rates.\n\n`;
+    output += `The standard deviation of ${Stats.formatPercent(stdDev, 2, userSettings)} shows **moderate variability** in your growth rates.\n\n`;
   } else {
-    output += `The low standard deviation of ${Stats.formatPercent(stdDev, 2)} indicates **consistent, stable growth** across periods.\n\n`;
+    output += `The low standard deviation of ${Stats.formatPercent(stdDev, 2, userSettings)} indicates **consistent, stable growth** across periods.\n\n`;
   }
 
-  output += `The **compound growth rate** (${Stats.formatPercent(cagr, 2)}) shows the equivalent consistent rate that would take you from ${Stats.formatNumber(startValue, 2)} to ${Stats.formatNumber(endValue, 2)} over ${totalPeriods} period(s). `;
+  output += `The **compound growth rate** (${Stats.formatPercent(cagr, 2, userSettings)}) shows the equivalent consistent rate that would take you from ${Stats.formatNumber(startValue, 2, userSettings)} to ${Stats.formatNumber(endValue, 2, userSettings)} over ${totalPeriods} period(s). `;
 
   if (Math.abs(cagr - avgGrowth) > 0.05) {
     output += `This differs from your average growth rate, suggesting non-linear growth patterns.\n`;
