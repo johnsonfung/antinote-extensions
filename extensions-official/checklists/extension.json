@@ -1,6 +1,6 @@
 {
   "name": "checklists",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": "johnsonfung",
   "description": "Commands for managing checklist items - move or remove checked items",
   "license": "MIT",

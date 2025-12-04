@@ -87,7 +87,7 @@ describe("Checklists Extension - Metadata Validation", function() {
 describe("Checklists Extension - Command Execution Tests", function() {
 
   describe("checked_to_bottom command", function() {
-    it("should move checked items to bottom", function() {
+    it("should move checked items to bottom with blank line separator", function() {
       var payload = {
         parameters: [],
         fullText: "Task 1 /x\nTask 2\nTask 3 /x\nTask 4",
@@ -99,7 +99,7 @@ describe("Checklists Extension - Command Execution Tests", function() {
 
       var result = checked_to_bottom.execute(payload);
       expect(result.status).toBe("success");
-      expect(result.payload).toBe("Task 2\nTask 4\nTask 1 /x\nTask 3 /x");
+      expect(result.payload).toBe("Task 2\nTask 4\n\nTask 1 /x\nTask 3 /x");
     });
 
     it("should return original if no checked items", function() {

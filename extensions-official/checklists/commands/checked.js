@@ -87,8 +87,8 @@
       });
     }
 
-    // Combine: unchecked items first, then checked items
-    const result = uncheckedLines.concat(checkedLines).join('\n');
+    // Combine: unchecked items first, blank line, then checked items
+    const result = uncheckedLines.join('\n') + '\n\n' + checkedLines.join('\n');
 
     return new ReturnObject({
       status: "success",
