@@ -13,12 +13,17 @@ function Command(config) {
   this.helpText = config.helpText ||  "This command replaces text in a line.";
   this.tutorials = config.tutorials || [];
 
+  // Allow execute to be defined inline in the config object
+  if (typeof config.execute === "function") {
+    this.execute = config.execute;
+  }
+
   if (config.extension && typeof config.extension.register_command === "function") {
     config.extension.register_command(this);
   }
 
   // Add this command to the global registry
-    this.commandRegistry = global.commandRegistry;
+  this.commandRegistry = global.commandRegistry;
   global.commandRegistry.push(this);
 }
 

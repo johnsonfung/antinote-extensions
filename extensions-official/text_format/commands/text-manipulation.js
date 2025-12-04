@@ -18,8 +18,8 @@
     type: "replaceAll",
     helpText: "Find and replace text throughout the entire document.",
     tutorials: [
-      new TutorialCommand("replace(old, new)", "Replace 'old' with 'new'"),
-      new TutorialCommand("replace(foo, bar)", "Replace all 'foo' with 'bar'")
+      new TutorialCommand({command: "replace(old, new)", description: "Replace 'old' with 'new'"}),
+      new TutorialCommand({command: "replace(foo, bar)", description: "Replace all 'foo' with 'bar'"})
     ],
     extension: extensionRoot
   });

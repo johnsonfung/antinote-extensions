@@ -67,7 +67,9 @@
 
   // Format number as money with dollar sign
   const formatDollar = (amount) => {
-    return "$" + amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const isNegative = amount < 0;
+    const absAmount = Math.abs(amount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    return isNegative ? "-$" + absAmount : "$" + absAmount;
   };
 
   // Format percentage
@@ -85,8 +87,10 @@
     let balance = initial;
     const monthlyRate = annualRate / 12;
     const totalMonths = years * 12;
+    const wholeMonths = Math.floor(totalMonths);
+    const fractionalMonth = totalMonths - wholeMonths;
 
-    for (let month = 1; month <= totalMonths; month++) {
+    for (let month = 1; month <= wholeMonths; month++) {
       // Add monthly contribution
       balance += monthlyContribution;
 
@@ -99,13 +103,23 @@
       balance = balance * (1 + monthlyRate);
     }
 
+    // Handle fractional month: apply proportional interest
+    if (fractionalMonth > 0) {
+      // Apply simple interest for the fractional period
+      balance = balance * (1 + monthlyRate * fractionalMonth);
+    }
+
     return balance;
   };
 
   // Calculate total contributions
   const calculateTotalContributions = (initial, annualContribution, monthlyContribution, years) => {
-    const totalAnnual = annualContribution * years;
-    const totalMonthly = monthlyContribution * 12 * years;
+    const totalMonths = Math.floor(years * 12);
+    // Annual contributions happen at start of each year (months 13, 25, 37, etc.)
+    // So for totalMonths, we get floor((totalMonths - 1) / 12) annual contributions
+    const numAnnualContributions = totalMonths > 0 ? Math.floor((totalMonths - 1) / 12) : 0;
+    const totalAnnual = annualContribution * numAnnualContributions;
+    const totalMonthly = monthlyContribution * totalMonths;
     return initial + totalAnnual + totalMonthly;
   };
 

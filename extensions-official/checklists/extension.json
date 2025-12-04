@@ -1,0 +1,29 @@
+{
+  "name": "checklists",
+  "version": "1.0.0",
+  "author": "johnsonfung",
+  "description": "Commands for managing checklist items - move or remove checked items",
+  "license": "MIT",
+  "category": "Text Manipulation",
+  "dataScope": "full",
+  "endpoints": [],
+  "requiredAPIKeys": [],
+  "files": [
+    "index.js",
+    "commands/checked.js"
+  ],
+  "commands": [
+    {
+      "name": "checked_to_bottom",
+      "description": "Move all checked items to the bottom of the list",
+      "type": "replaceAll"
+    },
+    {
+      "name": "remove_checked",
+      "description": "Remove all checked items from the list",
+      "type": "replaceAll"
+    }
+  ],
+  "official": true,
+  "includedByDefault": true
+}

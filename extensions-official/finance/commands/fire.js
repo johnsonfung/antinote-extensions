@@ -55,12 +55,20 @@
     output += `- **Monthly Income**: ${Calc.formatDollar(monthlyIncome)}\n\n`;
 
     output += `### What This Means:\n`;
-    output += `Using the ${Calc.formatPercent(withdrawalRate)} rule (a widely-used safe withdrawal rate), `;
-    output += `you can withdraw ${Calc.formatDollar(annualIncome)} per year from your ${Calc.formatDollar(amountSaved)} portfolio `;
-    output += `without depleting your principal. This assumes your investments continue to grow at roughly the withdrawal rate.\n\n`;
+    output += `At a ${Calc.formatPercent(withdrawalRate)} withdrawal rate, `;
+    output += `you can withdraw ${Calc.formatDollar(annualIncome)} per year from your ${Calc.formatDollar(amountSaved)} portfolio.\n\n`;
 
-    output += `The ${Calc.formatPercent(withdrawalRate)} rule is based on historical market data suggesting this withdrawal rate `;
-    output += `provides a high probability of your portfolio lasting 30+ years, even through market downturns.\n\n`;
+    if (withdrawalRate === 0.04) {
+      output += `The 4.00% rule is based on the Trinity Study and historical market data, suggesting this withdrawal rate `;
+      output += `provides a high probability of your portfolio lasting 30+ years, even through market downturns.\n\n`;
+    } else if (withdrawalRate < 0.04) {
+      output += `A ${Calc.formatPercent(withdrawalRate)} withdrawal rate is more conservative than the traditional 4% rule, `;
+      output += `which may provide greater portfolio longevity and a larger safety margin against market downturns.\n\n`;
+    } else {
+      output += `**Note:** A ${Calc.formatPercent(withdrawalRate)} withdrawal rate is higher than the traditional 4% rule. `;
+      output += `Higher withdrawal rates increase the risk of depleting your portfolio over a 30-year retirement, `;
+      output += `especially during extended market downturns. Consider your risk tolerance and retirement timeline carefully.\n\n`;
+    }
 
     output += `## FIRE Number Calculator\n`;
     output += `To support different annual expense levels, you would need:\n`;
@@ -111,35 +119,41 @@
       return new ReturnObject({status: "error", message: "Please provide valid savings, contributions, and expense amounts."});
     }
 
-    // Calculate FIRE number (amount needed to retire)
+    // Today's annual expenses and FIRE number (for reference)
     const annualExpenses = monthlyExpenses * 12;
-    const fireNumber = annualExpenses / postFireRate;
+    const fireNumberToday = annualExpenses / postFireRate;
 
-    // Calculate years to FIRE
+    // Calculate years to FIRE with inflation-adjusted target
+    // The FIRE number grows with inflation, so we need to find when portfolio >= inflation-adjusted FIRE number
     let yearsToFIRE = 0;
     let balance = currentSavings;
     const monthlyPreFireRate = preFireRate / 12;
+    const monthlyInflationRate = Math.pow(1 + inflationRate, 1/12) - 1;
 
-    if (balance >= fireNumber) {
+    // Calculate the inflation-adjusted FIRE number at month 0
+    let currentFireNumber = fireNumberToday;
+
+    if (balance >= currentFireNumber) {
       yearsToFIRE = 0;
-    } else if (monthlyAdditions === 0) {
-      // No contributions - just compound growth
-      yearsToFIRE = Math.log(fireNumber / balance) / Math.log(1 + preFireRate);
     } else {
-      // Calculate with monthly contributions
+      // Calculate with monthly contributions and inflation-adjusted target
       let months = 0;
       const maxMonths = 100 * 12; // 100 year cap
 
-      while (balance < fireNumber && months < maxMonths) {
+      while (balance < currentFireNumber && months < maxMonths) {
+        // Grow portfolio
         balance = balance * (1 + monthlyPreFireRate) + monthlyAdditions;
+        // Grow FIRE target with inflation
+        currentFireNumber = currentFireNumber * (1 + monthlyInflationRate);
         months++;
       }
 
       yearsToFIRE = months / 12;
     }
 
-    // Calculate future value at FIRE
-    const fvNestEgg = fireNumber;
+    // Calculate future values at FIRE
+    const fvNestEgg = balance; // Actual portfolio value when FIRE is reached
+    const fvFireNumber = currentFireNumber; // Inflation-adjusted FIRE target
 
     // Calculate inflation-adjusted expenses at retirement
     const fvMonthlyExpenses = monthlyExpenses * Math.pow(1 + inflationRate, yearsToFIRE);
@@ -148,7 +162,7 @@
     // Calculate present value of expenses
     const pvMonthlyExpenses = monthlyExpenses;
 
-    // Verify the math
+    // Withdrawal amount based on the actual portfolio at FIRE
     const withdrawalAmount = fvNestEgg * postFireRate;
 
     let output = `# FIRE Plan\n\n`;
@@ -159,9 +173,10 @@
     output += `- **Annual Expenses (Today)**: ${Calc.formatDollar(annualExpenses)}\n\n`;
 
     output += `## Your FIRE Number\n`;
-    output += `- **Target Portfolio**: ${Calc.formatDollar(fireNumber)}\n`;
+    output += `- **Target Portfolio (Today's Dollars)**: ${Calc.formatDollar(fireNumberToday)}\n`;
+    output += `- **Target Portfolio (Inflation-Adjusted)**: ${Calc.formatDollar(fvFireNumber)}\n`;
     output += `- **Based On**: ${Calc.formatPercent(postFireRate)} safe withdrawal rate\n`;
-    output += `- **Gap to Close**: ${Calc.formatDollar(Math.max(0, fireNumber - currentSavings))}\n\n`;
+    output += `- **Gap to Close (Today)**: ${Calc.formatDollar(Math.max(0, fireNumberToday - currentSavings))}\n\n`;
 
     if (yearsToFIRE >= 100) {
       output += `## ⚠️ Timeline Not Achievable\n`;
@@ -205,9 +220,9 @@
       output += `- **Estimated Savings Rate**: ${savingsRate.toFixed(1)}%\n\n`;
 
       output += `### Ways to Accelerate FIRE:\n`;
-      output += `1. **Increase savings rate**: Every $100/month extra saves ~${(100 * 12 * yearsToFIRE / fireNumber * 100).toFixed(2)}% more time\n`;
-      output += `2. **Reduce expenses**: Every $100/month less in retirement reduces your FIRE number by ${Calc.formatDollar(100 * 12 / postFireRate)}\n`;
-      output += `3. **Boost returns**: Just 1% higher return could shave years off your timeline\n`;
+      output += `1. **Increase savings rate**: Higher monthly contributions accelerate portfolio growth\n`;
+      output += `2. **Reduce expenses**: Every $100/month less in retirement reduces your FIRE number by ${Calc.formatDollar(100 * 12 / postFireRate)} (in today's dollars)\n`;
+      output += `3. **Boost returns**: Higher investment returns help your portfolio outpace inflation\n`;
     }
 
     return new ReturnObject({status: "success", message: "FIRE plan generated", payload: output});

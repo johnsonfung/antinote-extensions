@@ -9,7 +9,7 @@
 
   const extensionRoot = new Extension({
     name: extensionName,
-    version: "1.0.5",
+    version: "1.0.6",
     endpoints: [], // No endpoints - uses ai_providers
     requiredAPIKeys: [], // No API keys - uses ai_providers
     author: "johnsonfung",
@@ -21,34 +21,34 @@
 
   // Register extension preferences
 
-  // Polish command preferences - custom prompts for each professionalism level
+  // Polish command preferences - custom prompts for each level
   const polishLevel1Pref = new Preference({
     key: "polish_level1_prompt",
-    label: "Polish Level 1 Prompt (Casual)",
+    label: "Polish Level 1 Prompt (Typos & Grammar)",
     type: "paragraph",
-    defaultValue: "Polish this text to be clear and casual while maintaining the author's voice. Keep the tone friendly and approachable.",
+    defaultValue: "Fix clear typos, spelling mistakes, and grammar errors in this text. Make minimal changes - only correct obvious mistakes while preserving the original wording and style.",
     options: null,
-    helpText: "System prompt for level 1 polish (casual/friendly)"
+    helpText: "System prompt for level 1 polish (typos, spelling, grammar fixes only)"
   });
   extensionRoot.register_preference(polishLevel1Pref);
 
   const polishLevel2Pref = new Preference({
     key: "polish_level2_prompt",
-    label: "Polish Level 2 Prompt (Professional)",
+    label: "Polish Level 2 Prompt (Work Email)",
     type: "paragraph",
-    defaultValue: "Polish this text to be professional and clear. Improve grammar, structure, and clarity while maintaining a business-appropriate tone.",
+    defaultValue: "Polish this text for clarity and structure, suitable for a work email. Fix grammar and spelling, improve sentence structure, and organize the content clearly while keeping it concise and professional.",
     options: null,
-    helpText: "System prompt for level 2 polish (professional)"
+    helpText: "System prompt for level 2 polish (structured like a work email)"
   });
   extensionRoot.register_preference(polishLevel2Pref);
 
   const polishLevel3Pref = new Preference({
     key: "polish_level3_prompt",
-    label: "Polish Level 3 Prompt (Formal)",
+    label: "Polish Level 3 Prompt (Work Speech)",
     type: "paragraph",
-    defaultValue: "Polish this text to be highly formal and sophisticated. Use precise language, formal structure, and elevated vocabulary appropriate for academic or executive communication.",
+    defaultValue: "Elaborate and polish this text for a longer format like a work speech or presentation. Expand on key points, add appropriate transitions, and structure the content for verbal delivery while maintaining a professional and engaging tone.",
     options: null,
-    helpText: "System prompt for level 3 polish (formal/sophisticated)"
+    helpText: "System prompt for level 3 polish (elaborated like a work speech)"
   });
   extensionRoot.register_preference(polishLevel3Pref);
 
@@ -91,14 +91,14 @@
   const polish = new Command({
     name: "polish",
     parameters: [
-      new Parameter({type: "int", name: "level", helpText: "Professionalism level (1=casual, 2=professional, 3=formal)", default: 2, required: false})
+      new Parameter({type: "int", name: "level", helpText: "Polish level (1=typos/grammar, 2=work email, 3=work speech)", default: 1, required: false})
     ],
     type: "replaceAll",
-    helpText: "Polish text with AI to improve professionalism and clarity",
+    helpText: "Polish text with AI at different levels of refinement",
     tutorials: [
-      new TutorialCommand({command: "polish(1)", description: "Polish text with casual, friendly tone"}),
-      new TutorialCommand({command: "polish(2)", description: "Polish text with professional tone (default)"}),
-      new TutorialCommand({command: "polish(3)", description: "Polish text with formal, sophisticated tone"})
+      new TutorialCommand({command: "polish(1)", description: "Fix typos, spelling, and grammar only (default)"}),
+      new TutorialCommand({command: "polish(2)", description: "Structure for clarity like a work email"}),
+      new TutorialCommand({command: "polish(3)", description: "Elaborate for longer format like a work speech"})
     ],
     extension: extensionRoot
   });
@@ -115,7 +115,7 @@
 
     // Validate level
     if (level < 1 || level > 3) {
-      return new ReturnObject({status: "error", message: "Level must be 1, 2, or 3 (1=casual, 2=professional, 3=formal)"});
+      return new ReturnObject({status: "error", message: "Level must be 1, 2, or 3 (1=typos/grammar, 2=work email, 3=work speech)"});
     }
 
     if (!fullText || fullText.trim() === "") {

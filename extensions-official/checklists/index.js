@@ -1,19 +1,19 @@
 // ===============================
-// Antinote Extension: text_format
-// Version 2.0.0
-// Multi-file structure
+// Antinote Extension: checklists
+// Version 1.0.0
+// Commands for managing checklist items
 // ===============================
 
 (function () {
-  const extensionName = "text_format";
+  const extensionName = "checklists";
 
   const extensionRoot = new Extension({
     name: extensionName,
-    version: "2.0.1",
+    version: "1.0.0",
     endpoints: [],
     requiredAPIKeys: [],
     author: "johnsonfung",
-    category: "Text Formatting",
+    category: "Text Manipulation",
     dataScope: "full"
   });
 

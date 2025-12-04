@@ -1,6 +1,6 @@
 {
   "name": "text_format",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "author": "johnsonfung",
   "description": "Format entire text with various transformations including find/replace, append, prepend, and case conversions",
   "license": "MIT",
