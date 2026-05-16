@@ -6,7 +6,7 @@
 
     const extensionRoot = new Extension({
         name: extensionName,
-        version: "1.0.0",
+        version: "1.0.1",
         author: "Aditya Gaurkar",
         endpoints: ["https://api.frankfurter.dev/v1"],
         requiredAPIKeys:["dummy"],
@@ -14,30 +14,47 @@
         dataScope: "none"
     });
 
-    // // Registering preferences for default TO currencies
-    // const default_to = new Preference({
-    //     key:"to_default",
-    //     label: "Default currency to convert to",
-    //     type: "selectOne",
-    //     defaultValue: "INR",
-    //     options: ["USD", "INR", "EUR", "GBP", "JPY", "AUD", "CAD", "CHF", "CNY", "SEK"],
-    //     helpText: "Select the default currency to convert to"
-    // });
-    // extensionRoot.register_preference(default_to);
+    //create shared space
 
-    // // Registering preferences for default FROM currencies
-    // const default_from = new Preference({
-    //     key:"from_default",
-    //     label: "Default currency to convert from",
-    //     type: "selectOne",
-    //     defaultValue: "USD",
-    //     options: ["USD", "INR", "EUR", "GBP", "JPY", "AUD", "CAD", "CHF", "CNY", "SEK"],
-    //     helpText: "Select the default currency to convert from"
-    // });
-    // extensionRoot.register_preference(default_from);
+    const Shared = {};
 
-    // var from_default = getExtensionPreference(extensionName, "from_default");
-    // var to_default = getExtensionPreference(extensionName, "to_default");
+    //export to global scope
+    const globalScope = (typeof global !== 'undefined') ? global :
+                        (typeof window !== 'undefined') ? window : this;
+    
+    if (typeof globalScope.__EXTENSION_SHARED__ === 'undefined') {
+        globalScope.__EXTENSION_SHARED__ = {};
+    }
+
+    globalScope.__EXTENSION_SHARED__[extensionName] = {
+        root: extensionRoot,
+        shared: Shared
+    };
+    
+    // Registering preferences for default TO currencies
+    const default_to = new Preference({
+        key:"to_default",
+        label: "Default currency to convert to",
+        type: "selectOne",
+        defaultValue: "INR",
+        options: ["USD", "INR", "EUR", "GBP", "JPY", "AUD", "CAD", "CHF", "CNY", "SEK"],
+        helpText: "Select the default currency to convert to"
+    });
+    extensionRoot.register_preference(default_to);
+
+    // Registering preferences for default FROM currencies
+    const default_from = new Preference({
+        key:"from_default",
+        label: "Default currency to convert from",
+        type: "selectOne",
+        defaultValue: "USD",
+        options: ["USD", "INR", "EUR", "GBP", "JPY", "AUD", "CAD", "CHF", "CNY", "SEK"],
+        helpText: "Select the default currency to convert from"
+    });
+    extensionRoot.register_preference(default_from);
+
+    var from_default = getExtensionPreference(extensionName, "from_default");
+    var to_default = getExtensionPreference(extensionName, "to_default");
 
     const fx = new Command({
         name: "fx",
@@ -81,5 +98,8 @@
         const result = convert(amount);
 
         return new ReturnObject({status: "success", message: "retrieved", payload: `${result} ${to}`});
+    }
+    if (typeof global !== "undefined") {
+        global.fx = fx;
     }
 })();
