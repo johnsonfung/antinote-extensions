@@ -28,9 +28,9 @@ Keychain key SHOULD be "dummy" (without the quotes) or the extension won't work.
 Enter any value in the API Key Value.
 Give the extension permission to use this API key on the same page.
 Save and exit.
- 
+
 ### Command
-::fx( <amount>, <from_currency>, <to_currency>)
+::fx( amount, from_currency, to_currency)
 
 ### Example
 
