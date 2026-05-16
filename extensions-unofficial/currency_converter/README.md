@@ -30,7 +30,7 @@ Give the extension permission to use this API key on the same page.
 Save and exit.
 
 ### Command
-::fx( amount, from_currency, to_currency)
+::fx(amount, from_currency, to_currency)
 
 ### Example
 
