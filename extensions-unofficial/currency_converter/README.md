@@ -19,8 +19,18 @@ It fetches the latest exchange rate and returns the converted value.
 
 ## Usage
 
+### Setting up API key
+You do not need an API key to use this plugin, but antinote throws an error when an empty key is passed in an API call.
+
+Go to the Extensions and scroll down to API keys.
+Click Add API Key, give the key any name you want.
+Keychain key SHOULD be "dummy" (without the quotes) or the extension won't work.
+Enter any value in the API Key Value.
+Give the extension permission to use this API key on the same page.
+Save and exit.
+ 
 ### Command
-::fx(<amount>, <from_currency>, <to_currency>)
+::fx( <amount>, <from_currency>, <to_currency>)
 
 ### Example
 
