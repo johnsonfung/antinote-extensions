@@ -5,7 +5,7 @@ A utility extension to easily work with LaTeX syntax in your Antinote notes.
 ## Commands
 
 ### `::latex(expression)`
-Formats a single math expression into block LaTeX math delimiters `$$expression$$`.
+Translates a LaTeX math expression into Unicode characters directly on the line.
 
 #### Example
 **Before:**
@@ -14,8 +14,18 @@ Formats a single math expression into block LaTeX math delimiters `$$expression$
 ```
 
 **After execution:**
-```latex
-$$3x + 5 = 12$$
+```text
+3x + 5 = 12
+```
+
+**Before:**
+```text
+::latex(\forall x \exists \delta)
+```
+
+**After execution:**
+```text
+∀ x ∃ δ
 ```
 
 ---

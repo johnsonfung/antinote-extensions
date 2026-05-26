@@ -67,7 +67,7 @@ describe("LaTeX Extension - Metadata Validation", function() {
 
   it("should have required version field", function() {
     expect(metadata.version).toBeDefined();
-    expect(metadata.version).toBe("1.0.0");
+    expect(metadata.version).toBe("1.0.1");
   });
 
   it("should have required category field", function() {
@@ -143,6 +143,19 @@ describe("LaTeX Extension - Command Execution Tests", function() {
       expect(result.status).toBe("success");
       expect(result.payload).toBe("∑(n=0 → 10) + ∑(i=1 → ∞) + ∑(i=1) + ∏(n=1 → 5) + ∑");
     });
+
+    it("should handle nested parentheses in latex command without cutoff", function() {
+      var payload = {
+        parameters: ["f(x) = y"],
+        fullText: "::latex(f(x) = y)",
+        userSettings: {},
+        preferences: {}
+      };
+
+      var result = latex.execute(payload);
+      expect(result.status).toBe("success");
+      expect(result.payload).toBe("f(x) = y");
+    });
   });
 
   describe("latex_note command", function() {
@@ -157,6 +170,19 @@ describe("LaTeX Extension - Command Execution Tests", function() {
       var result = latex_note.execute(payload);
       expect(result.status).toBe("success");
       expect(result.payload).toBe("The result is $∀ x ∃ ∧ ⋀ δ$.");
+    });
+
+    it("should format nested brackets in latex_note command (Toggle On)", function() {
+      var payload = {
+        parameters: [],
+        fullText: "The equation is [A \\cup [B \\cap C]].",
+        userSettings: {},
+        preferences: {}
+      };
+
+      var result = latex_note.execute(payload);
+      expect(result.status).toBe("success");
+      expect(result.payload).toBe("The equation is $A ∪ [B ∩ C]$.");
     });
 
     it("should wrap entire note in block delimiters and parse it when no brackets are present (Toggle On)", function() {

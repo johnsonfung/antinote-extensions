@@ -3,7 +3,7 @@
 
   const extensionRoot = new Extension({
     name: extensionName,
-    version: "1.0.0",
+    version: "1.0.1",
     endpoints: [],
     requiredAPIKeys: [],
     author: "user",
@@ -269,11 +269,28 @@
     let expression = "";
     const fullText = payload.fullText || "";
 
-    // Extract the raw expression with backslashes from fullText to bypass escaping stripping
-    const match = fullText.match(/::latex\((.*?)\)/);
-    if (match) {
-      expression = match[1];
-    } else {
+    // Extract the raw expression with balanced parentheses counting
+    const cmdIndex = fullText.indexOf("::latex(");
+    if (cmdIndex !== -1) {
+      let depth = 1;
+      let i = cmdIndex + 8; // length of "::latex("
+      while (i < fullText.length && depth > 0) {
+        const char = fullText[i];
+        if (char === '(') {
+          depth++;
+        } else if (char === ')') {
+          depth--;
+        }
+        
+        if (depth > 0) {
+          expression += char;
+        }
+        i++;
+      }
+    }
+
+    // Fallback if not found in fullText or parsing failed
+    if (!expression) {
       const [parsedParam] = this.getParsedParams(payload);
       expression = parsedParam || "";
     }
@@ -350,10 +367,12 @@
       }
     } else {
       // LaTeX is currently OFF -> Toggle it ON
-      const hasBrackets = /\[([^\]]+)\]/.test(fullText);
+      const bracketRegex = /\[((?:[^\[\]]|\[[^\[\]]*\])*)\]/g;
+      const hasBrackets = bracketRegex.test(fullText);
       if (hasBrackets) {
+        bracketRegex.lastIndex = 0; // Reset regex index
         // Convert [content] to inline $parsedContent$
-        result = fullText.replace(/\[([^\]]+)\]/g, function(match, content) {
+        result = fullText.replace(bracketRegex, function(match, content) {
           return "$" + parseLatex(content) + "$";
         });
       } else {
