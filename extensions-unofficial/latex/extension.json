@@ -1,0 +1,24 @@
+{
+  "name": "latex",
+  "version": "1.0.2",
+  "author": "MaybeItsAdam",
+  "description": "Easily wrap notes in LaTeX blocks or convert bracketed text to LaTeX math formulas.",
+  "license": "MIT",
+  "category": "Formatting",
+  "dataScope": "full",
+  "endpoints": [],
+  "requiredAPIKeys": [],
+  "commands": [
+    {
+      "name": "latex",
+      "description": "Translate a LaTeX math expression into Unicode characters",
+      "type": "replaceLine"
+    },
+    {
+      "name": "latex_note",
+      "description": "Convert all LaTeX expressions in the note to Unicode math",
+      "type": "replaceAll"
+    }
+  ],
+  "official": false
+}
