@@ -67,7 +67,7 @@ describe("LaTeX Extension - Metadata Validation", function() {
 
   it("should have required version field", function() {
     expect(metadata.version).toBeDefined();
-    expect(metadata.version).toBe("1.0.1");
+    expect(metadata.version).toBe("1.0.2");
   });
 
   it("should have required category field", function() {
@@ -159,7 +159,7 @@ describe("LaTeX Extension - Command Execution Tests", function() {
   });
 
   describe("latex_note command", function() {
-    it("should replace bracketed expressions and parse them (Toggle On)", function() {
+    it("should replace and parse bracketed expressions and strip the brackets", function() {
       var payload = {
         parameters: [],
         fullText: "The result is [\\forall x \\exists \\land \\bigwedge \\delta].",
@@ -169,10 +169,10 @@ describe("LaTeX Extension - Command Execution Tests", function() {
 
       var result = latex_note.execute(payload);
       expect(result.status).toBe("success");
-      expect(result.payload).toBe("The result is $∀ x ∃ ∧ ⋀ δ$.");
+      expect(result.payload).toBe("The result is ∀ x ∃ ∧ ⋀ δ.");
     });
 
-    it("should format nested brackets in latex_note command (Toggle On)", function() {
+    it("should format nested brackets and strip outer brackets", function() {
       var payload = {
         parameters: [],
         fullText: "The equation is [A \\cup [B \\cap C]].",
@@ -182,10 +182,10 @@ describe("LaTeX Extension - Command Execution Tests", function() {
 
       var result = latex_note.execute(payload);
       expect(result.status).toBe("success");
-      expect(result.payload).toBe("The equation is $A ∪ [B ∩ C]$.");
+      expect(result.payload).toBe("The equation is A ∪ [B ∩ C].");
     });
 
-    it("should wrap entire note in block delimiters and parse it when no brackets are present (Toggle On)", function() {
+    it("should parse the entire note when no brackets/delimiters are present", function() {
       var payload = {
         parameters: [],
         fullText: "x^2 + y_i",
@@ -195,33 +195,33 @@ describe("LaTeX Extension - Command Execution Tests", function() {
 
       var result = latex_note.execute(payload);
       expect(result.status).toBe("success");
-      expect(result.payload).toBe("$$\nx² + yᵢ\n$$");
-    });
-
-    it("should unwrap text if it is already block-wrapped (Toggle Off)", function() {
-      var payload = {
-        parameters: [],
-        fullText: "$$\nx² + yᵢ\n$$",
-        userSettings: {},
-        preferences: {}
-      };
-
-      var result = latex_note.execute(payload);
-      expect(result.status).toBe("success");
       expect(result.payload).toBe("x² + yᵢ");
     });
 
-    it("should convert inline LaTeX back to brackets (Toggle Off)", function() {
+    it("should parse and strip block-wrapped $$ delimiters", function() {
       var payload = {
         parameters: [],
-        fullText: "The result is $∀ x ∃ ∧ ⋀ δ$.",
+        fullText: "$$\nx^2 + y_i\n$$",
         userSettings: {},
         preferences: {}
       };
 
       var result = latex_note.execute(payload);
       expect(result.status).toBe("success");
-      expect(result.payload).toBe("The result is [∀ x ∃ ∧ ⋀ δ].");
+      expect(result.payload).toBe("\nx² + yᵢ\n");
+    });
+
+    it("should parse and strip inline $ delimiters", function() {
+      var payload = {
+        parameters: [],
+        fullText: "The result is $\\forall x \\exists \\land \\bigwedge \\delta$.",
+        userSettings: {},
+        preferences: {}
+      };
+
+      var result = latex_note.execute(payload);
+      expect(result.status).toBe("success");
+      expect(result.payload).toBe("The result is ∀ x ∃ ∧ ⋀ δ.");
     });
   });
 });

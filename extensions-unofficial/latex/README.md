@@ -31,31 +31,33 @@ Translates a LaTeX math expression into Unicode characters directly on the line.
 ---
 
 ### `::latex_note`
-Searches the entire note for LaTeX formatting (`$$` and `$`). If found, it toggles it off (converting them back to `[content]`). If not found, it toggles it on (converting `[content]` to `$content$`, or wrapping the entire note in `$$ ... $$` if no brackets exist).
+Searches the entire note for LaTeX expressions wrapped in math delimiters (`$$ ... $$`, `$ ... $`, or `[ ... ]`) and translates them into inline Unicode characters, stripping the delimiters. If no delimiters are found, it translates the entire note. This is a one-way formatting operation.
 
-#### Example (Inline Toggle On)
+#### Example (With Delimiters)
 **Before:**
 ```text
 The Pythagorean theorem states that [a^2 + b^2 = c^2], where [c] is the hypotenuse.
 ```
 
-**After `::latex_note`:**
+**After execution:**
 ```text
-The Pythagorean theorem states that $a^2 + b^2 = c^2$, where $c$ is the hypotenuse.
+The Pythagorean theorem states that a² + b² = c², where c is the hypotenuse.
 ```
 
-#### Example (Block Toggle On)
 **Before:**
 ```text
+$$
 x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}
+$$
 ```
 
-**After `::latex_note`:**
-```latex
-$$
-x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}
-$$
+**After execution:**
+```text
+x = ( -b ± √(b² - 4ac) )/(2a)
 ```
+
+#### Example (No Delimiters)
+If no delimiters are present, the command translates any LaTeX elements across the entire note directly.
 
 ## Installation
 

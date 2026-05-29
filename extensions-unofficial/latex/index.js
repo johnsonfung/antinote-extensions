@@ -3,7 +3,7 @@
 
   const extensionRoot = new Extension({
     name: extensionName,
-    version: "1.0.1",
+    version: "1.0.2",
     endpoints: [],
     requiredAPIKeys: [],
     author: "user",
@@ -316,11 +316,11 @@
     name: "latex_note",
     parameters: [],
     type: "replaceAll",
-    helpText: "Auto-detect and toggle LaTeX formatting in the note",
+    helpText: "Convert all LaTeX expressions in the note to Unicode math",
     tutorials: [
       new TutorialCommand({
         command: "latex_note",
-        description: "Toggles LaTeX formatting in the entire note"
+        description: "Formats LaTeX math in the entire note"
       })
     ],
     extension: extensionRoot
@@ -330,60 +330,36 @@
     const fullText = payload.fullText || "";
 
     const hasDoubleDollar = fullText.includes("$$");
-    const hasSingleDollar = fullText.includes("$");
-    const isLaTeXOn = hasDoubleDollar || hasSingleDollar;
+    const hasSingleDollar = /\$([^$\n]+)\$/.test(fullText);
+    const bracketRegex = /\[((?:[^\[\]]|\[[^\[\]]*\])*)\]/g;
+    const hasBrackets = bracketRegex.test(fullText);
+    bracketRegex.lastIndex = 0; // Reset regex index
 
-    let result;
-    if (isLaTeXOn) {
-      // LaTeX is currently ON -> Toggle it OFF
-      const trimmed = fullText.trim();
-      const startsWithDollar = trimmed.startsWith("$$\n") || trimmed.startsWith("$$");
-      const endsWithDollar = trimmed.endsWith("\n$$") || trimmed.endsWith("$$");
+    let result = fullText;
 
-      if (startsWithDollar && endsWithDollar) {
-        // Unwrap block LaTeX note
-        let content = trimmed;
-        if (content.startsWith("$$\n")) {
-          content = content.substring(3);
-        } else if (content.startsWith("$$")) {
-          content = content.substring(2);
-        }
-
-        if (content.endsWith("\n$$")) {
-          content = content.substring(0, content.length - 3);
-        } else if (content.endsWith("$$")) {
-          content = content.substring(0, content.length - 2);
-        }
-        result = content;
-      } else {
-        // Convert block $$content$$ to [content]
-        let temp = fullText.replace(/\$\$(.*?)\$\$/gs, function(match, content) {
-          return "[" + content + "]";
+    if (hasDoubleDollar || hasSingleDollar || hasBrackets) {
+      if (hasDoubleDollar) {
+        result = result.replace(/\$\$([\s\S]*?)\$\$/g, function(match, content) {
+          return parseLatex(content);
         });
-        // Convert inline $content$ to [content]
-        result = temp.replace(/\$([^$\n]+)\$/g, function(match, content) {
-          return "[" + content + "]";
+      }
+      if (hasSingleDollar) {
+        result = result.replace(/\$([^$\n]+)\$/g, function(match, content) {
+          return parseLatex(content);
+        });
+      }
+      if (hasBrackets) {
+        result = result.replace(bracketRegex, function(match, content) {
+          return parseLatex(content);
         });
       }
     } else {
-      // LaTeX is currently OFF -> Toggle it ON
-      const bracketRegex = /\[((?:[^\[\]]|\[[^\[\]]*\])*)\]/g;
-      const hasBrackets = bracketRegex.test(fullText);
-      if (hasBrackets) {
-        bracketRegex.lastIndex = 0; // Reset regex index
-        // Convert [content] to inline $parsedContent$
-        result = fullText.replace(bracketRegex, function(match, content) {
-          return "$" + parseLatex(content) + "$";
-        });
-      } else {
-        // Wrap the entire parsed note in block LaTeX $$
-        result = "$$\n" + parseLatex(fullText) + "\n$$";
-      }
+      result = parseLatex(fullText);
     }
 
     return new ReturnObject({
       status: "success",
-      message: isLaTeXOn ? "Removed LaTeX formatting." : "Applied LaTeX formatting.",
+      message: "Applied LaTeX formatting.",
       payload: result
     });
   };

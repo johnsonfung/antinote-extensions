@@ -1,7 +1,7 @@
 {
   "name": "latex",
-  "version": "1.0.1",
-  "author": "user",
+  "version": "1.0.2",
+  "author": "MaybeItsAdam",
   "description": "Easily wrap notes in LaTeX blocks or convert bracketed text to LaTeX math formulas.",
   "license": "MIT",
   "category": "Formatting",
@@ -16,7 +16,7 @@
     },
     {
       "name": "latex_note",
-      "description": "Auto-detect and toggle LaTeX formatting ($$ and $) in the note",
+      "description": "Convert all LaTeX expressions in the note to Unicode math",
       "type": "replaceAll"
     }
   ],
