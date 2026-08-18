@@ -14,9 +14,9 @@ This extension acts as a **service** - it has no user-facing commands. Instead, 
 
 ## Supported Providers
 
-- **OpenAI** - GPT models (gpt-4o, gpt-4o-mini, etc.)
-- **Anthropic** - Claude models (claude-3-5-sonnet, etc.)
-- **Google AI** - Gemini models (gemini-2.0-flash-exp, etc.)
+- **OpenAI** - GPT models (gpt-5, gpt-5-mini, etc.)
+- **Anthropic** - Claude models (claude-sonnet-5, etc.)
+- **Google AI** - Gemini models (gemini-2.5-flash, etc.)
 - **OpenRouter** - Unified access to multiple providers
 - **Ollama** - Local models (llama3.3, mistral, etc.)
 
@@ -41,9 +41,16 @@ This extension acts as a **service** - it has no user-facing commands. Instead, 
 
 Go to **Preferences > Extensions > AI Providers** and configure:
 - **AI Provider** - Choose your default provider
-- **Model** - Enter the model name for your provider
+- **Model** - Leave empty to use the provider's current default, or pick one from
+  the live model list. Antinote refreshes that list from the provider itself
+  (daily, and on demand from the same settings pane), so it never goes stale. A
+  model that doesn't belong to the selected provider is ignored in favour of that
+  provider's default, so switching provider never leaves a broken model behind.
 - **System Prompt** - Customize the default system prompt
-- **Default Max Tokens** - Set default token limit for responses
+- **Response Length** - brief, standard, or detailed. This is asked for in the
+  prompt rather than enforced with a token cap: a cap truncates the answer
+  mid-sentence, and on reasoning models (Gemini 2.5, o-series) a small cap gets
+  spent on thinking and the reply comes back empty.
 
 ## For Extension Developers
 
@@ -81,7 +88,7 @@ if (result.status === "success") {
 var result = callAIProvider("Translate to Spanish: Hello", {
   provider: "anthropic",        // Override default provider
   model: "claude-3-5-haiku-20241022",  // Override default model
-  maxTokens: 100,                // Override default max tokens
+  maxTokens: 100,                // Length hint in tokens (asked for in the prompt)
   temperature: 0.3,              // Override temperature
   systemPrompt: "You are a translator."  // Override system prompt
 });
@@ -97,7 +104,8 @@ var result = callAIProvider("Translate to Spanish: Hello", {
   - `provider` (string): Provider ID - "openai", "anthropic", "google", "openrouter", "ollama"
   - `model` (string): Model name
   - `systemPrompt` (string): System prompt for the AI
-  - `maxTokens` (number): Maximum tokens (0 = use default from preferences)
+  - `maxTokens` (number): Rough length hint in tokens, turned into a word count in
+    the prompt (0 = use the Response Length preference). Not a hard cap.
   - `temperature` (number): Temperature 0.0-2.0
 
 **Returns:** `ReturnObject`
@@ -178,7 +186,7 @@ translate.execute = function(payload) {
 
 ## Version
 
-1.0.0
+1.1.0
 
 ## Author
 

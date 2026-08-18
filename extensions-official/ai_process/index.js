@@ -9,7 +9,7 @@
 
   const extensionRoot = new Extension({
     name: extensionName,
-    version: "1.0.6",
+    version: "1.1.0",
     endpoints: [], // No endpoints - uses ai_providers
     requiredAPIKeys: [], // No API keys - uses ai_providers
     author: "johnsonfung",
@@ -76,11 +76,11 @@
   // Max tokens override
   const maxTokensPref = new Preference({
     key: "max_tokens",
-    label: "Max Tokens Override",
+    label: "Response Length Hint",
     type: "string",
     defaultValue: "",
     options: null,
-    helpText: "Override max tokens for AI responses (leave empty to use ai_providers default)"
+    helpText: "Rough length hint in tokens for these commands (leave empty to use the Response Length setting in ai_providers)"
   });
   extensionRoot.register_preference(maxTokensPref);
 

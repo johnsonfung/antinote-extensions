@@ -1,6 +1,6 @@
 {
   "name": "ai_providers",
-  "version": "1.0.5",
+  "version": "1.1.0",
   "author": "johnsonfung",
   "description": "Shared AI provider service for use by other extensions. Supports OpenAI, Anthropic, Google AI, OpenRouter, and Ollama.",
   "license": "MIT",
@@ -24,7 +24,7 @@
   "official": true,
   "includedByDefault": true,
   "size": {
-    "total": 14130,
-    "totalKB": 13.8
+    "total": 21125,
+    "totalKB": 20.6
   }
 }
