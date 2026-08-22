@@ -1,0 +1,25 @@
+{
+  "name": "currency_converter",
+  "version": "1.0.1",
+  "author": "Aditya Gaurkar",
+  "license": "MIT",
+  "category": "Utility",
+  "official": false,
+  "description": "Simple currency converter extension that allows users to convert amounts between different currencies using real-time exchange rates.",
+  "dataScope": "none",
+  "endpoints": [
+    "https://api.frankfurter.dev/v1"
+  ],
+  "requiredAPIKeys": [
+    "dummy"
+  ],
+  "commands": [
+    {
+      "name": "fx",
+      "description": "Currency converter",
+      "parameters": [
+        "amount, from_currency, to_currency"
+      ]
+    }
+  ]
+}
