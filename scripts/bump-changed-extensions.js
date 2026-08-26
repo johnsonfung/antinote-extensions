@@ -50,10 +50,14 @@ function getChangedFiles() {
 
 /**
  * Extract extension name from file path
+ *
+ * Extension folder names must be snake_case (enforced by validate.js); the
+ * allowlist here keeps unexpected characters out of git paths and shell-free
+ * subprocess arguments, so anything else is ignored rather than processed.
  */
 function getExtensionNameFromPath(filePath) {
   // Match patterns like: extensions-official/templates/...
-  const match = filePath.match(/^extensions-(official|unofficial)\/([^\/]+)\//);
+  const match = filePath.match(/^extensions-(official|unofficial)\/([a-z0-9_]+)\//);
   if (match) {
     return {
       name: match[2],
