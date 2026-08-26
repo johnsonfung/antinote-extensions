@@ -12,7 +12,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const { execSync } = require('child_process');
+const { execSync, spawnSync } = require('child_process');
 
 // Configuration
 const ROOT_DIR = path.join(__dirname, '..');
@@ -123,12 +123,13 @@ function getLastCommittedVersion(extensionInfo) {
   const gitPath = `extensions-${folderType}/${name}/extension.json`;
 
   try {
-    // Get the content from the last commit
-    const committedContent = execSync(`git show HEAD:"${gitPath}"`, {
+    // Get the content from the last commit using spawnSync to avoid shell injection
+    const result = spawnSync('git', ['show', 'HEAD:' + gitPath], {
       encoding: 'utf8',
       cwd: ROOT_DIR
     });
-    const committedMetadata = JSON.parse(committedContent);
+    if (result.status !== 0) return '1.0.0';
+    const committedMetadata = JSON.parse(result.stdout);
     return committedMetadata.version || '1.0.0';
   } catch (error) {
     // If file doesn't exist in last commit (new extension), return default version
@@ -172,7 +173,7 @@ function updateExtensionVersion(extensionInfo) {
 
     return { oldVersion: currentVersion, newVersion };
   } catch (error) {
-    console.error(`  ${colors.red}✗${colors.reset} Failed to update ${name}:`, error.message);
+    console.error('  ' + colors.red + '✗' + colors.reset + ' Failed to update ' + name + ':', error.message);
     return null;
   }
 }
