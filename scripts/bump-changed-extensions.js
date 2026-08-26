@@ -122,19 +122,29 @@ function getLastCommittedVersion(extensionInfo) {
   const folderType = isOfficial ? 'official' : 'unofficial';
   const gitPath = `extensions-${folderType}/${name}/extension.json`;
 
-  try {
-    // Get the content from the last commit using spawnSync to avoid shell injection
-    const result = spawnSync('git', ['show', 'HEAD:' + gitPath], {
-      encoding: 'utf8',
-      cwd: ROOT_DIR
-    });
-    if (result.status !== 0) return '1.0.0';
-    const committedMetadata = JSON.parse(result.stdout);
-    return committedMetadata.version || '1.0.0';
-  } catch (error) {
-    // If file doesn't exist in last commit (new extension), return default version
-    return '1.0.0';
+  // Get the content from the last commit using spawnSync to avoid shell injection
+  const result = spawnSync('git', ['show', `HEAD:${gitPath}`], {
+    encoding: 'utf8',
+    cwd: ROOT_DIR
+  });
+
+  if (result.error) {
+    throw new Error(`git show HEAD:${gitPath} could not run: ${result.error.message}`);
   }
+
+  if (result.status !== 0) {
+    const stderr = (result.stderr || '').trim();
+    // If file doesn't exist in last commit (new extension), return default version
+    if (/does not exist in|exists on disk, but not in/.test(stderr)) {
+      return '1.0.0';
+    }
+    // Any other git failure must not masquerade as a new extension — that would
+    // skip the auto-bump ("manually bumped") and ship changes under an old version
+    throw new Error(`git show HEAD:${gitPath} failed (exit ${result.status}): ${stderr}`);
+  }
+
+  const committedMetadata = JSON.parse(result.stdout);
+  return committedMetadata.version || '1.0.0';
 }
 
 /**
