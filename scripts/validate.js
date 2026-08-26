@@ -137,6 +137,13 @@ function getInheritedSecurityDisclosures(metadata, extensionName, allExtensions,
 function validateMetadata(extension, allExtensions) {
   const { metadataPath, name, isOfficial } = extension;
 
+  // Folder names flow into git paths, zip filenames, and manifest URLs, so
+  // enforce snake_case (same charset as command names) at the source
+  const validFolderNamePattern = /^[a-z0-9_]+$/;
+  if (!validFolderNamePattern.test(name)) {
+    errors.push(`[${name}] Extension folder name must use snake_case (lowercase letters, numbers, and underscores only)`);
+  }
+
   if (!validateFileExists(extension, metadataPath, 'extension.json')) {
     return;
   }

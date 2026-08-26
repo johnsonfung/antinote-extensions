@@ -12,7 +12,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const { execSync } = require('child_process');
+const { execSync, spawnSync } = require('child_process');
 
 // Configuration
 const ROOT_DIR = path.join(__dirname, '..');
@@ -50,10 +50,14 @@ function getChangedFiles() {
 
 /**
  * Extract extension name from file path
+ *
+ * Extension folder names must be snake_case (enforced by validate.js); the
+ * allowlist here keeps unexpected characters out of git paths and shell-free
+ * subprocess arguments, so anything else is ignored rather than processed.
  */
 function getExtensionNameFromPath(filePath) {
   // Match patterns like: extensions-official/templates/...
-  const match = filePath.match(/^extensions-(official|unofficial)\/([^\/]+)\//);
+  const match = filePath.match(/^extensions-(official|unofficial)\/([a-z0-9_]+)\//);
   if (match) {
     return {
       name: match[2],
@@ -122,18 +126,29 @@ function getLastCommittedVersion(extensionInfo) {
   const folderType = isOfficial ? 'official' : 'unofficial';
   const gitPath = `extensions-${folderType}/${name}/extension.json`;
 
-  try {
-    // Get the content from the last commit
-    const committedContent = execSync(`git show HEAD:"${gitPath}"`, {
-      encoding: 'utf8',
-      cwd: ROOT_DIR
-    });
-    const committedMetadata = JSON.parse(committedContent);
-    return committedMetadata.version || '1.0.0';
-  } catch (error) {
-    // If file doesn't exist in last commit (new extension), return default version
-    return '1.0.0';
+  // Get the content from the last commit using spawnSync to avoid shell injection
+  const result = spawnSync('git', ['show', `HEAD:${gitPath}`], {
+    encoding: 'utf8',
+    cwd: ROOT_DIR
+  });
+
+  if (result.error) {
+    throw new Error(`git show HEAD:${gitPath} could not run: ${result.error.message}`);
   }
+
+  if (result.status !== 0) {
+    const stderr = (result.stderr || '').trim();
+    // If file doesn't exist in last commit (new extension), return default version
+    if (/does not exist in|exists on disk, but not in/.test(stderr)) {
+      return '1.0.0';
+    }
+    // Any other git failure must not masquerade as a new extension — that would
+    // skip the auto-bump ("manually bumped") and ship changes under an old version
+    throw new Error(`git show HEAD:${gitPath} failed (exit ${result.status}): ${stderr}`);
+  }
+
+  const committedMetadata = JSON.parse(result.stdout);
+  return committedMetadata.version || '1.0.0';
 }
 
 /**
@@ -172,7 +187,7 @@ function updateExtensionVersion(extensionInfo) {
 
     return { oldVersion: currentVersion, newVersion };
   } catch (error) {
-    console.error(`  ${colors.red}✗${colors.reset} Failed to update ${name}:`, error.message);
+    console.error('  ' + colors.red + '✗' + colors.reset + ' Failed to update ' + name + ':', error.message);
     return null;
   }
 }
