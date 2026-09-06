@@ -108,7 +108,7 @@
 
     const extensionRoot = new Extension({
         name: extensionName,
-        version: "1.1.0",
+        version: "1.1.1",
         endpoints: allEndpoints,
         requiredAPIKeys: allApiKeys,
         author: "johnsonfung",
@@ -221,6 +221,21 @@
         return parts.join(" ");
     };
 
+    // Newer Claude models (Opus 4.7+, Sonnet 5+, Fable/Mythos) reject the
+    // `temperature` sampling parameter with a 400 error, so it must be omitted.
+    // Opus 4.6 / Sonnet 4.6 and older models still accept it.
+    const anthropicSupportsTemperature = (model) => {
+        const m = String(model || "").toLowerCase();
+        if (/claude-(fable|mythos)/.test(m)) return false;
+        const match = m.match(/claude-(opus|sonnet|haiku)-(\d+)(?:-(\d+))?/);
+        if (!match) return true;
+        const major = parseInt(match[2], 10);
+        const minor = match[3] !== undefined ? parseInt(match[3], 10) : 0;
+        if (major >= 5) return false;
+        if (major === 4 && minor >= 7) return false;
+        return true;
+    };
+
     // Helper function to build request for different providers
     const buildRequest = (provider, model, systemPrompt, userPrompt, temperature) => {
         const providerId = provider.toLowerCase();
@@ -278,7 +293,6 @@
             body = {
                 model,
                 max_tokens: ANTHROPIC_MAX_TOKENS,
-                temperature,
                 system: systemPrompt,
                 messages: [
                     {
@@ -287,6 +301,10 @@
                     }
                 ]
             };
+
+            if (anthropicSupportsTemperature(model)) {
+                body.temperature = temperature;
+            }
         } else if (providerId === "google") {
             // Google AI format. The key travels in a header, not the query
             // string: Antinote only substitutes {{API_KEY}} into headers and

@@ -106,7 +106,7 @@ var result = callAIProvider("Translate to Spanish: Hello", {
   - `systemPrompt` (string): System prompt for the AI
   - `maxTokens` (number): Rough length hint in tokens, turned into a word count in
     the prompt (0 = use the Response Length preference). Not a hard cap.
-  - `temperature` (number): Temperature 0.0-2.0
+  - `temperature` (number): Temperature 0.0-2.0 (ignored for Claude Opus 4.7+, Sonnet 5+, and Fable models, which no longer accept it)
 
 **Returns:** `ReturnObject`
 - `status`: "success" or "error"
