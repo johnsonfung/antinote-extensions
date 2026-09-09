@@ -11,6 +11,8 @@
 // - Google AI (Gemini models)
 // - OpenRouter (unified access to multiple providers)
 // - Ollama (local models)
+// - Custom (any OpenAI- or Anthropic-compatible endpoint: Azure OpenAI,
+//   LiteLLM, vLLM, a Bedrock gateway, ...)
 //
 // Usage by other extensions:
 // 1. Declare dependency on "ai_providers" in extension metadata
@@ -26,6 +28,21 @@
     // (Gemini 2.5, o-series) a small cap is spent thinking and the reply comes
     // back empty. Only Anthropic needs a number, because its API requires one.
     const ANTHROPIC_MAX_TOKENS = 8192;
+
+    // Preferences read through the app bridge, guarded so this file also loads
+    // where the bridge isn't installed yet (the Node test harness).
+    const readPreference = (key) => {
+        if (typeof getExtensionPreference !== "function") {
+            return null;
+        }
+        try {
+            return getExtensionPreference(extensionName, key);
+        } catch (e) {
+            return null;
+        }
+    };
+
+    const customEndpointNow = () => (readPreference("customEndpoint") || "").trim();
 
     // Provider configurations
     // `models` seeds the model list before the app's live catalog is available;
@@ -84,6 +101,18 @@
             defaultModel: "llama3.3",
             modelPrefixes: [],
             requiresApiKey: false
+        },
+        "custom": {
+            name: "Custom Endpoint",
+            // The real URL lives in the customEndpoint preference: read at call
+            // time for requests, declared to the app at load time (below).
+            endpoint: "",
+            apiKeyId: "apikey_custom",
+            models: [],
+            // No default: only the user knows what their endpoint serves.
+            defaultModel: "",
+            modelPrefixes: [],
+            requiresApiKey: true
         }
     };
 
@@ -100,15 +129,27 @@
     const allApiKeys = [];
     for (const providerId in PROVIDERS) {
         const provider = PROVIDERS[providerId];
-        allEndpoints.push(provider.endpoint);
+        // Never declare an empty endpoint: the app's allow-list does prefix
+        // matching, and "" would authorize every URL.
+        if (provider.endpoint) {
+            allEndpoints.push(provider.endpoint);
+        }
         if (provider.requiresApiKey && provider.apiKeyId) {
             allApiKeys.push(provider.apiKeyId);
         }
     }
 
+    // Declaring the saved custom URL here is what authorizes it with the app's
+    // endpoint allow-list — so a URL saved after load only takes effect once
+    // extensions reload. callAIProvider explains that when it happens.
+    const customEndpointAtLoad = customEndpointNow();
+    if (customEndpointAtLoad) {
+        allEndpoints.push(customEndpointAtLoad);
+    }
+
     const extensionRoot = new Extension({
         name: extensionName,
-        version: "1.1.0",
+        version: "1.2.0",
         endpoints: allEndpoints,
         requiredAPIKeys: allApiKeys,
         author: "johnsonfung",
@@ -124,7 +165,7 @@
     label: "AI Provider",
     type: "selectOne",
     defaultValue: "openai",
-    options: ["openai", "anthropic", "google", "openrouter", "ollama"],
+    options: ["openai", "anthropic", "google", "openrouter", "ollama", "custom"],
     helpText: "Default AI provider for all AI-powered extensions"
   });
     extensionRoot.register_preference(providerPref);
@@ -138,6 +179,36 @@
     helpText: "Leave empty to use the provider's current default. Antinote keeps the list of available models up to date from each provider."
   });
     extensionRoot.register_preference(modelPref);
+
+    const customEndpointPref = new Preference({
+    key: "customEndpoint",
+    label: "Custom Endpoint URL",
+    type: "string",
+    defaultValue: "",
+    options: null,
+    helpText: "Used when the provider is 'custom': the full chat URL of any OpenAI- or Anthropic-compatible endpoint (Azure OpenAI, LiteLLM, a Bedrock gateway, self-hosted vLLM...). After changing it, reload extensions so Antinote authorizes the new URL."
+  });
+    extensionRoot.register_preference(customEndpointPref);
+
+    const customFormatPref = new Preference({
+    key: "customFormat",
+    label: "Custom Endpoint Format",
+    type: "selectOne",
+    defaultValue: "openai",
+    options: ["openai", "anthropic"],
+    helpText: "Which API the custom endpoint speaks: 'openai' for chat-completions shapes, 'anthropic' for messages shapes."
+  });
+    extensionRoot.register_preference(customFormatPref);
+
+    const customAuthPref = new Preference({
+    key: "customAuth",
+    label: "Custom Endpoint Auth",
+    type: "selectOne",
+    defaultValue: "bearer",
+    options: ["bearer", "x-api-key", "none"],
+    helpText: "How the custom endpoint wants its API key: an 'Authorization: Bearer' header, an 'x-api-key' header, or no key at all (local or proxied setups)."
+  });
+    extensionRoot.register_preference(customAuthPref);
 
     const systemPromptPref = new Preference({
     key: "systemPrompt",
@@ -210,6 +281,18 @@
         return belongsToProvider ? model : config.defaultModel;
     };
 
+    // Which wire protocol a provider speaks. The custom endpoint borrows one
+    // of the shapes we already build rather than inventing a third.
+    const wireFormat = (providerId) => {
+        if (providerId === "custom") {
+            return readPreference("customFormat") === "anthropic" ? "anthropic" : "openai";
+        }
+        if (providerId === "openai" || providerId === "openrouter" || providerId === "ollama") {
+            return "openai";
+        }
+        return providerId; // "anthropic" or "google"
+    };
+
     // The full system prompt: the user's instructions, plus how long the answer
     // should be.
     const buildSystemPrompt = (basePrompt, responseLength, lengthHint) => {
@@ -221,7 +304,10 @@
         return parts.join(" ");
     };
 
-    // Helper function to build request for different providers
+    // Helper function to build request for different providers.
+    // `temperature` may be undefined and is only sent when it isn't: reasoning
+    // models (gpt-5, o-series) reject values other than their default, and no
+    // provider requires one — Anthropic included.
     const buildRequest = (provider, model, systemPrompt, userPrompt, temperature) => {
         const providerId = provider.toLowerCase();
         const config = PROVIDERS[providerId];
@@ -230,20 +316,36 @@
             return null;
         }
 
+        const format = wireFormat(providerId);
         let url = config.endpoint;
         let headers = {};
         let body = {};
+        let apiKeyId = config.apiKeyId;
 
-        if (providerId === "openai" || providerId === "openrouter" || providerId === "ollama") {
-            // OpenAI-compatible format (OpenAI, OpenRouter, Ollama)
+        // How the key travels: Anthropic's own API wants x-api-key, Google its
+        // own header, the custom endpoint follows its auth preference, and
+        // everyone else uses a Bearer token. Ollama sends nothing.
+        let authStyle = "bearer";
+        if (providerId === "anthropic") {
+            authStyle = "x-api-key";
+        } else if (providerId === "google") {
+            authStyle = "x-goog-api-key";
+        } else if (providerId === "ollama") {
+            authStyle = "none";
+        } else if (providerId === "custom") {
+            const authPref = readPreference("customAuth");
+            authStyle = (authPref === "x-api-key" || authPref === "none") ? authPref : "bearer";
+            url = customEndpointNow();
+        }
+        if (authStyle === "none") {
+            apiKeyId = null;
+        }
+
+        if (format === "openai") {
+            // OpenAI-compatible format (OpenAI, OpenRouter, Ollama, custom)
             headers = {
                 "Content-Type": "application/json"
             };
-
-            // Add authorization for providers that require it
-            if (providerId !== "ollama") {
-                headers["Authorization"] = "Bearer {{API_KEY}}";
-            }
 
             if (providerId === "openrouter") {
                 headers["HTTP-Referer"] = "https://antinote.app";
@@ -262,14 +364,12 @@
                         role: "user",
                         content: userPrompt
                     }
-                ],
-                temperature
+                ]
             };
-        } else if (providerId === "anthropic") {
-            // Anthropic format
+        } else if (format === "anthropic") {
+            // Anthropic format (Anthropic, custom)
             headers = {
                 "Content-Type": "application/json",
-                "x-api-key": "{{API_KEY}}",
                 "anthropic-version": "2023-06-01"
             };
 
@@ -278,7 +378,6 @@
             body = {
                 model,
                 max_tokens: ANTHROPIC_MAX_TOKENS,
-                temperature,
                 system: systemPrompt,
                 messages: [
                     {
@@ -287,15 +386,14 @@
                     }
                 ]
             };
-        } else if (providerId === "google") {
+        } else if (format === "google") {
             // Google AI format. The key travels in a header, not the query
             // string: Antinote only substitutes {{API_KEY}} into headers and
             // the body, so a key in the URL would be sent as the literal
             // placeholder.
             url = `${config.endpoint}${model}:generateContent`;
             headers = {
-                "Content-Type": "application/json",
-                "x-goog-api-key": "{{API_KEY}}"
+                "Content-Type": "application/json"
             };
 
             // Gemma models on this API reject systemInstruction, so their
@@ -312,9 +410,7 @@
                         ]
                     }
                 ],
-                generationConfig: {
-                    temperature
-                }
+                generationConfig: {}
             };
 
             if (supportsSystemInstruction) {
@@ -328,11 +424,28 @@
             }
         }
 
+        if (authStyle === "bearer") {
+            headers["Authorization"] = "Bearer {{API_KEY}}";
+        } else if (authStyle === "x-api-key") {
+            headers["x-api-key"] = "{{API_KEY}}";
+        } else if (authStyle === "x-goog-api-key") {
+            headers["x-goog-api-key"] = "{{API_KEY}}";
+        }
+
+        // Only send a temperature the caller actually asked for (see above).
+        if (temperature !== undefined) {
+            if (format === "google") {
+                body.generationConfig.temperature = temperature;
+            } else {
+                body.temperature = temperature;
+            }
+        }
+
         return {
             url,
             headers: JSON.stringify(headers),
             body: JSON.stringify(body),
-            apiKeyId: config.apiKeyId,
+            apiKeyId,
             provider: config
         };
     };
@@ -340,11 +453,12 @@
     // Helper function to parse response from different providers
     const parseResponse = (providerId, responseData) => {
         try {
-            if (providerId === "openai" || providerId === "openrouter" || providerId === "ollama") {
+            const format = wireFormat(providerId);
+            if (format === "openai") {
                 if (responseData.choices?.length > 0) {
                     return (responseData.choices[0].message?.content || "").trim() || null;
                 }
-            } else if (providerId === "anthropic") {
+            } else if (format === "anthropic") {
                 if (responseData.content?.length > 0) {
                     return responseData.content
                         .filter((block) => block.type === "text")
@@ -352,7 +466,7 @@
                         .join("")
                         .trim() || null;
                 }
-            } else if (providerId === "google") {
+            } else if (format === "google") {
                 if (responseData.candidates?.length > 0) {
                     const candidate = responseData.candidates[0];
                     if (candidate.content?.parts?.length > 0) {
@@ -400,11 +514,12 @@
     // Parameters:
     //   prompt (string): The user's prompt
     //   options (object, optional): Override default settings
-    //     - provider: Provider ID ("openai", "anthropic", "google", "openrouter", "ollama")
+    //     - provider: Provider ID ("openai", "anthropic", "google", "openrouter", "ollama", "custom")
     //     - model: Model name
     //     - systemPrompt: System prompt
     //     - maxTokens: Rough length hint in tokens (0 = use the length preference)
-    //     - temperature: Temperature (0.0-2.0)
+    //     - temperature: Temperature 0.0-2.0 (optional — only sent when set,
+    //       since reasoning models reject anything but their default)
     //
     // Returns: ReturnObject with status and response text
     function callAIProvider(prompt, options) {
@@ -417,18 +532,35 @@
             }
 
             // Get preferences (use options to override)
-            const provider = options.provider || getExtensionPreference(extensionName, "provider") || "openai";
+            const provider = options.provider || readPreference("provider") || "openai";
 
             if (!PROVIDERS[provider]) {
                 return new ReturnObject({status: "error", message: `Invalid provider configuration: ${provider}`});
             }
 
-            const model = resolveModel(provider, options.model || getExtensionPreference(extensionName, "model"));
-            const basePrompt = options.systemPrompt || getExtensionPreference(extensionName, "systemPrompt") || "You are a helpful assistant integrated into a plaintext scratch notes app. Be concise and direct.";
-            const responseLength = getExtensionPreference(extensionName, "responseLength") || "standard";
-            const temperature = options.temperature !== undefined ? options.temperature : 0.7;
+            const model = resolveModel(provider, options.model || readPreference("model"));
 
-            if (temperature < 0 || temperature > 2) {
+            if (provider === "custom") {
+                if (!customEndpointNow()) {
+                    return new ReturnObject({status: "error", message: "Set the Custom Endpoint URL in the ai_providers extension settings first."});
+                }
+                if (!model) {
+                    return new ReturnObject({status: "error", message: "Custom endpoints have no default model — set one in the ai_providers extension settings."});
+                }
+            }
+
+            const basePrompt = options.systemPrompt || readPreference("systemPrompt") || "You are a helpful assistant integrated into a plaintext scratch notes app. Be concise and direct.";
+            const responseLength = readPreference("responseLength") || "standard";
+
+            // Temperature is only forwarded when a caller explicitly set one:
+            // Anthropic never required it, and reasoning models (gpt-5,
+            // o-series) reject anything but their default — the old
+            // always-send-0.7 behaviour broke both.
+            let temperature = options.temperature;
+            if (typeof temperature !== "number" || isNaN(temperature)) {
+                temperature = undefined;
+            }
+            if (temperature !== undefined && (temperature < 0 || temperature > 2)) {
                 return new ReturnObject({status: "error", message: "temperature must be between 0.0 and 2.0."});
             }
 
@@ -452,26 +584,15 @@
                 return new ReturnObject({status: "error", message: `Invalid provider configuration: ${provider}`});
             }
 
-            // Call the API
-            let result;
-            if (provider === "ollama") {
-                // Ollama doesn't need an API key
-                result = callAPI(
-                    "",
-                    request.url,
-                    "POST",
-                    request.headers,
-                    request.body
-                );
-            } else {
-                result = callAPI(
-                    request.apiKeyId,
-                    request.url,
-                    "POST",
-                    request.headers,
-                    request.body
-                );
-            }
+            // Call the API. An empty key id means no key is needed (Ollama,
+            // keyless custom endpoints).
+            const result = callAPI(
+                request.apiKeyId || "",
+                request.url,
+                "POST",
+                request.headers,
+                request.body
+            );
 
             console.log("AI Provider Service - API call completed");
 
@@ -491,6 +612,13 @@
                     errorMessage = JSON.stringify(errorMessage);
                 }
                 return new ReturnObject({status: "error", message: `API error: ${errorMessage}`});
+            }
+
+            // A custom URL saved after extensions loaded isn't on the app's
+            // allow-list yet — the app blocks it, and the fix is a reload, not
+            // a scary security message.
+            if (!result.success && provider === "custom" && (result.error || "").indexOf("not authorized") !== -1) {
+                return new ReturnObject({status: "error", message: `Antinote hasn't authorized ${request.url} yet — custom endpoint URLs are registered when extensions load. Reload extensions (Settings → Extensions) or restart Antinote, then try again.`});
             }
 
             if (!result.success) {

@@ -103,6 +103,10 @@ describe("AI Providers Extension - Metadata Validation", function() {
     expect(metadata.requiredAPIKeys[3]).toBe("apikey_openrouter");
   });
 
+  it("declares the custom endpoint key", function() {
+    expect(metadata.requiredAPIKeys).toContain("apikey_custom");
+  });
+
   it("should have no commands (service only)", function() {
     expect(metadata.commands).toBeDefined();
     expect(metadata.commands).toBeArray();
@@ -249,6 +253,77 @@ describe("AI Providers Extension - Request Building", function() {
     run({ provider: "openai" }, { maxTokens: 400 });
     expect(lastCall.body.messages[0].content).toContain("300 words");
     expect(lastCall.body.max_tokens).toBe(undefined);
+  });
+
+  it("omits temperature everywhere unless a caller sets one", function() {
+    run({ provider: "anthropic" });
+    expect(lastCall.body.temperature).toBe(undefined);
+    run({ provider: "openai" });
+    expect(lastCall.body.temperature).toBe(undefined);
+    run({ provider: "google" });
+    expect(lastCall.body.generationConfig.temperature).toBe(undefined);
+  });
+
+  it("passes through a temperature the caller set explicitly", function() {
+    run({ provider: "openai" }, { temperature: 1.2 });
+    expect(lastCall.body.temperature).toBe(1.2);
+    run({ provider: "anthropic" }, { temperature: 0 });
+    expect(lastCall.body.temperature).toBe(0);
+  });
+
+  it("sends custom-endpoint requests to the saved URL with Bearer auth", function() {
+    var result = run({ provider: "custom", model: "my-model", customEndpoint: "https://llm.internal/v1/chat/completions" });
+    expect(result.status).toBe("success");
+    expect(lastCall.url).toBe("https://llm.internal/v1/chat/completions");
+    expect(lastCall.headers["Authorization"]).toBe("Bearer {{API_KEY}}");
+    expect(lastCall.apiKeyId).toBe("apikey_custom");
+    expect(lastCall.body.model).toBe("my-model");
+    expect(lastCall.body.messages[0].role).toBe("system");
+  });
+
+  it("speaks the Anthropic shape when the custom endpoint asks for it", function() {
+    run({ provider: "custom", model: "my-model", customEndpoint: "https://gw.example.com/v1/messages", customFormat: "anthropic", customAuth: "x-api-key" });
+    expect(lastCall.headers["x-api-key"]).toBe("{{API_KEY}}");
+    expect(lastCall.headers["anthropic-version"]).toBe("2023-06-01");
+    expect(lastCall.body.max_tokens).toBe(8192);
+    expect(lastCall.body.system).toContain("plaintext scratch notes app");
+  });
+
+  it("sends no key when the custom endpoint auth is 'none'", function() {
+    run({ provider: "custom", model: "m", customEndpoint: "https://local.example.com/v1/chat/completions", customAuth: "none" });
+    expect(lastCall.apiKeyId).toBe("");
+    expect(lastCall.headers["Authorization"]).toBe(undefined);
+  });
+
+  it("keeps whatever model the user typed for the custom endpoint", function() {
+    // Bedrock-style ids don't match any known prefix and must survive as-is
+    run({ provider: "custom", model: "anthropic.claude-sonnet-5-v2:0", customEndpoint: "https://gw.example.com/v1/chat/completions" });
+    expect(lastCall.body.model).toBe("anthropic.claude-sonnet-5-v2:0");
+  });
+
+  it("asks for a URL before calling a custom endpoint", function() {
+    var result = run({ provider: "custom", model: "m" });
+    expect(result.status).toBe("error");
+    expect(result.message).toContain("Custom Endpoint URL");
+    expect(lastCall).toBe(null);
+  });
+
+  it("asks for a model before calling a custom endpoint", function() {
+    var result = run({ provider: "custom", customEndpoint: "https://llm.internal/v1/chat/completions" });
+    expect(result.status).toBe("error");
+    expect(result.message).toContain("model");
+    expect(lastCall).toBe(null);
+  });
+
+  it("tells the user to reload when the app hasn't authorized the new URL", function() {
+    var goodCallAPI = callAPI;
+    callAPI = function() {
+      return { success: false, statusCode: 0, data: "", error: "Security Error: API endpoint not authorized. Extensions can only call endpoints declared in their extension.json file." };
+    };
+    var result = run({ provider: "custom", model: "m", customEndpoint: "https://new.example.com/v1/chat/completions" });
+    callAPI = goodCallAPI;
+    expect(result.status).toBe("error");
+    expect(result.message).toContain("Reload extensions");
   });
 
   it("explains a 200 that came back with no answer", function() {

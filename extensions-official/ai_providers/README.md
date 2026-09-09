@@ -19,6 +19,7 @@ This extension acts as a **service** - it has no user-facing commands. Instead, 
 - **Google AI** - Gemini models (gemini-2.5-flash, etc.)
 - **OpenRouter** - Unified access to multiple providers
 - **Ollama** - Local models (llama3.3, mistral, etc.)
+- **Custom Endpoint** - Any OpenAI- or Anthropic-compatible endpoint (Azure OpenAI, LiteLLM, Amazon Bedrock behind a gateway, self-hosted vLLM, ...)
 
 ## Setup Instructions
 
@@ -36,6 +37,31 @@ This extension acts as a **service** - it has no user-facing commands. Instead, 
 1. [Install Ollama](https://ollama.com/download)
 2. Pull models: `ollama pull llama3.3`
 3. No API key needed
+
+### For a Custom Endpoint (Azure OpenAI, LiteLLM, Bedrock gateways, self-hosted)
+
+If your models live behind an OpenAI- or Anthropic-compatible endpoint that
+isn't one of the providers above:
+
+1. Set **AI Provider** to `custom`
+2. Set **Custom Endpoint URL** to the full chat URL, e.g.
+   `https://my-litellm.example.com/v1/chat/completions`
+3. Set **Custom Endpoint Format** to `openai` (chat-completions shape) or
+   `anthropic` (messages shape), whichever your endpoint speaks
+4. Set **Custom Endpoint Auth** to how it wants the key (`bearer`,
+   `x-api-key`, or `none` for keyless/local setups), and save the key under
+   the extension's API keys if one is needed
+5. Set **Model** to the model id your endpoint expects — custom endpoints
+   have no default, and ids are passed through untouched (Bedrock-style ids
+   like `anthropic.claude-sonnet-5-v2:0` are fine)
+6. **Reload extensions** (or restart Antinote). Antinote only authorizes the
+   URLs an extension declares when it loads, so a newly saved URL needs one
+   reload before calls to it are allowed.
+
+Amazon Bedrock note: Bedrock's native API needs AWS SigV4 request signing,
+which extensions can't do — point the custom endpoint at an
+OpenAI-compatible proxy in front of Bedrock instead (LiteLLM, the Bedrock
+Access Gateway, etc.).
 
 ### Configure Defaults
 
