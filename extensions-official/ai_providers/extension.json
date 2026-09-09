@@ -1,8 +1,8 @@
 {
   "name": "ai_providers",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "author": "johnsonfung",
-  "description": "Shared AI provider service for use by other extensions. Supports OpenAI, Anthropic, Google AI, OpenRouter, and Ollama.",
+  "description": "Shared AI provider service for use by other extensions. Supports OpenAI, Anthropic, Google AI, OpenRouter, Ollama, and any custom OpenAI- or Anthropic-compatible endpoint (Azure OpenAI, LiteLLM, Bedrock gateways, self-hosted models).",
   "license": "MIT",
   "category": "AI & ML",
   "dataScope": "none",
@@ -17,7 +17,8 @@
     "apikey_openai",
     "apikey_anthropic",
     "apikey_google",
-    "apikey_openrouter"
+    "apikey_openrouter",
+    "apikey_custom"
   ],
   "commands": [],
   "isService": true,

@@ -15,7 +15,7 @@
     // No endpoints or API keys needed - all handled by ai_providers
     const extensionRoot = new Extension({
         name: extensionName,
-        version: "3.1.0",
+        version: "3.1.1",
         endpoints: [],  // No endpoints - uses ai_providers
         requiredAPIKeys: [],  // No API keys - uses ai_providers
         author: "johnsonfung",
@@ -31,7 +31,7 @@
         parameters: [
             new Parameter({ type: "string", name: "prompt", helpText: "The prompt to send to the AI", required: true }),
             new Parameter({ type: "int", name: "length", helpText: "Rough length hint in tokens (0 = use the Response Length setting in ai_providers)", default: 0, required: false }),
-            new Parameter({ type: "float", name: "temperature", helpText: "Randomness of the response (0.0-2.0)", default: 0.7, required: false })
+            new Parameter({ type: "float", name: "temperature", helpText: "Randomness of the response (0.0-2.0). Leave out to use the model's default.", default: null, required: false })
         ],
         type: "insert",
         helpText: "Insert an AI-generated response to your prompt",
@@ -58,10 +58,13 @@
             }
 
             // Call the AI Providers service
-            const result = callAIProvider(prompt, {
-                maxTokens: length,
-                temperature
-            });
+            // Only forward a temperature the user actually typed — reasoning
+            // models reject values other than their default.
+            const options = { maxTokens: length };
+            if (!isNaN(temperature)) {
+                options.temperature = temperature;
+            }
+            const result = callAIProvider(prompt, options);
 
             return result;
 
