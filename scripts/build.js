@@ -381,9 +381,16 @@ function autoBumpChangedExtensions() {
   console.log('\n🔄 Auto-bumping versions for changed extensions...');
 
   try {
-    const { execSync } = require('child_process');
+    const { spawnSync } = require('child_process');
     const bumpScript = path.join(__dirname, 'bump-changed-extensions.js');
-    execSync(`node "${bumpScript}"`, { stdio: 'inherit', cwd: ROOT_DIR });
+    // Use spawnSync with an argv array (no shell) to avoid interpolation issues
+    const result = spawnSync(process.execPath, [bumpScript], { stdio: 'inherit', cwd: ROOT_DIR });
+    if (result.error) {
+      throw result.error;
+    }
+    if (result.status !== 0) {
+      throw new Error(`bump-changed-extensions.js exited with status ${result.status}`);
+    }
     console.log('  ✓ Version bumping completed');
   } catch (error) {
     console.error('  ✗ Failed to auto-bump versions:', error.message);
