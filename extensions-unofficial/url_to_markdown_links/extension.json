@@ -1,0 +1,27 @@
+{
+  "name": "url_to_markdown_links",
+  "version": "1.0.0",
+  "author": "kerim",
+  "description": "Replace every bare URL in a note with a markdown link titled by the page it points to.",
+  "license": "MIT",
+  "category": "Utilities",
+  "dataScope": "full",
+  "endpoints": [
+    "https://html.duckduckgo.com",
+    "http://",
+    "https://"
+  ],
+  "requiredAPIKeys": [],
+  "commands": [
+    {
+      "name": "url_to_markdown_links",
+      "description": "Convert bare URLs in the note to [page title](URL) markdown links.",
+      "type": "replaceAll"
+    }
+  ],
+  "official": false,
+  "size": {
+    "total": 22034,
+    "totalKB": 21.5
+  }
+}
