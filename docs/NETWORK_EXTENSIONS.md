@@ -88,7 +88,7 @@ Makes an authenticated HTTP request through the Swift bridge.
   - Use `""` for APIs that don't need a key
   - Must be declared in extension's `requiredAPIKeys` array
 - **`url`** (string): Full URL to call
-  - Must match a declared endpoint (prefix matching)
+  - Must match a declared endpoint (see [Prefix Matching](#prefix-matching))
   - Use `{{API_KEY}}` placeholder if key goes in URL
 - **`method`** (string): HTTP method (`"GET"`, `"POST"`, `"PUT"`, `"DELETE"`, etc.)
 - **`headers`** (string): JSON string of headers
@@ -132,9 +132,19 @@ new Extension({
 })
 ```
 
+### No endpoints, no network
+
+An extension with an empty `endpoints` list cannot make any API call. Before
+Antinote 2.1.4 an empty list was treated as "allow anything" for older
+extensions; that is gone. Extensions with `dependencies` inherit their
+dependencies' endpoints, so an extension that calls through `ai_providers`
+needs no endpoints of its own.
+
 ### Prefix Matching
 
-Declaring an endpoint allows that URL and all subpaths:
+Declaring an endpoint allows that URL and all subpaths. The match has to end on
+a URL boundary — the next character must be `/`, `?`, `#`, or the end of the
+URL — unless the declared endpoint itself ends in `/`:
 
 ```js
 // Declaring this:
@@ -149,7 +159,16 @@ Declaring an endpoint allows that URL and all subpaths:
 ❌ https://api.example.com/v2/users (different prefix)
 ❌ https://evil.com (completely different domain)
 ❌ https://api.example.com (too short - need full prefix)
+❌ https://api.example.com/v10/users (v1 must end at a "/")
+❌ https://api.example.com/v1-admin (same reason)
 ```
+
+URLs with a username or password in them (`https://user@host/`), URLs with a
+backslash, and anything other than `http`/`https` are always refused.
+
+`{{placeholder}}` segments in a declared endpoint match exactly one path
+segment: `https://api.example.com/v1/models/{{model}}/generate` allows
+`.../models/gpt-4/generate` but not `.../models/a/b/generate`.
 
 ### Multiple Domains
 
@@ -596,9 +615,10 @@ my_command.execute = function(payload) {
 
 ## Troubleshooting
 
-### "Endpoint not in allowlist"
+### "API endpoint not authorized"
 
-**Cause:** URL doesn't match declared endpoints
+**Cause:** URL doesn't match declared endpoints — or the extension declares none,
+which from Antinote 2.1.4 means no network access
 
 **Fix:** Add the endpoint to your extension declaration:
 ```js

@@ -135,7 +135,7 @@ Wrap your extension in an IIFE (Immediately Invoked Function Expression) to avoi
 
 - **`name`** (string): Unique name for your extension
 - **`version`** (string): Version number (e.g., "1.0.0")
-- **`endpoints`** (array): URLs your extension calls (e.g., `["https://api.example.com"]`)
+- **`endpoints`** (array): URLs your extension calls (e.g., `["https://api.example.com/v1"]`). Leave it empty and the extension gets no network access at all — from Antinote 2.1.4, an empty list no longer means "anything". Extensions that depend on a service (like `ai_providers`) inherit its endpoints
 - **`requiredAPIKeys`** (array): API key IDs needed (e.g., `["apikey_openai"]`)
 - **`author`** (string): Your GitHub username or name
 - **`category`** (string): Category for organization (e.g., "AI", "Math", "Date & Time", "Utilities")
@@ -347,7 +347,7 @@ my_command.execute = function(payload) {
 ### Security Features
 
 - **API keys never exposed** - Stored in macOS Keychain, accessed only by Swift
-- **Endpoint validation** - Swift verifies all URLs match declared endpoints (prefix matching)
+- **Endpoint validation** - Swift verifies every URL against the declared endpoints. A match must end on a URL boundary, so `https://api.example.com` allows `https://api.example.com/v1` but not `https://api.example.com.evil.site`. No declared endpoints means no network
 - **Extension identity verification** - Extensions cannot impersonate each other
 - **`{{API_KEY}}` placeholder** - Replaced by Swift with actual key value
 
