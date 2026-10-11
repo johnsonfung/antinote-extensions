@@ -376,13 +376,22 @@ const opencodeGoFormat = (model) => {
             return catalog.indexOf(model) !== -1 ? model : config.defaultModel;
         }
 
-        // No catalog. OpenCode Go has a closed seed list, matched in full:
-        // "glm-5.3" must not also accept "glm-5.3-flash", and "hy3" must not
-        // accept "hy3-preview". Family prefixes like "gpt-" or "claude" would
-        // keep a leftover model from another provider.
+        // No catalog. OpenCode Go's seed list is matched in full ("glm-5.3"
+        // must not also accept "glm-5.3-flash") and answered with the listed
+        // spelling, because OpenCode matches ids exactly. An unlisted id is sent
+        // as typed so a model OpenCode adds later still works — unless it looks
+        // like a leftover from another provider (an OpenAI, Anthropic or Google
+        // family name, or an OpenRouter "vendor/model" id), which would only
+        // fail upstream.
         if (providerId === "opencodego") {
-            const known = config.models.some((id) => id.toLowerCase() === model.toLowerCase());
-            return known ? model : config.defaultModel;
+            const lower = model.toLowerCase();
+            const listed = config.models.find((id) => id.toLowerCase() === lower);
+            if (listed) {
+                return listed;
+            }
+            const leftover = lower.indexOf("/") !== -1 || ["openai", "anthropic", "google"].some((other) =>
+                PROVIDERS[other].modelPrefixes.some((prefix) => lower.indexOf(prefix) === 0));
+            return leftover ? config.defaultModel : model;
         }
 
         // Other providers fall back to the naming conventions we know.
@@ -657,8 +666,14 @@ const opencodeGoFormat = (model) => {
             return `${providerName} blocked this request (${blockReason}).`;
         }
 
+        // Responses API: a truncated reply is status "incomplete" with the
+        // reason alongside, mapped onto the chat-completions names below.
+        const incompleteReason = responseData?.status === "incomplete"
+            ? responseData?.incomplete_details?.reason
+            : null;
         const finishReason = responseData?.candidates?.[0]?.finishReason
-            || responseData?.choices?.[0]?.finish_reason;
+            || responseData?.choices?.[0]?.finish_reason
+            || (incompleteReason === "max_output_tokens" ? "length" : incompleteReason);
 
         if (finishReason === "MAX_TOKENS" || finishReason === "length") {
             return `${providerName} ran out of room before it wrote an answer. Reasoning models spend that budget thinking — try a shorter note or a non-reasoning model.`;

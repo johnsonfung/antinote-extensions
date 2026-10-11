@@ -11,10 +11,10 @@
     "https://api.anthropic.com/v1/messages",
     "https://generativelanguage.googleapis.com/v1beta/models/",
     "https://openrouter.ai/api/v1/chat/completions",
-    "http://localhost:11434/v1/chat/completions",
     "https://opencode.ai/zen/go/v1/chat/completions",
     "https://opencode.ai/zen/go/v1/messages",
-    "https://opencode.ai/zen/go/v1/responses"
+    "https://opencode.ai/zen/go/v1/responses",
+    "http://localhost:11434/v1/chat/completions"
   ],
   "requiredAPIKeys": [
     "apikey_openai",
@@ -29,7 +29,7 @@
   "official": true,
   "includedByDefault": true,
   "size": {
-    "total": 33488,
-    "totalKB": 32.7
+    "total": 34277,
+    "totalKB": 33.5
   }
 }
