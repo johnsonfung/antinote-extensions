@@ -189,6 +189,7 @@ grep -r "apikey_" extensions-official/
 - `apikey_anthropic` - Anthropic/Claude
 - `apikey_google` - Google AI/Gemini
 - `apikey_openrouter` - OpenRouter
+- `apikey_opencodego` - OpenCode Go
 - `apikey_weather` - Weather APIs
 
 ### Creating a New API Key ID

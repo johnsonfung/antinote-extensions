@@ -10,6 +10,7 @@
 // - Anthropic (Claude models)
 // - Google AI (Gemini models)
 // - OpenRouter (unified access to multiple providers)
+// - OpenCode Go (many labs' models; each sent to the API that serves it)
 // - Ollama (local models)
 // - Custom (any OpenAI- or Anthropic-compatible endpoint: Azure OpenAI,
 //   LiteLLM, vLLM, a Bedrock gateway, ...)
@@ -28,6 +29,67 @@
     // (Gemini 2.5, o-series) a small cap is spent thinking and the reply comes
     // back empty. Only Anthropic needs a number, because its API requires one.
     const ANTHROPIC_MAX_TOKENS = 8192;
+
+    // One id for the life of this extension. Antinote has no per-note
+    // conversation id, so the running instance is the conversation OpenCode
+    // uses for routing and prompt caching.
+    let opencodeSessionId = null;
+
+    const opencodeSession = () => {
+        if (!opencodeSessionId) {
+            opencodeSessionId = `${Date.now().toString(16)}-${Math.random().toString(16).slice(2)}`;
+        }
+        return opencodeSessionId;
+    };
+
+    // OpenCode Go serves one key across four APIs, and the model id picks
+    // which. https://opencode.ai/docs/go/
+    const OPENCODE_GO = "https://opencode.ai/inference/go";
+    const OPENCODE_GO_CHAT = `${OPENCODE_GO}/openai/v1/chat/completions`;
+    const OPENCODE_GO_MESSAGES = `${OPENCODE_GO}/anthropic/v1/messages`;
+    const OPENCODE_GO_RESPONSES = `${OPENCODE_GO}/openai/v1/responses`;
+    const OPENCODE_GO_GOOGLE = `${OPENCODE_GO}/google/v1beta/models/`;
+    const OPENCODE_GO_USER_AGENT = "@antinote/ai_providers/1.3.0";
+    const OPENCODE_GO_FORMATS = ["openai", "anthropic", "responses", "google"];
+
+    // Antinote reads which API serves each model from models.dev (the catalog
+    // OpenCode's own client uses) and answers through getAIModelRoute, so a
+    // model OpenCode adds or moves needs no change here. This table only
+    // covers Antinote versions without that bridge, or a device that hasn't
+    // reached models.dev yet. Models not in it use chat completions.
+    const OPENCODE_GO_FALLBACK_ROUTES = {
+        "claude-haiku-5-5": "anthropic",
+        "minimax-m3": "anthropic",
+        "minimax-m2.7": "anthropic",
+        "qwen3.8-max": "anthropic",
+        "qwen3.8-flash": "anthropic",
+        "qwen3.7-plus": "anthropic",
+        "grok-4.7": "responses",
+        "grok-4.6": "responses",
+        "gpt-6-luna": "responses",
+        "gpt-5.6-luna": "responses",
+        "muse-spark-1.3-contributor": "responses",
+        "muse-spark-1.2-contributor": "responses",
+        "gemini-4-argon": "google"
+    };
+
+    // The API that serves `model`, or null when neither Antinote nor the
+    // fallback table knows the model.
+    const opencodeGoKnownFormat = (model) => {
+        if (typeof getAIModelRoute === "function") {
+            try {
+                const route = getAIModelRoute("opencodego", model);
+                if (OPENCODE_GO_FORMATS.indexOf(route) !== -1) {
+                    return route;
+                }
+            } catch (e) {
+                console.error("Could not read the model route:", e);
+            }
+        }
+        return OPENCODE_GO_FALLBACK_ROUTES[(model || "").toLowerCase()] || null;
+    };
+
+    const opencodeGoFormat = (model) => opencodeGoKnownFormat(model) || "openai";
 
     // Preferences read through the app bridge, guarded so this file also loads
     // where the bridge isn't installed yet (the Node test harness).
@@ -51,7 +113,7 @@
     const PROVIDERS = {
         "openai": {
             name: "OpenAI",
-            endpoint: "https://api.openai.com/v1/chat/completions",
+            endpoints: ["https://api.openai.com/v1/chat/completions"],
             apiKeyId: "apikey_openai",
             models: ["gpt-5", "gpt-5-mini", "gpt-4.1", "gpt-4o", "gpt-4o-mini"],
             defaultModel: "gpt-5",
@@ -60,7 +122,7 @@
         },
         "anthropic": {
             name: "Anthropic",
-            endpoint: "https://api.anthropic.com/v1/messages",
+            endpoints: ["https://api.anthropic.com/v1/messages"],
             apiKeyId: "apikey_anthropic",
             models: ["claude-opus-5", "claude-sonnet-5", "claude-haiku-4-5"],
             defaultModel: "claude-sonnet-5",
@@ -69,7 +131,7 @@
         },
         "google": {
             name: "Google AI",
-            endpoint: "https://generativelanguage.googleapis.com/v1beta/models/",
+            endpoints: ["https://generativelanguage.googleapis.com/v1beta/models/"],
             apiKeyId: "apikey_google",
             models: ["gemini-2.5-flash", "gemini-2.5-pro", "gemini-2.5-flash-lite"],
             defaultModel: "gemini-2.5-flash",
@@ -78,7 +140,7 @@
         },
         "openrouter": {
             name: "OpenRouter",
-            endpoint: "https://openrouter.ai/api/v1/chat/completions",
+            endpoints: ["https://openrouter.ai/api/v1/chat/completions"],
             apiKeyId: "apikey_openrouter",
             models: [
                 "openrouter/auto",
@@ -93,9 +155,22 @@
             modelPrefixes: [],
             requiresApiKey: true
         },
+        "opencodego": {
+            name: "OpenCode Go",
+            // Chat first. buildRequest picks the URL for each model's API.
+            endpoints: [OPENCODE_GO_CHAT, OPENCODE_GO_MESSAGES, OPENCODE_GO_RESPONSES, OPENCODE_GO_GOOGLE],
+            apiKeyId: "apikey_opencodego",
+            // Antinote lists the models live from OpenCode's /v1/models.
+            models: [],
+            defaultModel: "mimo-v2.6-flash",
+            // No family prefix: Go serves models from many labs, including
+            // some Claude, GPT and Gemini ones. resolveModel checks routes instead.
+            modelPrefixes: [],
+            requiresApiKey: true
+        },
         "ollama": {
             name: "Ollama (Local)",
-            endpoint: "http://localhost:11434/v1/chat/completions",
+            endpoints: ["http://localhost:11434/v1/chat/completions"],
             apiKeyId: null,
             models: ["llama3.3", "qwen2.5:32b", "mistral", "phi4", "deepseek-r1:32b"],
             defaultModel: "llama3.3",
@@ -106,7 +181,7 @@
             name: "Custom Endpoint",
             // The real URL lives in the customEndpoint preference: read at call
             // time for requests, declared to the app at load time (below).
-            endpoint: "",
+            endpoints: [],
             apiKeyId: "apikey_custom",
             models: [],
             // No default: only the user knows what their endpoint serves.
@@ -129,10 +204,14 @@
     const allApiKeys = [];
     for (const providerId in PROVIDERS) {
         const provider = PROVIDERS[providerId];
-        // Never declare an empty endpoint: the app's allow-list does prefix
-        // matching, and "" would authorize every URL.
-        if (provider.endpoint) {
-            allEndpoints.push(provider.endpoint);
+        // Never declare an empty URL: the app's allow-list does prefix
+        // matching, and "" would authorize every URL. endpoints[0] is the
+        // chat target; later entries are extra calls.
+        const urls = provider.endpoints || [];
+        for (let i = 0; i < urls.length; i++) {
+            if (urls[i] && allEndpoints.indexOf(urls[i]) === -1) {
+                allEndpoints.push(urls[i]);
+            }
         }
         if (provider.requiresApiKey && provider.apiKeyId) {
             allApiKeys.push(provider.apiKeyId);
@@ -149,7 +228,7 @@
 
     const extensionRoot = new Extension({
         name: extensionName,
-        version: "1.2.0",
+        version: "1.3.0",
         endpoints: allEndpoints,
         requiredAPIKeys: allApiKeys,
         author: "johnsonfung",
@@ -165,7 +244,7 @@
     label: "AI Provider",
     type: "selectOne",
     defaultValue: "openai",
-    options: ["openai", "anthropic", "google", "openrouter", "ollama", "custom"],
+    options: ["openai", "anthropic", "google", "openrouter", "opencodego", "ollama", "custom"],
     helpText: "Default AI provider for all AI-powered extensions"
   });
     extensionRoot.register_preference(providerPref);
@@ -272,8 +351,27 @@
             return catalog.indexOf(model) !== -1 ? model : config.defaultModel;
         }
 
-        // No catalog: fall back to the naming conventions we know. Providers
-        // with no recognisable prefix keep whatever the user typed.
+        // No catalog. An OpenCode Go model with a known route is sent in
+        // lowercase, since OpenCode's ids are lowercase and matched exactly.
+        // An unknown id is sent as typed, so a model OpenCode adds later
+        // still works. The exception is an id that looks left over from
+        // another provider (an OpenAI, Anthropic or Google family name, or an
+        // OpenRouter "vendor/model" id), which would only fail upstream.
+        // Known routes are checked first because Go serves some Claude, GPT
+        // and Gemini models itself.
+        if (providerId === "opencodego") {
+            const lower = model.toLowerCase();
+            if (opencodeGoKnownFormat(model)) {
+                return lower;
+            }
+            const leftover = lower.indexOf("/") !== -1 || ["openai", "anthropic", "google"].some((other) =>
+                PROVIDERS[other].modelPrefixes.some((prefix) => lower.indexOf(prefix) === 0));
+            return leftover ? config.defaultModel : model;
+        }
+
+        // Other providers fall back to the naming conventions we know.
+        // An empty prefix list means there is no convention: keep whatever
+        // the user typed.
         if (config.modelPrefixes.length === 0) {
             return model;
         }
@@ -283,9 +381,12 @@
 
     // Which wire protocol a provider speaks. The custom endpoint borrows one
     // of the shapes we already build rather than inventing a third.
-    const wireFormat = (providerId) => {
+    const wireFormat = (providerId, model) => {
         if (providerId === "custom") {
             return readPreference("customFormat") === "anthropic" ? "anthropic" : "openai";
+        }
+        if (providerId === "opencodego") {
+            return opencodeGoFormat(model);
         }
         if (providerId === "openai" || providerId === "openrouter" || providerId === "ollama") {
             return "openai";
@@ -316,19 +417,23 @@
             return null;
         }
 
-        const format = wireFormat(providerId);
-        let url = config.endpoint;
+        const format = wireFormat(providerId, model);
+        // endpoints[0] is the former `endpoint`: chat/completions, Anthropic
+        // messages, or the Google models prefix. OpenCode Go overrides this
+        // per model below.
+        let url = (config.endpoints && config.endpoints[0]) || "";
         let headers = {};
         let body = {};
         let apiKeyId = config.apiKeyId;
 
         // How the key travels: Anthropic's own API wants x-api-key, Google its
         // own header, the custom endpoint follows its auth preference, and
-        // everyone else uses a Bearer token. Ollama sends nothing.
+        // everyone else uses a Bearer token. Ollama sends nothing. OpenCode
+        // Go authenticates each model the way its API's own SDK does.
         let authStyle = "bearer";
-        if (providerId === "anthropic") {
+        if (providerId === "anthropic" || (providerId === "opencodego" && format === "anthropic")) {
             authStyle = "x-api-key";
-        } else if (providerId === "google") {
+        } else if (providerId === "google" || (providerId === "opencodego" && format === "google")) {
             authStyle = "x-goog-api-key";
         } else if (providerId === "ollama") {
             authStyle = "none";
@@ -336,6 +441,18 @@
             const authPref = readPreference("customAuth");
             authStyle = (authPref === "x-api-key" || authPref === "none") ? authPref : "bearer";
             url = customEndpointNow();
+        }
+
+        if (providerId === "opencodego") {
+            if (format === "responses") {
+                url = OPENCODE_GO_RESPONSES;
+            } else if (format === "anthropic") {
+                url = OPENCODE_GO_MESSAGES;
+            } else if (format === "google") {
+                url = OPENCODE_GO_GOOGLE;
+            } else {
+                url = OPENCODE_GO_CHAT;
+            }
         }
         if (authStyle === "none") {
             apiKeyId = null;
@@ -391,7 +508,7 @@
             // string: Antinote only substitutes {{API_KEY}} into headers and
             // the body, so a key in the URL would be sent as the literal
             // placeholder.
-            url = `${config.endpoint}${model}:generateContent`;
+            url = `${url}${model}:generateContent`;
             headers = {
                 "Content-Type": "application/json"
             };
@@ -422,6 +539,17 @@
                     ]
                 };
             }
+        } else if (format === "responses") {
+            // Responses API body. Only OpenCode Go uses this format.
+            headers = {
+                "Content-Type": "application/json"
+            };
+
+            body = {
+                model,
+                instructions: systemPrompt,
+                input: userPrompt
+            };
         }
 
         if (authStyle === "bearer") {
@@ -430,6 +558,13 @@
             headers["x-api-key"] = "{{API_KEY}}";
         } else if (authStyle === "x-goog-api-key") {
             headers["x-goog-api-key"] = "{{API_KEY}}";
+        }
+
+        // OpenCode uses the session id to keep routing and prompt caching
+        // attached to one conversation, and rejects generic client names.
+        if (providerId === "opencodego") {
+            headers["x-opencode-session"] = opencodeSession();
+            headers["User-Agent"] = OPENCODE_GO_USER_AGENT;
         }
 
         // Only send a temperature the caller actually asked for (see above).
@@ -451,9 +586,9 @@
     };
 
     // Helper function to parse response from different providers
-    const parseResponse = (providerId, responseData) => {
+    const parseResponse = (providerId, responseData, model) => {
         try {
-            const format = wireFormat(providerId);
+            const format = wireFormat(providerId, model);
             if (format === "openai") {
                 if (responseData.choices?.length > 0) {
                     return (responseData.choices[0].message?.content || "").trim() || null;
@@ -466,6 +601,21 @@
                         .join("")
                         .trim() || null;
                 }
+            } else if (format === "responses") {
+                if (typeof responseData.output_text === "string" && responseData.output_text.trim()) {
+                    return responseData.output_text.trim();
+                }
+                const output = responseData.output || [];
+                const texts = [];
+                for (let i = 0; i < output.length; i++) {
+                    const content = output[i].content || [];
+                    for (let j = 0; j < content.length; j++) {
+                        if (content[j].type === "output_text" && content[j].text) {
+                            texts.push(content[j].text);
+                        }
+                    }
+                }
+                return texts.join("").trim() || null;
             } else if (format === "google") {
                 if (responseData.candidates?.length > 0) {
                     const candidate = responseData.candidates[0];
@@ -492,8 +642,14 @@
             return `${providerName} blocked this request (${blockReason}).`;
         }
 
+        // Responses API: a truncated reply is status "incomplete" with the
+        // reason alongside, mapped onto the chat-completions names below.
+        const incompleteReason = responseData?.status === "incomplete"
+            ? responseData?.incomplete_details?.reason
+            : null;
         const finishReason = responseData?.candidates?.[0]?.finishReason
-            || responseData?.choices?.[0]?.finish_reason;
+            || responseData?.choices?.[0]?.finish_reason
+            || (incompleteReason === "max_output_tokens" ? "length" : incompleteReason);
 
         if (finishReason === "MAX_TOKENS" || finishReason === "length") {
             return `${providerName} ran out of room before it wrote an answer. Reasoning models spend that budget thinking — try a shorter note or a non-reasoning model.`;
@@ -514,7 +670,7 @@
     // Parameters:
     //   prompt (string): The user's prompt
     //   options (object, optional): Override default settings
-    //     - provider: Provider ID ("openai", "anthropic", "google", "openrouter", "ollama", "custom")
+    //     - provider: Provider ID ("openai", "anthropic", "google", "openrouter", "opencodego", "ollama", "custom")
     //     - model: Model name
     //     - systemPrompt: System prompt
     //     - maxTokens: Rough length hint in tokens (0 = use the length preference)
@@ -630,7 +786,7 @@
             }
 
             // Extract response text based on provider
-            const responseText = parseResponse(provider, responseData);
+            const responseText = parseResponse(provider, responseData, model);
 
             if (!responseText) {
                 return new ReturnObject({status: "error", message: describeEmptyResponse(provider, responseData)});

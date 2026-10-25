@@ -402,7 +402,7 @@ Antinote provides a centralized **AI Providers Service** (`ai_providers`) that h
 
 ### Why Use the AI Service?
 
-- **Unified Interface** - Single API for OpenAI, Anthropic, Google AI, OpenRouter, and Ollama
+- **Unified Interface** - Single API for OpenAI, Anthropic, Google AI, OpenRouter, OpenCode Go, and Ollama
 - **User Configuration** - Users configure their preferred provider and API keys once
 - **No Duplicate Code** - Don't reimplement AI provider logic in each extension
 - **Centralized Updates** - Provider changes update all AI extensions automatically

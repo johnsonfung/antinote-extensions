@@ -85,26 +85,39 @@ describe("AI Providers Extension - Metadata Validation", function() {
   it("should have endpoints array with all provider APIs", function() {
     expect(metadata.endpoints).toBeDefined();
     expect(metadata.endpoints).toBeArray();
-    expect(metadata.endpoints.length).toBeGreaterThanOrEqual(5);
+    expect(metadata.endpoints.length).toBeGreaterThanOrEqual(9);
     expect(metadata.endpoints[0]).toContain("api.openai.com");
     expect(metadata.endpoints[1]).toContain("api.anthropic.com");
     expect(metadata.endpoints[2]).toContain("generativelanguage.googleapis.com");
     expect(metadata.endpoints[3]).toContain("openrouter.ai");
-    expect(metadata.endpoints[4]).toContain("localhost:11434");
+    expect(metadata.endpoints[4]).toContain("opencode.ai/inference/go/openai/v1/chat/completions");
+    expect(metadata.endpoints[5]).toContain("opencode.ai/inference/go/anthropic/v1/messages");
+    expect(metadata.endpoints[6]).toContain("opencode.ai/inference/go/openai/v1/responses");
+    expect(metadata.endpoints[7]).toContain("opencode.ai/inference/go/google/v1beta/models/");
+    expect(metadata.endpoints[8]).toContain("localhost:11434");
   });
 
   it("should require API keys for cloud providers", function() {
     expect(metadata.requiredAPIKeys).toBeDefined();
     expect(metadata.requiredAPIKeys).toBeArray();
-    expect(metadata.requiredAPIKeys.length).toBeGreaterThanOrEqual(4);
+    expect(metadata.requiredAPIKeys.length).toBeGreaterThanOrEqual(5);
     expect(metadata.requiredAPIKeys[0]).toBe("apikey_openai");
     expect(metadata.requiredAPIKeys[1]).toBe("apikey_anthropic");
     expect(metadata.requiredAPIKeys[2]).toBe("apikey_google");
     expect(metadata.requiredAPIKeys[3]).toBe("apikey_openrouter");
+    expect(metadata.requiredAPIKeys[4]).toBe("apikey_opencodego");
   });
 
   it("declares the custom endpoint key", function() {
     expect(metadata.requiredAPIKeys).toContain("apikey_custom");
+  });
+
+  it("declares OpenCode Go endpoints and its API key", function() {
+    expect(metadata.endpoints).toContain("https://opencode.ai/inference/go/openai/v1/chat/completions");
+    expect(metadata.endpoints).toContain("https://opencode.ai/inference/go/anthropic/v1/messages");
+    expect(metadata.endpoints).toContain("https://opencode.ai/inference/go/openai/v1/responses");
+    expect(metadata.endpoints).toContain("https://opencode.ai/inference/go/google/v1beta/models/");
+    expect(metadata.requiredAPIKeys).toContain("apikey_opencodego");
   });
 
   it("should have no commands (service only)", function() {
@@ -232,6 +245,10 @@ describe("AI Providers Extension - Request Building", function() {
     run({ provider: "openai" });
     expect(lastCall.body.max_tokens).toBe(undefined);
     expect(lastCall.body.max_completion_tokens).toBe(undefined);
+
+    run({ provider: "opencodego", model: "mimo-v2.6-flash" });
+    expect(lastCall.body.max_tokens).toBe(undefined);
+    expect(lastCall.body.max_completion_tokens).toBe(undefined);
   });
 
   it("does not cap output tokens on Google", function() {
@@ -242,17 +259,41 @@ describe("AI Providers Extension - Request Building", function() {
   it("still sends the max_tokens Anthropic requires", function() {
     run({ provider: "anthropic" });
     expect(lastCall.body.max_tokens).toBe(8192);
+
+    run({ provider: "opencodego", model: "claude-haiku-5-5" });
+    expect(lastCall.body.max_tokens).toBe(8192);
   });
 
   it("asks for the response length in the system prompt", function() {
     run({ provider: "openai", responseLength: "brief" });
     expect(lastCall.body.messages[0].content).toContain("couple of sentences");
+
+    run({ provider: "opencodego", model: "mimo-v2.6-flash", responseLength: "brief" });
+    expect(lastCall.body.messages[0].content).toContain("couple of sentences");
+
+    run({ provider: "opencodego", model: "claude-haiku-5-5", responseLength: "brief" });
+    expect(lastCall.body.system).toContain("couple of sentences");
+
+    run({ provider: "opencodego", model: "grok-4.7", responseLength: "brief" });
+    expect(lastCall.body.instructions).toContain("couple of sentences");
   });
 
   it("turns an explicit token count into a word count in the prompt", function() {
     run({ provider: "openai" }, { maxTokens: 400 });
     expect(lastCall.body.messages[0].content).toContain("300 words");
     expect(lastCall.body.max_tokens).toBe(undefined);
+
+    run({ provider: "opencodego", model: "mimo-v2.6-flash" }, { maxTokens: 400 });
+    expect(lastCall.body.messages[0].content).toContain("300 words");
+    expect(lastCall.body.max_tokens).toBe(undefined);
+
+    run({ provider: "opencodego", model: "grok-4.7" }, { maxTokens: 400 });
+    expect(lastCall.body.instructions).toContain("300 words");
+    expect(lastCall.body.max_tokens).toBe(undefined);
+
+    run({ provider: "opencodego", model: "claude-haiku-5-5" }, { maxTokens: 400 });
+    expect(lastCall.body.system).toContain("300 words");
+    expect(lastCall.body.max_tokens).toBe(8192);
   });
 
   it("omits temperature everywhere unless a caller sets one", function() {
@@ -262,6 +303,12 @@ describe("AI Providers Extension - Request Building", function() {
     expect(lastCall.body.temperature).toBe(undefined);
     run({ provider: "google" });
     expect(lastCall.body.generationConfig.temperature).toBe(undefined);
+    run({ provider: "opencodego", model: "mimo-v2.6-flash" });
+    expect(lastCall.body.temperature).toBe(undefined);
+    run({ provider: "opencodego", model: "claude-haiku-5-5" });
+    expect(lastCall.body.temperature).toBe(undefined);
+    run({ provider: "opencodego", model: "grok-4.7" });
+    expect(lastCall.body.temperature).toBe(undefined);
   });
 
   it("passes through a temperature the caller set explicitly", function() {
@@ -269,6 +316,12 @@ describe("AI Providers Extension - Request Building", function() {
     expect(lastCall.body.temperature).toBe(1.2);
     run({ provider: "anthropic" }, { temperature: 0 });
     expect(lastCall.body.temperature).toBe(0);
+    run({ provider: "opencodego", model: "mimo-v2.6-flash" }, { temperature: 1.2 });
+    expect(lastCall.body.temperature).toBe(1.2);
+    run({ provider: "opencodego", model: "claude-haiku-5-5" }, { temperature: 0 });
+    expect(lastCall.body.temperature).toBe(0);
+    run({ provider: "opencodego", model: "grok-4.7" }, { temperature: 0.4 });
+    expect(lastCall.body.temperature).toBe(0.4);
   });
 
   it("sends custom-endpoint requests to the saved URL with Bearer auth", function() {
@@ -326,9 +379,166 @@ describe("AI Providers Extension - Request Building", function() {
     expect(result.message).toContain("Reload extensions");
   });
 
+  it("sends OpenCode Go chat models to chat completions with a stable session", function() {
+    var result = run({ provider: "opencodego", model: "mimo-v2.6-flash" });
+    expect(result.status).toBe("success");
+    expect(lastCall.url).toBe("https://opencode.ai/inference/go/openai/v1/chat/completions");
+    expect(lastCall.headers["Authorization"]).toBe("Bearer {{API_KEY}}");
+    expect(lastCall.apiKeyId).toBe("apikey_opencodego");
+    expect(lastCall.headers["User-Agent"]).toBe("@antinote/ai_providers/1.3.0");
+    expect(lastCall.headers["x-opencode-session"]).toBeDefined();
+    expect(lastCall.body.model).toBe("mimo-v2.6-flash");
+    expect(lastCall.body.messages[1].content).toBe("Say hi");
+
+    var session = lastCall.headers["x-opencode-session"];
+    run({ provider: "opencodego", model: "mimo-v2.6-flash" });
+    expect(lastCall.headers["x-opencode-session"]).toBe(session);
+  });
+
+  it("sends OpenCode Go response models to the responses API", function() {
+    mockResponse = { output_text: "from responses" };
+    var result = run({ provider: "opencodego", model: "grok-4.7" });
+    expect(result.status).toBe("success");
+    expect(result.payload).toBe("from responses");
+    expect(lastCall.url).toBe("https://opencode.ai/inference/go/openai/v1/responses");
+    expect(lastCall.headers["Authorization"]).toBe("Bearer {{API_KEY}}");
+    expect(lastCall.body.model).toBe("grok-4.7");
+    expect(lastCall.body.input).toBe("Say hi");
+    expect(lastCall.body.instructions).toContain("plaintext scratch notes app");
+    expect(lastCall.body.messages).toBe(undefined);
+    mockResponse = okResponse;
+  });
+
+  it("reads OpenCode Go responses from output content blocks", function() {
+    mockResponse = {
+      output: [
+        { type: "message", content: [{ type: "output_text", text: "from blocks" }] }
+      ]
+    };
+    var result = run({ provider: "opencodego", model: "grok-4.7" });
+    expect(result.status).toBe("success");
+    expect(result.payload).toBe("from blocks");
+    mockResponse = okResponse;
+  });
+
+  it("sends OpenCode Go message models to the Anthropic messages API", function() {
+    var result = run({ provider: "opencodego", model: "claude-haiku-5-5" });
+    expect(result.status).toBe("success");
+    expect(lastCall.url).toBe("https://opencode.ai/inference/go/anthropic/v1/messages");
+    expect(lastCall.headers["x-api-key"]).toBe("{{API_KEY}}");
+    expect(lastCall.headers["anthropic-version"]).toBe("2023-06-01");
+    expect(lastCall.apiKeyId).toBe("apikey_opencodego");
+    expect(lastCall.body.max_tokens).toBe(8192);
+    expect(lastCall.body.model).toBe("claude-haiku-5-5");
+    expect(lastCall.headers["x-opencode-session"]).toBeDefined();
+  });
+
+  it("falls back to the OpenCode Go default when the model belongs to another provider", function() {
+    getAvailableModels = undefined;
+    run({ provider: "opencodego", model: "gpt-4o" });
+    expect(lastCall.url).toBe("https://opencode.ai/inference/go/openai/v1/chat/completions");
+    expect(lastCall.body.model).toBe("mimo-v2.6-flash");
+  });
+
+  it("routes OpenCode Go models by what Antinote reads from models.dev", function() {
+    getAIModelRoute = function(provider, model) {
+      expect(provider).toBe("opencodego");
+      return { "brand-new-claude": "anthropic", "new-responses-model": "responses", "glm-5.3": "openai" }[model] || "";
+    };
+    run({ provider: "opencodego", model: "brand-new-claude" });
+    expect(lastCall.url).toBe("https://opencode.ai/inference/go/anthropic/v1/messages");
+    expect(lastCall.headers["x-api-key"]).toBe("{{API_KEY}}");
+    run({ provider: "opencodego", model: "new-responses-model" });
+    expect(lastCall.url).toBe("https://opencode.ai/inference/go/openai/v1/responses");
+    run({ provider: "opencodego", model: "glm-5.3" });
+    expect(lastCall.url).toBe("https://opencode.ai/inference/go/openai/v1/chat/completions");
+    getAIModelRoute = undefined;
+  });
+
+  it("lets Antinote's route win over the built-in fallback table", function() {
+    // OpenCode moved a model: the app's fresh route beats the shipped table.
+    getAIModelRoute = function() { return "openai"; };
+    run({ provider: "opencodego", model: "grok-4.7" });
+    expect(lastCall.url).toBe("https://opencode.ai/inference/go/openai/v1/chat/completions");
+    getAIModelRoute = undefined;
+  });
+
+  it("uses the fallback table when Antinote doesn't know the route", function() {
+    getAIModelRoute = function() { return ""; };
+    run({ provider: "opencodego", model: "claude-haiku-5-5" });
+    expect(lastCall.url).toBe("https://opencode.ai/inference/go/anthropic/v1/messages");
+    getAIModelRoute = function() { throw "bridge broke"; };
+    run({ provider: "opencodego", model: "grok-4.7" });
+    expect(lastCall.url).toBe("https://opencode.ai/inference/go/openai/v1/responses");
+    getAIModelRoute = undefined;
+  });
+
+  it("sends OpenCode Go's Gemini models to its generateContent endpoint", function() {
+    mockResponse = { candidates: [{ content: { parts: [{ text: "from gemini" }] } }] };
+    var result = run({ provider: "opencodego", model: "gemini-4-argon" });
+    expect(result.status).toBe("success");
+    expect(result.payload).toBe("from gemini");
+    expect(lastCall.url).toBe("https://opencode.ai/inference/go/google/v1beta/models/gemini-4-argon:generateContent");
+    expect(lastCall.headers["x-goog-api-key"]).toBe("{{API_KEY}}");
+    expect(lastCall.headers["Authorization"]).toBe(undefined);
+    expect(lastCall.headers["x-opencode-session"]).toBeDefined();
+    mockResponse = okResponse;
+  });
+
+  it("keeps OpenCode Go's own Claude, GPT and Gemini models instead of treating them as leftovers", function() {
+    getAvailableModels = undefined;
+    run({ provider: "opencodego", model: "claude-haiku-5-5" });
+    expect(lastCall.body.model).toBe("claude-haiku-5-5");
+    run({ provider: "opencodego", model: "gpt-6-luna" });
+    expect(lastCall.body.model).toBe("gpt-6-luna");
+    run({ provider: "opencodego", model: "gemini-4-argon" });
+    expect(lastCall.url).toContain("/models/gemini-4-argon:generateContent");
+  });
+
+  it("sends an unlisted OpenCode Go model as typed when the catalog is unavailable", function() {
+    getAvailableModels = undefined;
+    run({ provider: "opencodego", model: "glm-6" });
+    expect(lastCall.url).toBe("https://opencode.ai/inference/go/openai/v1/chat/completions");
+    expect(lastCall.body.model).toBe("glm-6");
+    run({ provider: "opencodego", model: "hy3-preview" });
+    expect(lastCall.body.model).toBe("hy3-preview");
+  });
+
+  it("lowercases a known OpenCode Go model typed in another case", function() {
+    getAvailableModels = undefined;
+    run({ provider: "opencodego", model: "Claude-Haiku-5-5" });
+    expect(lastCall.url).toBe("https://opencode.ai/inference/go/anthropic/v1/messages");
+    expect(lastCall.body.model).toBe("claude-haiku-5-5");
+  });
+
+  it("falls back from an OpenRouter-style id left over on OpenCode Go", function() {
+    getAvailableModels = undefined;
+    run({ provider: "opencodego", model: "anthropic/claude-sonnet-4" });
+    expect(lastCall.body.model).toBe("mimo-v2.6-flash");
+  });
+
+  it("uses chat completions for an OpenCode Go model the route map does not list", function() {
+    getAvailableModels = function() { return ["some-new-model"]; };
+    run({ provider: "opencodego", model: "some-new-model" });
+    expect(lastCall.url).toBe("https://opencode.ai/inference/go/openai/v1/chat/completions");
+    expect(lastCall.body.model).toBe("some-new-model");
+    getAvailableModels = undefined;
+  });
+
   it("explains a 200 that came back with no answer", function() {
     mockResponse = { candidates: [{ finishReason: "MAX_TOKENS", content: {} }] };
     var result = run({ provider: "google" });
+    expect(result.status).toBe("error");
+    expect(result.message).toContain("ran out of room");
+
+    mockResponse = { choices: [{ finish_reason: "length", message: { content: "" } }] };
+    result = run({ provider: "opencodego", model: "mimo-v2.6-flash" });
+    expect(result.status).toBe("error");
+    expect(result.message).toContain("OpenCode Go");
+    expect(result.message).toContain("ran out of room");
+
+    mockResponse = { status: "incomplete", incomplete_details: { reason: "max_output_tokens" }, output: [] };
+    result = run({ provider: "opencodego", model: "grok-4.7" });
     expect(result.status).toBe("error");
     expect(result.message).toContain("ran out of room");
     mockResponse = okResponse;
@@ -344,6 +554,10 @@ describe("AI Providers Extension - Request Building", function() {
       };
     };
     var result = run({ provider: "google" });
+    expect(result.status).toBe("error");
+    expect(result.message).toContain("API key not valid");
+
+    result = run({ provider: "opencodego", model: "mimo-v2.6-flash" });
     expect(result.status).toBe("error");
     expect(result.message).toContain("API key not valid");
   });

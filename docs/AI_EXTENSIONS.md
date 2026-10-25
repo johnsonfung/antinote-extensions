@@ -15,6 +15,7 @@ Antinote provides a **centralized AI service** (`ai_providers` extension) that h
 - Anthropic (Claude models)
 - Google AI (Gemini models)
 - OpenRouter (multi-provider access)
+- OpenCode Go (curated models via OpenCode)
 - Ollama (local models)
 
 ✅ **User Configuration** - Users configure their preferred provider and API keys **once**
@@ -122,6 +123,7 @@ Sends a prompt to the user's configured AI provider.
 - `"anthropic"` - Anthropic Claude models
 - `"google"` - Google Gemini models
 - `"openrouter"` - OpenRouter (unified access)
+- `"opencodego"` - OpenCode Go (curated models)
 - `"ollama"` - Ollama (local models)
 
 ---

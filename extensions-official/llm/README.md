@@ -4,7 +4,7 @@ General-purpose AI command for getting AI-generated responses in your Antinote n
 
 ## Overview
 
-This extension provides a simple `ai` command that uses the **AI Providers** service for all AI functionality. It supports multiple providers (OpenAI, Anthropic, Google AI, OpenRouter, Ollama) through a shared configuration.
+This extension provides a simple `ai` command that uses the **AI Providers** service for all AI functionality. It supports multiple providers (OpenAI, Anthropic, Google AI, OpenRouter, OpenCode Go, Ollama) through a shared configuration.
 
 **Dependencies:** This extension requires the `ai_providers` extension to be installed and enabled.
 
@@ -51,7 +51,7 @@ Get a more creative response with 100 tokens and higher temperature.
 ## Configuration
 
 All configuration is handled by the **AI Providers** extension. See its README for:
-- Supported providers (OpenAI, Anthropic, Google AI, OpenRouter, Ollama)
+- Supported providers (OpenAI, Anthropic, Google AI, OpenRouter, OpenCode Go, Ollama)
 - Available models
 - Provider setup instructions
 - System prompt customization

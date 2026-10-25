@@ -105,7 +105,7 @@ The output starts with `list:` followed by a title, then each item on its own li
 
 - **Dependencies:** ai_providers extension
 - **Data Scope:** full (requires access to entire note content)
-- **API Keys:** Inherited from ai_providers (OpenAI, Anthropic, Google, or OpenRouter depending on provider selection)
+- **API Keys:** Inherited from ai_providers (OpenAI, Anthropic, Google, OpenRouter, or OpenCode Go depending on provider selection)
 
 ## Configuration
 
