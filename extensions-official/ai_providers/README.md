@@ -40,7 +40,11 @@ This extension acts as a **service** - it has no user-facing commands. Instead, 
 2. Save that key in Antinote as `apikey_opencodego`
 3. Set **AI Provider** to `opencodego`. Leave **Model** empty to use `mimo-v2.6-flash`, or pick another id from the list
 
-OpenCode Go sends each model to the endpoint that serves it (chat completions, Anthropic messages, or the OpenAI Responses API). Requests include a stable `x-opencode-session` header for the running Antinote session so OpenCode can route and cache them as one conversation.
+Antinote fetches the model list live from OpenCode, so new models show up without an extension update.
+
+OpenCode Go serves each model on one of four APIs: chat completions, Anthropic messages, the OpenAI Responses API, or Google's generateContent. Antinote looks up which API serves each model on [models.dev](https://models.dev), the catalog OpenCode's own client uses, and this extension sends the request there. Older Antinote versions without that lookup use a small fallback table, and send any model not in it to chat completions.
+
+Requests include an `x-opencode-session` header, as OpenCode asks. It is one id for the whole time Antinote is running, shared across notes, so OpenCode can group those requests together for routing and prompt caching.
 
 ### For Ollama (Local Models)
 

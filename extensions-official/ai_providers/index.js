@@ -10,7 +10,7 @@
 // - Anthropic (Claude models)
 // - Google AI (Gemini models)
 // - OpenRouter (unified access to multiple providers)
-// - OpenCode Go (curated models; chat, messages, or responses by model)
+// - OpenCode Go (many labs' models; each sent to the API that serves it)
 // - Ollama (local models)
 // - Custom (any OpenAI- or Anthropic-compatible endpoint: Azure OpenAI,
 //   LiteLLM, vLLM, a Bedrock gateway, ...)
@@ -20,80 +20,6 @@
 // 2. Call: callAIProvider(prompt, options, callback)
 //
 // This extension has no commands - it only provides a service
-
-// OpenCode Go serves one key across three APIs. The model id picks the URL.
-// https://opencode.ai/docs/go/
-const OPENCODE_GO_CHAT = "https://opencode.ai/zen/go/v1/chat/completions";
-const OPENCODE_GO_MESSAGES = "https://opencode.ai/zen/go/v1/messages";
-const OPENCODE_GO_RESPONSES = "https://opencode.ai/zen/go/v1/responses";
-const OPENCODE_GO_USER_AGENT = "@antinote/ai_providers/1.3.0";
-
-// Available models can be found at https://opencode.ai/docs/go/#endpoints.
-// Chat-completions models. Anything not listed in the other two maps uses
-// this endpoint, including models the live catalog adds later.
-const OPENCODE_GO_MODELS = [
-    "glm-5.3-flash",
-    "glm-5.3",
-    "glm-5.2",
-    "kimi-k3",
-    "kimi-k2.7-code",
-    "kimi-k2.6",
-    "longcat-2.0",
-    "longcat-2.5-preview-free",
-    "step-5-preview-free",
-    "deepseek-v4.1-flash",
-    "deepseek-v4-pro",
-    "deepseek-v4-flash",
-    "deepseek-v4-flash-vision-exp",
-    "mimo-v2.6-flash",
-    "mimo-v2.6-pro",
-    "mimo-v2.5",
-    "mimo-v2.5-pro",
-    "hy4-preview",
-    "hy3",
-    "space-bunny",
-    "claude-haiku-5-5",
-    "minimax-m3",
-    "minimax-m2.7",
-    "qwen3.8-max",
-    "qwen3.8-flash",
-    "qwen3.7-plus",
-    "grok-4.7",
-    "grok-4.6",
-    "gpt-6-luna",
-    "gpt-5.6-luna",
-    "muse-spark-1.3-contributor",
-    "muse-spark-1.2-contributor"
-];
-
-const OPENCODE_GO_MESSAGE_MODELS = {
-    "claude-haiku-5-5": true,
-    "minimax-m3": true,
-    "minimax-m2.7": true,
-    "qwen3.8-max": true,
-    "qwen3.8-flash": true,
-    "qwen3.7-plus": true
-};
-
-const OPENCODE_GO_RESPONSE_MODELS = {
-    "grok-4.7": true,
-    "grok-4.6": true,
-    "gpt-6-luna": true,
-    "gpt-5.6-luna": true,
-    "muse-spark-1.3-contributor": true,
-    "muse-spark-1.2-contributor": true
-};
-
-const opencodeGoFormat = (model) => {
-    const id = (model || "").toLowerCase();
-    if (OPENCODE_GO_RESPONSE_MODELS[id]) {
-        return "responses";
-    }
-    if (OPENCODE_GO_MESSAGE_MODELS[id]) {
-        return "anthropic";
-    }
-    return "openai";
-};
 
 (function () {
     const extensionName = "ai_providers";
@@ -115,6 +41,55 @@ const opencodeGoFormat = (model) => {
         }
         return opencodeSessionId;
     };
+
+    // OpenCode Go serves one key across four APIs, and the model id picks
+    // which. https://opencode.ai/docs/go/
+    const OPENCODE_GO = "https://opencode.ai/inference/go";
+    const OPENCODE_GO_CHAT = `${OPENCODE_GO}/openai/v1/chat/completions`;
+    const OPENCODE_GO_MESSAGES = `${OPENCODE_GO}/anthropic/v1/messages`;
+    const OPENCODE_GO_RESPONSES = `${OPENCODE_GO}/openai/v1/responses`;
+    const OPENCODE_GO_GOOGLE = `${OPENCODE_GO}/google/v1beta/models/`;
+    const OPENCODE_GO_USER_AGENT = "@antinote/ai_providers/1.3.0";
+    const OPENCODE_GO_FORMATS = ["openai", "anthropic", "responses", "google"];
+
+    // Antinote reads which API serves each model from models.dev (the catalog
+    // OpenCode's own client uses) and answers through getAIModelRoute, so a
+    // model OpenCode adds or moves needs no change here. This table only
+    // covers Antinote versions without that bridge, or a device that hasn't
+    // reached models.dev yet. Models not in it use chat completions.
+    const OPENCODE_GO_FALLBACK_ROUTES = {
+        "claude-haiku-5-5": "anthropic",
+        "minimax-m3": "anthropic",
+        "minimax-m2.7": "anthropic",
+        "qwen3.8-max": "anthropic",
+        "qwen3.8-flash": "anthropic",
+        "qwen3.7-plus": "anthropic",
+        "grok-4.7": "responses",
+        "grok-4.6": "responses",
+        "gpt-6-luna": "responses",
+        "gpt-5.6-luna": "responses",
+        "muse-spark-1.3-contributor": "responses",
+        "muse-spark-1.2-contributor": "responses",
+        "gemini-4-argon": "google"
+    };
+
+    // The API that serves `model`, or null when neither Antinote nor the
+    // fallback table knows the model.
+    const opencodeGoKnownFormat = (model) => {
+        if (typeof getAIModelRoute === "function") {
+            try {
+                const route = getAIModelRoute("opencodego", model);
+                if (OPENCODE_GO_FORMATS.indexOf(route) !== -1) {
+                    return route;
+                }
+            } catch (e) {
+                console.error("Could not read the model route:", e);
+            }
+        }
+        return OPENCODE_GO_FALLBACK_ROUTES[(model || "").toLowerCase()] || null;
+    };
+
+    const opencodeGoFormat = (model) => opencodeGoKnownFormat(model) || "openai";
 
     // Preferences read through the app bridge, guarded so this file also loads
     // where the bridge isn't installed yet (the Node test harness).
@@ -182,14 +157,14 @@ const opencodeGoFormat = (model) => {
         },
         "opencodego": {
             name: "OpenCode Go",
-            // First entry is the chat URL requests use. messages and responses
-            // are extra calls.
-            endpoints: [OPENCODE_GO_CHAT, OPENCODE_GO_MESSAGES, OPENCODE_GO_RESPONSES],
+            // Chat first. buildRequest picks the URL for each model's API.
+            endpoints: [OPENCODE_GO_CHAT, OPENCODE_GO_MESSAGES, OPENCODE_GO_RESPONSES, OPENCODE_GO_GOOGLE],
             apiKeyId: "apikey_opencodego",
-            models: OPENCODE_GO_MODELS,
+            // Antinote lists the models live from OpenCode's /v1/models.
+            models: [],
             defaultModel: "mimo-v2.6-flash",
-            // No family prefix. Seed ids overlap each other and other
-            // providers, so resolveModel exact-matches `models` instead.
+            // No family prefix: Go serves models from many labs, including
+            // some Claude, GPT and Gemini ones. resolveModel checks routes instead.
             modelPrefixes: [],
             requiresApiKey: true
         },
@@ -376,18 +351,18 @@ const opencodeGoFormat = (model) => {
             return catalog.indexOf(model) !== -1 ? model : config.defaultModel;
         }
 
-        // No catalog. OpenCode Go's seed list is matched in full ("glm-5.3"
-        // must not also accept "glm-5.3-flash") and answered with the listed
-        // spelling, because OpenCode matches ids exactly. An unlisted id is sent
-        // as typed so a model OpenCode adds later still works — unless it looks
-        // like a leftover from another provider (an OpenAI, Anthropic or Google
-        // family name, or an OpenRouter "vendor/model" id), which would only
-        // fail upstream.
+        // No catalog. An OpenCode Go model with a known route is sent in
+        // lowercase, since OpenCode's ids are lowercase and matched exactly.
+        // An unknown id is sent as typed, so a model OpenCode adds later
+        // still works. The exception is an id that looks left over from
+        // another provider (an OpenAI, Anthropic or Google family name, or an
+        // OpenRouter "vendor/model" id), which would only fail upstream.
+        // Known routes are checked first because Go serves some Claude, GPT
+        // and Gemini models itself.
         if (providerId === "opencodego") {
             const lower = model.toLowerCase();
-            const listed = config.models.find((id) => id.toLowerCase() === lower);
-            if (listed) {
-                return listed;
+            if (opencodeGoKnownFormat(model)) {
+                return lower;
             }
             const leftover = lower.indexOf("/") !== -1 || ["openai", "anthropic", "google"].some((other) =>
                 PROVIDERS[other].modelPrefixes.some((prefix) => lower.indexOf(prefix) === 0));
@@ -454,12 +429,11 @@ const opencodeGoFormat = (model) => {
         // How the key travels: Anthropic's own API wants x-api-key, Google its
         // own header, the custom endpoint follows its auth preference, and
         // everyone else uses a Bearer token. Ollama sends nothing. OpenCode
-        // Go's messages models follow the Anthropic SDK; its other models
-        // follow the OpenAI SDK.
+        // Go authenticates each model the way its API's own SDK does.
         let authStyle = "bearer";
         if (providerId === "anthropic" || (providerId === "opencodego" && format === "anthropic")) {
             authStyle = "x-api-key";
-        } else if (providerId === "google") {
+        } else if (providerId === "google" || (providerId === "opencodego" && format === "google")) {
             authStyle = "x-goog-api-key";
         } else if (providerId === "ollama") {
             authStyle = "none";
@@ -474,6 +448,8 @@ const opencodeGoFormat = (model) => {
                 url = OPENCODE_GO_RESPONSES;
             } else if (format === "anthropic") {
                 url = OPENCODE_GO_MESSAGES;
+            } else if (format === "google") {
+                url = OPENCODE_GO_GOOGLE;
             } else {
                 url = OPENCODE_GO_CHAT;
             }
@@ -532,7 +508,7 @@ const opencodeGoFormat = (model) => {
             // string: Antinote only substitutes {{API_KEY}} into headers and
             // the body, so a key in the URL would be sent as the literal
             // placeholder.
-            url = `${(config.endpoints && config.endpoints[0]) || ""}${model}:generateContent`;
+            url = `${url}${model}:generateContent`;
             headers = {
                 "Content-Type": "application/json"
             };
@@ -564,7 +540,7 @@ const opencodeGoFormat = (model) => {
                 };
             }
         } else if (format === "responses") {
-            // Responses API body. At present only OpenCode Go selects this format, via opencodeGoFormat.
+            // Responses API body. Only OpenCode Go uses this format.
             headers = {
                 "Content-Type": "application/json"
             };
