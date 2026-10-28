@@ -190,6 +190,7 @@ grep -r "apikey_" extensions-official/
 - `apikey_google` - Google AI/Gemini
 - `apikey_openrouter` - OpenRouter
 - `apikey_opencodego` - OpenCode Go
+- `apikey_cheaperinference` - Cheaper Inference
 - `apikey_weather` - Weather APIs
 
 ### Creating a New API Key ID

@@ -19,12 +19,13 @@ This extension acts as a **service** - it has no user-facing commands. Instead, 
 - **Google AI** - Gemini models (gemini-2.5-flash, etc.)
 - **OpenRouter** - Unified access to multiple providers
 - **OpenCode Go** - Curated models from [OpenCode Go](https://opencode.ai/docs/go/) (GLM, Kimi, DeepSeek, Grok, and others)
+- **Cheaper Inference** - OpenAI-compatible gateway from [Cheaper Inference](https://cheaperinference.com/docs) (GPT, Claude, DeepSeek, GLM, and others)
 - **Ollama** - Local models (llama3.3, mistral, etc.)
 - **Custom Endpoint** - Any OpenAI- or Anthropic-compatible endpoint (Azure OpenAI, LiteLLM, Amazon Bedrock behind a gateway, self-hosted vLLM, ...)
 
 ## Setup Instructions
 
-### For Cloud Providers (OpenAI, Anthropic, Google, OpenRouter, OpenCode Go)
+### For Cloud Providers (OpenAI, Anthropic, Google, OpenRouter, OpenCode Go, Cheaper Inference)
 
 1. Go to **Preferences > API Keys** in Antinote
 2. Add API key(s) for your chosen provider(s):
@@ -33,6 +34,7 @@ This extension acts as a **service** - it has no user-facing commands. Instead, 
    - **Google AI**: Keychain Key `apikey_google`
    - **OpenRouter**: Keychain Key `apikey_openrouter`
    - **OpenCode Go**: Keychain Key `apikey_opencodego`
+   - **Cheaper Inference**: Keychain Key `apikey_cheaperinference`
 
 ### For OpenCode Go
 
@@ -45,6 +47,12 @@ Antinote fetches the model list live from OpenCode, so new models show up withou
 OpenCode Go serves each model on one of four APIs: chat completions, Anthropic messages, the OpenAI Responses API, or Google's generateContent. Antinote looks up which API serves each model on [models.dev](https://models.dev), the catalog OpenCode's own client uses, and this extension sends the request there. Older Antinote versions without that lookup use a small fallback table, and send any model not in it to chat completions.
 
 Requests include an `x-opencode-session` header, as OpenCode asks. It is one id for the whole time Antinote is running, shared across notes, so OpenCode can group those requests together for routing and prompt caching.
+
+### For Cheaper Inference
+
+1. Create an account at [Cheaper Inference](https://cheaperinference.com) and copy an API key
+2. Save that key in Antinote as `apikey_cheaperinference`
+3. Set **AI Provider** to `cheaperinference`. Leave **Model** empty to use `gpt-5.4-mini`, or enter another model id from the [Cheaper Inference docs](https://cheaperinference.com/docs)
 
 ### For Ollama (Local Models)
 
@@ -141,7 +149,7 @@ var result = callAIProvider("Translate to Spanish: Hello", {
 **Parameters:**
 - `prompt` (string, required): The user's prompt/question
 - `options` (object, optional): Override default settings
-  - `provider` (string): Provider ID - "openai", "anthropic", "google", "openrouter", "opencodego", "ollama", "custom"
+  - `provider` (string): Provider ID - "openai", "anthropic", "google", "openrouter", "opencodego", "cheaperinference", "ollama", "custom"
   - `model` (string): Model name
   - `systemPrompt` (string): System prompt for the AI
   - `maxTokens` (number): Rough length hint in tokens, turned into a word count in
@@ -226,7 +234,7 @@ translate.execute = function(payload) {
 
 ## Version
 
-1.3.0
+1.4.0
 
 ## Author
 

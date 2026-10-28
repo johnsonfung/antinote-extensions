@@ -16,6 +16,7 @@ Antinote provides a **centralized AI service** (`ai_providers` extension) that h
 - Google AI (Gemini models)
 - OpenRouter (multi-provider access)
 - OpenCode Go (curated models via OpenCode)
+- Cheaper Inference (OpenAI-compatible gateway)
 - Ollama (local models)
 
 ✅ **User Configuration** - Users configure their preferred provider and API keys **once**
@@ -124,6 +125,7 @@ Sends a prompt to the user's configured AI provider.
 - `"google"` - Google Gemini models
 - `"openrouter"` - OpenRouter (unified access)
 - `"opencodego"` - OpenCode Go (curated models)
+- `"cheaperinference"` - Cheaper Inference (OpenAI-compatible gateway)
 - `"ollama"` - Ollama (local models)
 
 ---

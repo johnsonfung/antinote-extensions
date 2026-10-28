@@ -11,6 +11,7 @@
 // - Google AI (Gemini models)
 // - OpenRouter (unified access to multiple providers)
 // - OpenCode Go (many labs' models; each sent to the API that serves it)
+// - Cheaper Inference (OpenAI-compatible gateway to many labs' models)
 // - Ollama (local models)
 // - Custom (any OpenAI- or Anthropic-compatible endpoint: Azure OpenAI,
 //   LiteLLM, vLLM, a Bedrock gateway, ...)
@@ -168,6 +169,17 @@
             modelPrefixes: [],
             requiresApiKey: true
         },
+        "cheaperinference": {
+            name: "Cheaper Inference",
+            endpoints: ["https://api.cheaperinference.com/v1/chat/completions"],
+            apiKeyId: "apikey_cheaperinference",
+            models: ["gpt-5.4-mini", "gpt-5.4", "claude-sonnet-5", "deepseek-v4-flash", "glm-5.3"],
+            defaultModel: "gpt-5.4-mini",
+            // Serves models from many labs under bare ids, so there is no
+            // family prefix to check — an unknown model is left alone.
+            modelPrefixes: [],
+            requiresApiKey: true
+        },
         "ollama": {
             name: "Ollama (Local)",
             endpoints: ["http://localhost:11434/v1/chat/completions"],
@@ -228,7 +240,7 @@
 
     const extensionRoot = new Extension({
         name: extensionName,
-        version: "1.3.0",
+        version: "1.4.0",
         endpoints: allEndpoints,
         requiredAPIKeys: allApiKeys,
         author: "johnsonfung",
@@ -244,7 +256,7 @@
     label: "AI Provider",
     type: "selectOne",
     defaultValue: "openai",
-    options: ["openai", "anthropic", "google", "openrouter", "opencodego", "ollama", "custom"],
+    options: ["openai", "anthropic", "google", "openrouter", "opencodego", "cheaperinference", "ollama", "custom"],
     helpText: "Default AI provider for all AI-powered extensions"
   });
     extensionRoot.register_preference(providerPref);
@@ -388,7 +400,7 @@
         if (providerId === "opencodego") {
             return opencodeGoFormat(model);
         }
-        if (providerId === "openai" || providerId === "openrouter" || providerId === "ollama") {
+        if (providerId === "openai" || providerId === "openrouter" || providerId === "cheaperinference" || providerId === "ollama") {
             return "openai";
         }
         return providerId; // "anthropic" or "google"
@@ -459,7 +471,7 @@
         }
 
         if (format === "openai") {
-            // OpenAI-compatible format (OpenAI, OpenRouter, Ollama, custom)
+            // OpenAI-compatible format (OpenAI, OpenRouter, Cheaper Inference, Ollama, custom)
             headers = {
                 "Content-Type": "application/json"
             };
@@ -670,7 +682,7 @@
     // Parameters:
     //   prompt (string): The user's prompt
     //   options (object, optional): Override default settings
-    //     - provider: Provider ID ("openai", "anthropic", "google", "openrouter", "opencodego", "ollama", "custom")
+    //     - provider: Provider ID ("openai", "anthropic", "google", "openrouter", "opencodego", "cheaperinference", "ollama", "custom")
     //     - model: Model name
     //     - systemPrompt: System prompt
     //     - maxTokens: Rough length hint in tokens (0 = use the length preference)
