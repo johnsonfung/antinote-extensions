@@ -85,7 +85,7 @@ describe("AI Providers Extension - Metadata Validation", function() {
   it("should have endpoints array with all provider APIs", function() {
     expect(metadata.endpoints).toBeDefined();
     expect(metadata.endpoints).toBeArray();
-    expect(metadata.endpoints.length).toBeGreaterThanOrEqual(9);
+    expect(metadata.endpoints.length).toBeGreaterThanOrEqual(10);
     expect(metadata.endpoints[0]).toContain("api.openai.com");
     expect(metadata.endpoints[1]).toContain("api.anthropic.com");
     expect(metadata.endpoints[2]).toContain("generativelanguage.googleapis.com");
@@ -94,18 +94,20 @@ describe("AI Providers Extension - Metadata Validation", function() {
     expect(metadata.endpoints[5]).toContain("opencode.ai/inference/go/anthropic/v1/messages");
     expect(metadata.endpoints[6]).toContain("opencode.ai/inference/go/openai/v1/responses");
     expect(metadata.endpoints[7]).toContain("opencode.ai/inference/go/google/v1beta/models/");
-    expect(metadata.endpoints[8]).toContain("localhost:11434");
+    expect(metadata.endpoints[8]).toContain("api.cheaperinference.com/v1/chat/completions");
+    expect(metadata.endpoints[9]).toContain("localhost:11434");
   });
 
   it("should require API keys for cloud providers", function() {
     expect(metadata.requiredAPIKeys).toBeDefined();
     expect(metadata.requiredAPIKeys).toBeArray();
-    expect(metadata.requiredAPIKeys.length).toBeGreaterThanOrEqual(5);
+    expect(metadata.requiredAPIKeys.length).toBeGreaterThanOrEqual(6);
     expect(metadata.requiredAPIKeys[0]).toBe("apikey_openai");
     expect(metadata.requiredAPIKeys[1]).toBe("apikey_anthropic");
     expect(metadata.requiredAPIKeys[2]).toBe("apikey_google");
     expect(metadata.requiredAPIKeys[3]).toBe("apikey_openrouter");
     expect(metadata.requiredAPIKeys[4]).toBe("apikey_opencodego");
+    expect(metadata.requiredAPIKeys[5]).toBe("apikey_cheaperinference");
   });
 
   it("declares the custom endpoint key", function() {
@@ -118,6 +120,11 @@ describe("AI Providers Extension - Metadata Validation", function() {
     expect(metadata.endpoints).toContain("https://opencode.ai/inference/go/openai/v1/responses");
     expect(metadata.endpoints).toContain("https://opencode.ai/inference/go/google/v1beta/models/");
     expect(metadata.requiredAPIKeys).toContain("apikey_opencodego");
+  });
+
+  it("declares the Cheaper Inference endpoint and its API key", function() {
+    expect(metadata.endpoints).toContain("https://api.cheaperinference.com/v1/chat/completions");
+    expect(metadata.requiredAPIKeys).toContain("apikey_cheaperinference");
   });
 
   it("should have no commands (service only)", function() {
@@ -523,6 +530,28 @@ describe("AI Providers Extension - Request Building", function() {
     expect(lastCall.url).toBe("https://opencode.ai/inference/go/openai/v1/chat/completions");
     expect(lastCall.body.model).toBe("some-new-model");
     getAvailableModels = undefined;
+  });
+
+  it("sends Cheaper Inference requests to chat completions with Bearer auth", function() {
+    getAvailableModels = undefined;
+    var result = run({ provider: "cheaperinference" });
+    expect(result.status).toBe("success");
+    expect(lastCall.url).toBe("https://api.cheaperinference.com/v1/chat/completions");
+    expect(lastCall.headers["Authorization"]).toBe("Bearer {{API_KEY}}");
+    expect(lastCall.apiKeyId).toBe("apikey_cheaperinference");
+    expect(lastCall.body.model).toBe("gpt-5.4-mini");
+    expect(lastCall.body.messages[1].content).toBe("Say hi");
+    expect(lastCall.body.max_tokens).toBe(undefined);
+    expect(lastCall.body.temperature).toBe(undefined);
+  });
+
+  it("keeps the model the user typed for Cheaper Inference", function() {
+    getAvailableModels = undefined;
+    run({ provider: "cheaperinference", model: "claude-sonnet-5" });
+    expect(lastCall.body.model).toBe("claude-sonnet-5");
+    run({ provider: "cheaperinference", model: "deepseek-v4-flash" }, { temperature: 0.4 });
+    expect(lastCall.body.model).toBe("deepseek-v4-flash");
+    expect(lastCall.body.temperature).toBe(0.4);
   });
 
   it("explains a 200 that came back with no answer", function() {

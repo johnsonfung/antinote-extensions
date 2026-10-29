@@ -1,8 +1,8 @@
 {
   "name": "ai_providers",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "author": "johnsonfung",
-  "description": "Shared AI provider service for use by other extensions. Supports OpenAI, Anthropic, Google AI, OpenRouter, OpenCode Go, Ollama, and any custom OpenAI- or Anthropic-compatible endpoint (Azure OpenAI, LiteLLM, Bedrock gateways, self-hosted models).",
+  "description": "Shared AI provider service for use by other extensions. Supports OpenAI, Anthropic, Google AI, OpenRouter, OpenCode Go, Cheaper Inference, Ollama, and any custom OpenAI- or Anthropic-compatible endpoint (Azure OpenAI, LiteLLM, Bedrock gateways, self-hosted models).",
   "license": "MIT",
   "category": "AI & ML",
   "dataScope": "none",
@@ -15,6 +15,7 @@
     "https://opencode.ai/inference/go/anthropic/v1/messages",
     "https://opencode.ai/inference/go/openai/v1/responses",
     "https://opencode.ai/inference/go/google/v1beta/models/",
+    "https://api.cheaperinference.com/v1/chat/completions",
     "http://localhost:11434/v1/chat/completions"
   ],
   "requiredAPIKeys": [
@@ -23,6 +24,7 @@
     "apikey_google",
     "apikey_openrouter",
     "apikey_opencodego",
+    "apikey_cheaperinference",
     "apikey_custom"
   ],
   "commands": [],
@@ -30,7 +32,7 @@
   "official": true,
   "includedByDefault": true,
   "size": {
-    "total": 34613,
-    "totalKB": 33.8
+    "total": 35346,
+    "totalKB": 34.5
   }
 }
